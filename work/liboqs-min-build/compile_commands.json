@@ -1,0 +1,518 @@
+[
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src",
+  "command": "/usr/bin/cc -Doqs_EXPORTS -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -o CMakeFiles/oqs.dir/kem/kem.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/kem.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/kem.c",
+  "output": "src/CMakeFiles/oqs.dir/kem/kem.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src",
+  "command": "/usr/bin/cc -Doqs_EXPORTS -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -o CMakeFiles/oqs.dir/sig/sig.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/sig/sig.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/sig/sig.c",
+  "output": "src/CMakeFiles/oqs.dir/sig/sig.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src",
+  "command": "/usr/bin/cc -Doqs_EXPORTS -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -o CMakeFiles/oqs.dir/sig_stfl/sig_stfl.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/sig_stfl/sig_stfl.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/sig_stfl/sig_stfl.c",
+  "output": "src/CMakeFiles/oqs.dir/sig_stfl/sig_stfl.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common",
+  "command": "/usr/bin/cc -DOQS_HAVE_ALIGNED_ALLOC -DOQS_HAVE_MEMSET_S -DOQS_HAVE_POSIX_MEMALIGN -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/common.dir/aes/aes_ossl.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/aes/aes_ossl.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/aes/aes_ossl.c",
+  "output": "src/common/CMakeFiles/common.dir/aes/aes_ossl.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common",
+  "command": "/usr/bin/cc -DOQS_HAVE_ALIGNED_ALLOC -DOQS_HAVE_MEMSET_S -DOQS_HAVE_POSIX_MEMALIGN -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/common.dir/aes/aes.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/aes/aes.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/aes/aes.c",
+  "output": "src/common/CMakeFiles/common.dir/aes/aes.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common",
+  "command": "/usr/bin/cc -DOQS_HAVE_ALIGNED_ALLOC -DOQS_HAVE_MEMSET_S -DOQS_HAVE_POSIX_MEMALIGN -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/common.dir/sha2/sha2_ossl.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha2/sha2_ossl.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha2/sha2_ossl.c",
+  "output": "src/common/CMakeFiles/common.dir/sha2/sha2_ossl.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common",
+  "command": "/usr/bin/cc -DOQS_HAVE_ALIGNED_ALLOC -DOQS_HAVE_MEMSET_S -DOQS_HAVE_POSIX_MEMALIGN -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/common.dir/sha2/sha2.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha2/sha2.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha2/sha2.c",
+  "output": "src/common/CMakeFiles/common.dir/sha2/sha2.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common",
+  "command": "/usr/bin/cc -DOQS_HAVE_ALIGNED_ALLOC -DOQS_HAVE_MEMSET_S -DOQS_HAVE_POSIX_MEMALIGN -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/common.dir/sha3/xkcp_sha3.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha3/xkcp_sha3.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha3/xkcp_sha3.c",
+  "output": "src/common/CMakeFiles/common.dir/sha3/xkcp_sha3.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common",
+  "command": "/usr/bin/cc -DOQS_HAVE_ALIGNED_ALLOC -DOQS_HAVE_MEMSET_S -DOQS_HAVE_POSIX_MEMALIGN -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/common.dir/sha3/xkcp_sha3x4.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha3/xkcp_sha3x4.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha3/xkcp_sha3x4.c",
+  "output": "src/common/CMakeFiles/common.dir/sha3/xkcp_sha3x4.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common",
+  "command": "/usr/bin/cc -DOQS_HAVE_ALIGNED_ALLOC -DOQS_HAVE_MEMSET_S -DOQS_HAVE_POSIX_MEMALIGN -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/common.dir/sha3/sha3.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha3/sha3.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha3/sha3.c",
+  "output": "src/common/CMakeFiles/common.dir/sha3/sha3.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common",
+  "command": "/usr/bin/cc -DOQS_HAVE_ALIGNED_ALLOC -DOQS_HAVE_MEMSET_S -DOQS_HAVE_POSIX_MEMALIGN -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/common.dir/sha3/sha3x4.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha3/sha3x4.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha3/sha3x4.c",
+  "output": "src/common/CMakeFiles/common.dir/sha3/sha3x4.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common",
+  "command": "/usr/bin/cc -DOQS_HAVE_ALIGNED_ALLOC -DOQS_HAVE_MEMSET_S -DOQS_HAVE_POSIX_MEMALIGN -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/common.dir/ossl_helpers.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/ossl_helpers.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/ossl_helpers.c",
+  "output": "src/common/CMakeFiles/common.dir/ossl_helpers.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common",
+  "command": "/usr/bin/cc -DOQS_HAVE_ALIGNED_ALLOC -DOQS_HAVE_MEMSET_S -DOQS_HAVE_POSIX_MEMALIGN -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/common.dir/common.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/common.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/common.c",
+  "output": "src/common/CMakeFiles/common.dir/common.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common",
+  "command": "/usr/bin/cc -DOQS_HAVE_ALIGNED_ALLOC -DOQS_HAVE_MEMSET_S -DOQS_HAVE_POSIX_MEMALIGN -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/common.dir/pqclean_shims/fips202.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims/fips202.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims/fips202.c",
+  "output": "src/common/CMakeFiles/common.dir/pqclean_shims/fips202.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common",
+  "command": "/usr/bin/cc -DOQS_HAVE_ALIGNED_ALLOC -DOQS_HAVE_MEMSET_S -DOQS_HAVE_POSIX_MEMALIGN -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/common.dir/pqclean_shims/fips202x4.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims/fips202x4.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims/fips202x4.c",
+  "output": "src/common/CMakeFiles/common.dir/pqclean_shims/fips202x4.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common",
+  "command": "/usr/bin/cc -DOQS_HAVE_ALIGNED_ALLOC -DOQS_HAVE_MEMSET_S -DOQS_HAVE_POSIX_MEMALIGN -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/common.dir/rand/rand.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/rand/rand.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/rand/rand.c",
+  "output": "src/common/CMakeFiles/common.dir/rand/rand.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common",
+  "command": "/usr/bin/cc -DOQS_HAVE_ALIGNED_ALLOC -DOQS_HAVE_MEMSET_S -DOQS_HAVE_POSIX_MEMALIGN -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=default -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/internal.dir/aes/aes_ossl.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/aes/aes_ossl.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/aes/aes_ossl.c",
+  "output": "src/common/CMakeFiles/internal.dir/aes/aes_ossl.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common",
+  "command": "/usr/bin/cc -DOQS_HAVE_ALIGNED_ALLOC -DOQS_HAVE_MEMSET_S -DOQS_HAVE_POSIX_MEMALIGN -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=default -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/internal.dir/aes/aes.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/aes/aes.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/aes/aes.c",
+  "output": "src/common/CMakeFiles/internal.dir/aes/aes.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common",
+  "command": "/usr/bin/cc -DOQS_HAVE_ALIGNED_ALLOC -DOQS_HAVE_MEMSET_S -DOQS_HAVE_POSIX_MEMALIGN -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=default -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/internal.dir/sha2/sha2_ossl.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha2/sha2_ossl.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha2/sha2_ossl.c",
+  "output": "src/common/CMakeFiles/internal.dir/sha2/sha2_ossl.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common",
+  "command": "/usr/bin/cc -DOQS_HAVE_ALIGNED_ALLOC -DOQS_HAVE_MEMSET_S -DOQS_HAVE_POSIX_MEMALIGN -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=default -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/internal.dir/sha2/sha2.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha2/sha2.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha2/sha2.c",
+  "output": "src/common/CMakeFiles/internal.dir/sha2/sha2.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common",
+  "command": "/usr/bin/cc -DOQS_HAVE_ALIGNED_ALLOC -DOQS_HAVE_MEMSET_S -DOQS_HAVE_POSIX_MEMALIGN -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=default -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/internal.dir/sha3/xkcp_sha3.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha3/xkcp_sha3.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha3/xkcp_sha3.c",
+  "output": "src/common/CMakeFiles/internal.dir/sha3/xkcp_sha3.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common",
+  "command": "/usr/bin/cc -DOQS_HAVE_ALIGNED_ALLOC -DOQS_HAVE_MEMSET_S -DOQS_HAVE_POSIX_MEMALIGN -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=default -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/internal.dir/sha3/xkcp_sha3x4.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha3/xkcp_sha3x4.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha3/xkcp_sha3x4.c",
+  "output": "src/common/CMakeFiles/internal.dir/sha3/xkcp_sha3x4.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common",
+  "command": "/usr/bin/cc -DOQS_HAVE_ALIGNED_ALLOC -DOQS_HAVE_MEMSET_S -DOQS_HAVE_POSIX_MEMALIGN -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=default -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/internal.dir/sha3/sha3.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha3/sha3.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha3/sha3.c",
+  "output": "src/common/CMakeFiles/internal.dir/sha3/sha3.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common",
+  "command": "/usr/bin/cc -DOQS_HAVE_ALIGNED_ALLOC -DOQS_HAVE_MEMSET_S -DOQS_HAVE_POSIX_MEMALIGN -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=default -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/internal.dir/sha3/sha3x4.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha3/sha3x4.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha3/sha3x4.c",
+  "output": "src/common/CMakeFiles/internal.dir/sha3/sha3x4.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common",
+  "command": "/usr/bin/cc -DOQS_HAVE_ALIGNED_ALLOC -DOQS_HAVE_MEMSET_S -DOQS_HAVE_POSIX_MEMALIGN -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=default -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/internal.dir/ossl_helpers.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/ossl_helpers.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/ossl_helpers.c",
+  "output": "src/common/CMakeFiles/internal.dir/ossl_helpers.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common",
+  "command": "/usr/bin/cc -DOQS_HAVE_ALIGNED_ALLOC -DOQS_HAVE_MEMSET_S -DOQS_HAVE_POSIX_MEMALIGN -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=default -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/internal.dir/common.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/common.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/common.c",
+  "output": "src/common/CMakeFiles/internal.dir/common.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common",
+  "command": "/usr/bin/cc -DOQS_HAVE_ALIGNED_ALLOC -DOQS_HAVE_MEMSET_S -DOQS_HAVE_POSIX_MEMALIGN -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=default -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/internal.dir/rand/rand_nist.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/rand/rand_nist.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/rand/rand_nist.c",
+  "output": "src/common/CMakeFiles/internal.dir/rand/rand_nist.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common/sha3/xkcp_low",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/xkcp_low_keccakp_1600_plain64.dir/KeccakP-1600/plain-64bits/KeccakP-1600-opt64.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha3/xkcp_low/KeccakP-1600/plain-64bits/KeccakP-1600-opt64.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha3/xkcp_low/KeccakP-1600/plain-64bits/KeccakP-1600-opt64.c",
+  "output": "src/common/sha3/xkcp_low/CMakeFiles/xkcp_low_keccakp_1600_plain64.dir/KeccakP-1600/plain-64bits/KeccakP-1600-opt64.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common/sha3/xkcp_low",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha3/xkcp_low/KeccakP-1600/plain-64bits -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/xkcp_low_keccakp_1600times4_serial.dir/KeccakP-1600times4/serial/KeccakP-1600-times4-on1.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha3/xkcp_low/KeccakP-1600times4/serial/KeccakP-1600-times4-on1.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha3/xkcp_low/KeccakP-1600times4/serial/KeccakP-1600-times4-on1.c",
+  "output": "src/common/sha3/xkcp_low/CMakeFiles/xkcp_low_keccakp_1600times4_serial.dir/KeccakP-1600times4/serial/KeccakP-1600-times4-on1.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_c.h\\\" -o CMakeFiles/ml_kem_768_ref.dir/kem_ml_kem_768.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/kem_ml_kem_768.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/kem_ml_kem_768.c",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_ref.dir/kem_ml_kem_768.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_c.h\\\" -o CMakeFiles/ml_kem_768_ref.dir/mlkem-native_ml-kem-768_ref/mlkem/src/compress.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref/mlkem/src/compress.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref/mlkem/src/compress.c",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_ref.dir/mlkem-native_ml-kem-768_ref/mlkem/src/compress.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_c.h\\\" -o CMakeFiles/ml_kem_768_ref.dir/mlkem-native_ml-kem-768_ref/mlkem/src/debug.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref/mlkem/src/debug.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref/mlkem/src/debug.c",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_ref.dir/mlkem-native_ml-kem-768_ref/mlkem/src/debug.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_c.h\\\" -o CMakeFiles/ml_kem_768_ref.dir/mlkem-native_ml-kem-768_ref/mlkem/src/indcpa.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref/mlkem/src/indcpa.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref/mlkem/src/indcpa.c",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_ref.dir/mlkem-native_ml-kem-768_ref/mlkem/src/indcpa.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_c.h\\\" -o CMakeFiles/ml_kem_768_ref.dir/mlkem-native_ml-kem-768_ref/mlkem/src/kem.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref/mlkem/src/kem.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref/mlkem/src/kem.c",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_ref.dir/mlkem-native_ml-kem-768_ref/mlkem/src/kem.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_c.h\\\" -o CMakeFiles/ml_kem_768_ref.dir/mlkem-native_ml-kem-768_ref/mlkem/src/poly.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref/mlkem/src/poly.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref/mlkem/src/poly.c",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_ref.dir/mlkem-native_ml-kem-768_ref/mlkem/src/poly.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_c.h\\\" -o CMakeFiles/ml_kem_768_ref.dir/mlkem-native_ml-kem-768_ref/mlkem/src/poly_k.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref/mlkem/src/poly_k.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref/mlkem/src/poly_k.c",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_ref.dir/mlkem-native_ml-kem-768_ref/mlkem/src/poly_k.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_c.h\\\" -o CMakeFiles/ml_kem_768_ref.dir/mlkem-native_ml-kem-768_ref/mlkem/src/sampling.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref/mlkem/src/sampling.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref/mlkem/src/sampling.c",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_ref.dir/mlkem-native_ml-kem-768_ref/mlkem/src/sampling.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_c.h\\\" -o CMakeFiles/ml_kem_768_ref.dir/mlkem-native_ml-kem-768_ref/mlkem/src/verify.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref/mlkem/src/verify.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref/mlkem/src/verify.c",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_ref.dir/mlkem-native_ml-kem-768_ref/mlkem/src/verify.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64 -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_aarch64.h\\\" -o CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/compress.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/compress.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/compress.c",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/compress.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64 -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_aarch64.h\\\" -o CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/debug.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/debug.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/debug.c",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/debug.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64 -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_aarch64.h\\\" -o CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/indcpa.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/indcpa.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/indcpa.c",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/indcpa.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64 -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_aarch64.h\\\" -o CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/kem.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/kem.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/kem.c",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/kem.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64 -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_aarch64.h\\\" -o CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/aarch64_zetas.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/aarch64_zetas.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/aarch64_zetas.c",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/aarch64_zetas.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64 -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -fPIC -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_aarch64.h\\\" -o CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/intt_aarch64_asm.S.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/intt_aarch64_asm.S",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/intt_aarch64_asm.S",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/intt_aarch64_asm.S.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64 -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -fPIC -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_aarch64.h\\\" -o CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/ntt_aarch64_asm.S.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/ntt_aarch64_asm.S",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/ntt_aarch64_asm.S",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/ntt_aarch64_asm.S.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64 -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -fPIC -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_aarch64.h\\\" -o CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/poly_mulcache_compute_aarch64_asm.S.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/poly_mulcache_compute_aarch64_asm.S",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/poly_mulcache_compute_aarch64_asm.S",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/poly_mulcache_compute_aarch64_asm.S.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64 -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -fPIC -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_aarch64.h\\\" -o CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/poly_reduce_aarch64_asm.S.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/poly_reduce_aarch64_asm.S",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/poly_reduce_aarch64_asm.S",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/poly_reduce_aarch64_asm.S.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64 -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -fPIC -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_aarch64.h\\\" -o CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/poly_tobytes_aarch64_asm.S.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/poly_tobytes_aarch64_asm.S",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/poly_tobytes_aarch64_asm.S",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/poly_tobytes_aarch64_asm.S.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64 -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -fPIC -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_aarch64.h\\\" -o CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/poly_tomont_aarch64_asm.S.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/poly_tomont_aarch64_asm.S",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/poly_tomont_aarch64_asm.S",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/poly_tomont_aarch64_asm.S.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64 -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -fPIC -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_aarch64.h\\\" -o CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_k2_aarch64_asm.S.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64 -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -fPIC -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_aarch64.h\\\" -o CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_k3_aarch64_asm.S.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64 -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -fPIC -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_aarch64.h\\\" -o CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/polyvec_basemul_acc_montgomery_cached_k4_aarch64_asm.S.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64 -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -fPIC -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_aarch64.h\\\" -o CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/rej_uniform_aarch64_asm.S.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/rej_uniform_aarch64_asm.S",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/rej_uniform_aarch64_asm.S",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/rej_uniform_aarch64_asm.S.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64 -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_aarch64.h\\\" -o CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/rej_uniform_table.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/rej_uniform_table.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/rej_uniform_table.c",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/native/aarch64/src/rej_uniform_table.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64 -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_aarch64.h\\\" -o CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/poly.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/poly.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/poly.c",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/poly.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64 -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_aarch64.h\\\" -o CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/poly_k.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/poly_k.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/poly_k.c",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/poly_k.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64 -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_aarch64.h\\\" -o CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/sampling.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/sampling.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/sampling.c",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/sampling.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem",
+  "command": "/usr/bin/cc  -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64 -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\\\"../../integration/liboqs/config_aarch64.h\\\" -o CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/verify.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/verify.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_aarch64/mlkem/src/verify.c",
+  "output": "src/kem/ml_kem/CMakeFiles/ml_kem_768_aarch64.dir/mlkem-native_ml-kem-768_aarch64/mlkem/src/verify.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/test_aes.dir/test_aes.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_aes.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_aes.c",
+  "output": "tests/CMakeFiles/test_aes.dir/test_aes.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/test_hash.dir/test_hash.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_hash.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_hash.c",
+  "output": "tests/CMakeFiles/test_hash.dir/test_hash.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/test_sha3.dir/test_sha3.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_sha3.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_sha3.c",
+  "output": "tests/CMakeFiles/test_sha3.dir/test_sha3.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/speed_common.dir/speed_common.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/speed_common.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/speed_common.c",
+  "output": "tests/CMakeFiles/speed_common.dir/speed_common.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/example_kem.dir/example_kem.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/example_kem.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/example_kem.c",
+  "output": "tests/CMakeFiles/example_kem.dir/example_kem.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/kat_kem.dir/kat_kem.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/kat_kem.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/kat_kem.c",
+  "output": "tests/CMakeFiles/kat_kem.dir/kat_kem.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/kat_kem.dir/test_helpers.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_helpers.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_helpers.c",
+  "output": "tests/CMakeFiles/kat_kem.dir/test_helpers.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/test_kem.dir/test_kem.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_kem.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_kem.c",
+  "output": "tests/CMakeFiles/test_kem.dir/test_kem.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/test_kem.dir/test_helpers.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_helpers.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_helpers.c",
+  "output": "tests/CMakeFiles/test_kem.dir/test_helpers.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/test_kem_mem.dir/test_kem_mem.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_kem_mem.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_kem_mem.c",
+  "output": "tests/CMakeFiles/test_kem_mem.dir/test_kem_mem.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/test_kem_mem.dir/test_helpers.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_helpers.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_helpers.c",
+  "output": "tests/CMakeFiles/test_kem_mem.dir/test_helpers.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/speed_kem.dir/speed_kem.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/speed_kem.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/speed_kem.c",
+  "output": "tests/CMakeFiles/speed_kem.dir/speed_kem.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/example_sig.dir/example_sig.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/example_sig.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/example_sig.c",
+  "output": "tests/CMakeFiles/example_sig.dir/example_sig.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/example_sig_stfl.dir/example_sig_stfl.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/example_sig_stfl.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/example_sig_stfl.c",
+  "output": "tests/CMakeFiles/example_sig_stfl.dir/example_sig_stfl.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/kat_sig.dir/kat_sig.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/kat_sig.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/kat_sig.c",
+  "output": "tests/CMakeFiles/kat_sig.dir/kat_sig.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/kat_sig.dir/test_helpers.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_helpers.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_helpers.c",
+  "output": "tests/CMakeFiles/kat_sig.dir/test_helpers.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/kat_sig_stfl.dir/kat_sig_stfl.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/kat_sig_stfl.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/kat_sig_stfl.c",
+  "output": "tests/CMakeFiles/kat_sig_stfl.dir/kat_sig_stfl.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/kat_sig_stfl.dir/test_helpers.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_helpers.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_helpers.c",
+  "output": "tests/CMakeFiles/kat_sig_stfl.dir/test_helpers.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/test_sig.dir/test_sig.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_sig.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_sig.c",
+  "output": "tests/CMakeFiles/test_sig.dir/test_sig.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/test_sig.dir/test_helpers.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_helpers.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_helpers.c",
+  "output": "tests/CMakeFiles/test_sig.dir/test_helpers.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/test_sig_mem.dir/test_sig_mem.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_sig_mem.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_sig_mem.c",
+  "output": "tests/CMakeFiles/test_sig_mem.dir/test_sig_mem.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/speed_sig.dir/speed_sig.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/speed_sig.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/speed_sig.c",
+  "output": "tests/CMakeFiles/speed_sig.dir/speed_sig.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/test_sig_stfl.dir/test_sig_stfl.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_sig_stfl.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_sig_stfl.c",
+  "output": "tests/CMakeFiles/test_sig_stfl.dir/test_sig_stfl.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/test_sig_stfl.dir/test_helpers.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_helpers.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/test_helpers.c",
+  "output": "tests/CMakeFiles/test_sig_stfl.dir/test_helpers.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/speed_sig_stfl.dir/speed_sig_stfl.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/speed_sig_stfl.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/speed_sig_stfl.c",
+  "output": "tests/CMakeFiles/speed_sig_stfl.dir/speed_sig_stfl.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/dump_alg_info.dir/dump_alg_info.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/dump_alg_info.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/dump_alg_info.c",
+  "output": "tests/CMakeFiles/dump_alg_info.dir/dump_alg_info.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/vectors_sig.dir/vectors_sig.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/vectors_sig.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/vectors_sig.c",
+  "output": "tests/CMakeFiles/vectors_sig.dir/vectors_sig.c.o"
+},
+{
+  "directory": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests",
+  "command": "/usr/bin/cc -DOQS_COMPILE_GIT_COMMIT=\\\"unknown\\\" -DOQS_COMPILE_OPTIONS=\"\\\"[-march=armv8-a+crypto;-Wa,--noexecstack;-fomit-frame-pointer;-Wbad-function-cast;-Wcast-qual;-Wnarrowing;-Wconversion]\\\"\" -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src -isystem /opt/homebrew/Cellar/openssl@3/3.6.1/include -O3 -DNDEBUG -std=gnu11 -fPIE -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion -o CMakeFiles/vectors_kem.dir/vectors_kem.c.o -c /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/vectors_kem.c",
+  "file": "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/tests/vectors_kem.c",
+  "output": "tests/CMakeFiles/vectors_kem.dir/vectors_kem.c.o"
+}
+]

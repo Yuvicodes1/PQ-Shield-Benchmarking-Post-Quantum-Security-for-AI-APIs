@@ -1,0 +1,12 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/cmake_install.cmake",
+		"/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/cmake_install.cmake",
+		"/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common/cmake_install.cmake",
+		"/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/common/sha3/xkcp_low/cmake_install.cmake",
+		"/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem/cmake_install.cmake",
+		"/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

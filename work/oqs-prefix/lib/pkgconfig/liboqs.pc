@@ -1,0 +1,10 @@
+prefix=/Users/manav/Documents/Codex/2026-07-26/i/work/oqs-prefix
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: liboqs
+Description: Library for quantum-safe cryptographic algorithms
+Version: 0.16.0
+Requires.private: openssl
+Cflags: -I${includedir}
+Libs: -L${libdir} -loqs

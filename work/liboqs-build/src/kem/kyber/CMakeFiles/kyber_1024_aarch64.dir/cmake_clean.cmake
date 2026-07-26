@@ -1,0 +1,40 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/__asm_NTT.S.o"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/__asm_base_mul.S.o"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/__asm_iNTT.S.o"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/__asm_poly.S.o"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/cbd.c.o"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/cbd.c.o.d"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/feat.S.o"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/fips202x2.c.o"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/fips202x2.c.o.d"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/indcpa.c.o"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/indcpa.c.o.d"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/kem.c.o"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/kem.c.o.d"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/neon_poly.c.o"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/neon_poly.c.o.d"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/neon_polyvec.c.o"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/neon_polyvec.c.o.d"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/neon_symmetric-shake.c.o"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/neon_symmetric-shake.c.o.d"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/ntt.c.o"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/ntt.c.o.d"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/poly.c.o"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/poly.c.o.d"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/polyvec.c.o"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/polyvec.c.o.d"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/reduce.c.o"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/reduce.c.o.d"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/rejsample.c.o"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/rejsample.c.o.d"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/symmetric-shake.c.o"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/symmetric-shake.c.o.d"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/verify.c.o"
+  "CMakeFiles/kyber_1024_aarch64.dir/oldpqclean_kyber1024_aarch64/verify.c.o.d"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang ASM C)
+  include(CMakeFiles/kyber_1024_aarch64.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()
