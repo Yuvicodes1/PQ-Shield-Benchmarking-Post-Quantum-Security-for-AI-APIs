@@ -142,6 +142,7 @@ tests/CMakeFiles/test_hash.dir/test_hash.c.o: \
   /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include/oqs/kem.h \
   /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include/oqs/kem_ml_kem.h \
   /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include/oqs/sig.h \
+  /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include/oqs/sig_ml_dsa.h \
   /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include/oqs/sig_stfl.h \
   /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include/oqs/sha3x4_ops.h \
   /opt/homebrew/Cellar/openssl@3/3.6.1/include/openssl/opensslv.h \

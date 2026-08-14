@@ -1,0 +1,22 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.DS_Store
+.env
+.env.*
+
+# Generated model, benchmark, and analysis outputs
+model/artifacts/*.pkl
+results/raw/
+outputs/
+htmlcov/
+.coverage
+
+# Local liboqs source checkout, build products, and install prefix
+work/liboqs/
+work/liboqs-build/
+work/liboqs-min-build/
+work/liboqs-python/
+work/oqs-prefix/
+work/pdfs/

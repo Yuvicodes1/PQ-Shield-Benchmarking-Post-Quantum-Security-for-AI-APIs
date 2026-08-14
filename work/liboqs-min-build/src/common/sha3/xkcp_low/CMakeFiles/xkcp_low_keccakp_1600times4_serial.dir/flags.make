@@ -6,5 +6,7 @@ C_DEFINES =
 
 C_INCLUDES = -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/sha3/xkcp_low/KeccakP-1600/plain-64bits
 
-C_FLAGS = -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion
+C_FLAGSarm64 = -O3 -DNDEBUG -std=gnu11 -arch arm64 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion
+
+C_FLAGS = -O3 -DNDEBUG -std=gnu11 -arch arm64 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion
 

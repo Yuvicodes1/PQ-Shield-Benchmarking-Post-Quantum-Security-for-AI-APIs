@@ -47,6 +47,11 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem/cmake_install.cmake")
 endif()
 
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/sig/ml_dsa/cmake_install.cmake")
+endif()
+
 if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/liboqs" TYPE FILE FILES
     "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/liboqsConfig.cmake"
@@ -116,6 +121,7 @@ if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT
     "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/sig/sig.h"
     "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/sig_stfl/sig_stfl.h"
     "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/kem_ml_kem.h"
+    "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/sig/ml_dsa/sig_ml_dsa.h"
     "/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include/oqs/oqsconfig.h"
     )
 endif()

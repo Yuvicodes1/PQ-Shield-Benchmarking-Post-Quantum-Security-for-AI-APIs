@@ -7,11 +7,15 @@ ASM_DEFINES = -Doqs_EXPORTS
 
 ASM_INCLUDES = -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src
 
-ASM_FLAGS = -O3 -DNDEBUG -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -fPIC -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer
+ASM_FLAGSarm64 = -O3 -DNDEBUG -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -fPIC -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer
+
+ASM_FLAGS = -O3 -DNDEBUG -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -fPIC -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer
 
 C_DEFINES = -Doqs_EXPORTS
 
 C_INCLUDES = -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src
 
-C_FLAGS = -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer
+C_FLAGSarm64 = -O3 -DNDEBUG -std=gnu11 -arch arm64 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer
+
+C_FLAGS = -O3 -DNDEBUG -std=gnu11 -arch arm64 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer
 

@@ -1,4 +1,4 @@
-"""Async raw-metric runner for the control and Configuration A endpoints."""
+"""Async raw-metric runner for all PQ-Shield API configurations."""
 
 import argparse
 import asyncio
@@ -15,6 +15,8 @@ from cryptography.hazmat.primitives.asymmetric import ec, padding
 
 from bench.metrics import RequestMetric, write_metrics
 from crypto.config_a_classical import b64, pack_envelope, unb64, unpack_envelope
+from crypto.oqs_kem import MlKem768
+from crypto.oqs_sig import MlDsa65
 
 DEFAULT_FEATURES = [0.0] * 64
 
@@ -55,6 +57,36 @@ async def classical_request(client: httpx.AsyncClient) -> tuple[float, float, fl
     return rtt_ms, handshake_ms, float(payload["crypto_ms"])
 
 
+async def kem_request(client: httpx.AsyncClient, full_pqc: bool) -> tuple[float, float, float]:
+    handshake_started = perf_counter()
+    handshake_response = await client.get("/secure/handshake")
+    handshake_response.raise_for_status()
+    handshake = handshake_response.json()
+    handshake_ms = (perf_counter() - handshake_started) * 1000
+    kem_ciphertext, session_key = MlKem768().encapsulate(unb64(handshake["kem_public_key"]))
+    envelope = pack_envelope(session_key, json.dumps({"input": DEFAULT_FEATURES}).encode())
+    started = perf_counter()
+    response = await client.post("/secure/predict", json={
+        "kem_ciphertext": b64(kem_ciphertext), "envelope": b64(envelope)
+    })
+    response.raise_for_status()
+    rtt_ms = (perf_counter() - started) * 1000
+    payload = response.json()
+    encrypted_response = unb64(payload["envelope"])
+    signature = unb64(payload["signature"])
+    if full_pqc:
+        if not MlDsa65().verify(encrypted_response, signature, unb64(handshake["signing_public_key"])):
+            raise ValueError("Signature verification failed")
+    else:
+        signing_key = serialization.load_pem_public_key(handshake["signing_public_key"].encode())
+        try:
+            signing_key.verify(signature, encrypted_response, ec.ECDSA(hashes.SHA256()))
+        except InvalidSignature as exc:
+            raise ValueError("Signature verification failed") from exc
+    unpack_envelope(session_key, encrypted_response)
+    return rtt_ms, handshake_ms, float(payload["crypto_ms"])
+
+
 async def run_cell(base_url: str, configuration: str, concurrency: int, requests: int, repetition: int) -> list[RequestMetric]:
     semaphore = asyncio.Semaphore(concurrency)
     metrics: list[RequestMetric] = []
@@ -69,9 +101,14 @@ async def run_cell(base_url: str, configuration: str, concurrency: int, requests
         async def one(index: int) -> None:
             async with semaphore:
                 try:
-                    rtt_ms, handshake_ms, crypto_ms = await (
-                        control_request(client) if configuration == "control" else classical_request(client)
-                    )
+                    if configuration == "control":
+                        rtt_ms, handshake_ms, crypto_ms = await control_request(client)
+                    elif configuration == "classical":
+                        rtt_ms, handshake_ms, crypto_ms = await classical_request(client)
+                    else:
+                        rtt_ms, handshake_ms, crypto_ms = await kem_request(
+                            client, full_pqc=configuration == "full-pqc"
+                        )
                     cpu_seconds, rss = resource_snapshot()
                     metrics.append(RequestMetric(configuration, concurrency, repetition, index, rtt_ms,
                         handshake_ms, crypto_ms, cpu_seconds, rss, True))
@@ -86,7 +123,9 @@ async def run_cell(base_url: str, configuration: str, concurrency: int, requests
 async def main() -> None:
     parser = argparse.ArgumentParser(description="Record raw PQ-Shield benchmark metrics.")
     parser.add_argument("--url", default="http://127.0.0.1:8000")
-    parser.add_argument("--configuration", choices=["control", "classical"], required=True)
+    parser.add_argument(
+        "--configuration", choices=["control", "classical", "hybrid", "full-pqc"], required=True
+    )
     parser.add_argument("--concurrency", type=int, default=10)
     parser.add_argument("--requests", type=int, default=100)
     parser.add_argument("--repetition", type=int, default=1)

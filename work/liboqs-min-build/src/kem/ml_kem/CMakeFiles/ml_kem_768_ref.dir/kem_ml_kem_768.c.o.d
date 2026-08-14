@@ -109,6 +109,7 @@ src/kem/ml_kem/CMakeFiles/ml_kem_768_ref.dir/kem_ml_kem_768.c.o: \
   /Library/Developer/CommandLineTools/usr/lib/clang/21/include/__stddef_offsetof.h \
   /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include/oqs/kem.h \
   /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include/oqs/sig.h \
+  /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include/oqs/sig_ml_dsa.h \
   /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include/oqs/sig_stfl.h \
   /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include/oqs/aes_ops.h \
   /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include/oqs/sha2_ops.h \

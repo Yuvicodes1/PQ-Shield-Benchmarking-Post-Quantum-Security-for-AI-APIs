@@ -48,6 +48,17 @@
 /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem/CMakeFiles/install.dir
 /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem/CMakeFiles/install/local.dir
 /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/kem/ml_kem/CMakeFiles/install/strip.dir
+/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/sig/ml_dsa/CMakeFiles/ml_dsa_65_ref.dir
+/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/sig/ml_dsa/CMakeFiles/ml_dsa_65_aarch64.dir
+/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/sig/ml_dsa/CMakeFiles/ml_dsa_65_extmu.dir
+/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/sig/ml_dsa/CMakeFiles/package.dir
+/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/sig/ml_dsa/CMakeFiles/package_source.dir
+/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/sig/ml_dsa/CMakeFiles/edit_cache.dir
+/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/sig/ml_dsa/CMakeFiles/rebuild_cache.dir
+/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/sig/ml_dsa/CMakeFiles/list_install_components.dir
+/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/sig/ml_dsa/CMakeFiles/install.dir
+/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/sig/ml_dsa/CMakeFiles/install/local.dir
+/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/src/sig/ml_dsa/CMakeFiles/install/strip.dir
 /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests/CMakeFiles/test_aes.dir
 /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests/CMakeFiles/test_hash.dir
 /Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/tests/CMakeFiles/test_sha3.dir

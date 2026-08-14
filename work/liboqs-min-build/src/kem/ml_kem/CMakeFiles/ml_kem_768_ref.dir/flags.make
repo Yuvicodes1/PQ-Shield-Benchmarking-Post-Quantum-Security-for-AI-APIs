@@ -6,5 +6,7 @@ C_DEFINES =
 
 C_INCLUDES = -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/kem/ml_kem/mlkem-native_ml-kem-768_ref -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src/common/pqclean_shims
 
-C_FLAGS = -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\"../../integration/liboqs/config_c.h\"
+C_FLAGSarm64 = -O3 -DNDEBUG -std=gnu11 -arch arm64 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\"../../integration/liboqs/config_c.h\"
+
+C_FLAGS = -O3 -DNDEBUG -std=gnu11 -arch arm64 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -DMLK_CONFIG_PARAMETER_SET=768 -DMLK_CONFIG_FILE=\"../../integration/liboqs/config_c.h\"
 

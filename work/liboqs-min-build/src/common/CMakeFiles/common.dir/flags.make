@@ -6,5 +6,7 @@ C_DEFINES = -DOQS_HAVE_ALIGNED_ALLOC -DOQS_HAVE_MEMSET_S -DOQS_HAVE_POSIX_MEMALI
 
 C_INCLUDES = -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/opt/homebrew/Cellar/openssl@3/3.6.1/include
 
-C_FLAGS = -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion
+C_FLAGSarm64 = -O3 -DNDEBUG -std=gnu11 -arch arm64 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion
+
+C_FLAGS = -O3 -DNDEBUG -std=gnu11 -arch arm64 -fPIC -fvisibility=hidden -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer -Wbad-function-cast -Wcast-qual -Wnarrowing -Wconversion
 

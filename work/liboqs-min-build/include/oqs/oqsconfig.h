@@ -166,22 +166,22 @@
 /* #undef OQS_ENABLE_KEM_ml_kem_1024_cuda */
 /* #undef OQS_ENABLE_KEM_ml_kem_1024_icicle_cuda */
 
-/* #undef OQS_ENABLE_SIG_ML_DSA */
+#define OQS_ENABLE_SIG_ML_DSA 1
 /* #undef OQS_ENABLE_SIG_ml_dsa_44 */
 /* #undef OQS_ENABLE_SIG_ml_dsa_44_x86_64 */
 /* #undef OQS_ENABLE_SIG_ml_dsa_44_aarch64 */
-/* #undef OQS_ENABLE_SIG_ml_dsa_65 */
+#define OQS_ENABLE_SIG_ml_dsa_65 1
 /* #undef OQS_ENABLE_SIG_ml_dsa_65_x86_64 */
-/* #undef OQS_ENABLE_SIG_ml_dsa_65_aarch64 */
+#define OQS_ENABLE_SIG_ml_dsa_65_aarch64 1
 /* #undef OQS_ENABLE_SIG_ml_dsa_87 */
 /* #undef OQS_ENABLE_SIG_ml_dsa_87_x86_64 */
 /* #undef OQS_ENABLE_SIG_ml_dsa_87_aarch64 */
 /* #undef OQS_ENABLE_SIG_ml_dsa_44_extmu */
 /* #undef OQS_ENABLE_SIG_ml_dsa_44_extmu_x86_64 */
 /* #undef OQS_ENABLE_SIG_ml_dsa_44_extmu_aarch64 */
-/* #undef OQS_ENABLE_SIG_ml_dsa_65_extmu */
+#define OQS_ENABLE_SIG_ml_dsa_65_extmu 1
 /* #undef OQS_ENABLE_SIG_ml_dsa_65_extmu_x86_64 */
-/* #undef OQS_ENABLE_SIG_ml_dsa_65_extmu_aarch64 */
+#define OQS_ENABLE_SIG_ml_dsa_65_extmu_aarch64 1
 /* #undef OQS_ENABLE_SIG_ml_dsa_87_extmu */
 /* #undef OQS_ENABLE_SIG_ml_dsa_87_extmu_x86_64 */
 /* #undef OQS_ENABLE_SIG_ml_dsa_87_extmu_aarch64 */

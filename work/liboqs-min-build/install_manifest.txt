@@ -17,4 +17,5 @@
 /Users/manav/Documents/Codex/2026-07-26/i/work/oqs-prefix/include/oqs/sig.h
 /Users/manav/Documents/Codex/2026-07-26/i/work/oqs-prefix/include/oqs/sig_stfl.h
 /Users/manav/Documents/Codex/2026-07-26/i/work/oqs-prefix/include/oqs/kem_ml_kem.h
+/Users/manav/Documents/Codex/2026-07-26/i/work/oqs-prefix/include/oqs/sig_ml_dsa.h
 /Users/manav/Documents/Codex/2026-07-26/i/work/oqs-prefix/include/oqs/oqsconfig.h

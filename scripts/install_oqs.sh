@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Minimal local liboqs build required by Configuration B. No system install.
+# Minimal local liboqs build required by Configurations B and C. No system install.
 root="$(cd "$(dirname "$0")/.." && pwd)"
 mkdir -p "$root/work"
 if [ ! -d "$root/work/liboqs/.git" ]; then
@@ -9,7 +9,7 @@ if [ ! -d "$root/work/liboqs/.git" ]; then
 fi
 cmake -S "$root/work/liboqs" -B "$root/work/liboqs-min-build" \
   -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON \
-  -DOQS_MINIMAL_BUILD=KEM_ml_kem_768 \
+  -DOQS_MINIMAL_BUILD="KEM_ml_kem_768;SIG_ml_dsa_65" \
   -DCMAKE_INSTALL_PREFIX="$root/work/oqs-prefix"
 cmake --build "$root/work/liboqs-min-build" --parallel 4
 cmake --install "$root/work/liboqs-min-build"

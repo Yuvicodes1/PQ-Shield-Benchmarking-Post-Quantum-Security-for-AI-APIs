@@ -6,5 +6,7 @@ C_DEFINES =
 
 C_INCLUDES = -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs-min-build/include -I/Users/manav/Documents/Codex/2026-07-26/i/work/liboqs/src
 
-C_FLAGS = -O3 -DNDEBUG -std=gnu11 -fPIC -fvisibility=default -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer
+C_FLAGSarm64 = -O3 -DNDEBUG -std=gnu11 -arch arm64 -fPIC -fvisibility=default -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer
+
+C_FLAGS = -O3 -DNDEBUG -std=gnu11 -arch arm64 -fPIC -fvisibility=default -march=armv8-a+crypto -Wa,--noexecstack -fomit-frame-pointer
 

@@ -312,6 +312,45 @@ ml_kem_768_aarch64/fast:
 .PHONY : ml_kem_768_aarch64/fast
 
 #=============================================================================
+# Target rules for targets named ml_dsa_65_ref
+
+# Build rule for target.
+ml_dsa_65_ref: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ml_dsa_65_ref
+.PHONY : ml_dsa_65_ref
+
+# fast build rule for target.
+ml_dsa_65_ref/fast:
+	$(MAKE) $(MAKESILENT) -f src/sig/ml_dsa/CMakeFiles/ml_dsa_65_ref.dir/build.make src/sig/ml_dsa/CMakeFiles/ml_dsa_65_ref.dir/build
+.PHONY : ml_dsa_65_ref/fast
+
+#=============================================================================
+# Target rules for targets named ml_dsa_65_aarch64
+
+# Build rule for target.
+ml_dsa_65_aarch64: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ml_dsa_65_aarch64
+.PHONY : ml_dsa_65_aarch64
+
+# fast build rule for target.
+ml_dsa_65_aarch64/fast:
+	$(MAKE) $(MAKESILENT) -f src/sig/ml_dsa/CMakeFiles/ml_dsa_65_aarch64.dir/build.make src/sig/ml_dsa/CMakeFiles/ml_dsa_65_aarch64.dir/build
+.PHONY : ml_dsa_65_aarch64/fast
+
+#=============================================================================
+# Target rules for targets named ml_dsa_65_extmu
+
+# Build rule for target.
+ml_dsa_65_extmu: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ml_dsa_65_extmu
+.PHONY : ml_dsa_65_extmu
+
+# fast build rule for target.
+ml_dsa_65_extmu/fast:
+	$(MAKE) $(MAKESILENT) -f src/sig/ml_dsa/CMakeFiles/ml_dsa_65_extmu.dir/build.make src/sig/ml_dsa/CMakeFiles/ml_dsa_65_extmu.dir/build
+.PHONY : ml_dsa_65_extmu/fast
+
+#=============================================================================
 # Target rules for targets named test_aes
 
 # Build rule for target.
@@ -623,6 +662,9 @@ help:
 	@echo "... kat_kem"
 	@echo "... kat_sig"
 	@echo "... kat_sig_stfl"
+	@echo "... ml_dsa_65_aarch64"
+	@echo "... ml_dsa_65_extmu"
+	@echo "... ml_dsa_65_ref"
 	@echo "... ml_kem_768_aarch64"
 	@echo "... ml_kem_768_ref"
 	@echo "... oqs"
