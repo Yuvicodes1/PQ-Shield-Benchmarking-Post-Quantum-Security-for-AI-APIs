@@ -1,4 +1,4 @@
-# PQ-Shield
+# PQ-Shield Benchmarking
 
 PQ-Shield is an empirical framework for measuring the security and performance trade-offs of post-quantum cryptography (PQC) around a latency-sensitive AI inference API.
 
