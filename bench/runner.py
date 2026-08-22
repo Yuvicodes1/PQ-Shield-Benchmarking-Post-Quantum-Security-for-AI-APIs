@@ -1,142 +1,217 @@
-"""Async raw-metric runner for all PQ-Shield API configurations."""
+"""Async load generator for a single (config, concurrency) cell.
+
+Launches `--concurrency` concurrent workers, each repeatedly performing a
+full protected transaction (handshake + predict + verify, via
+api.secure_client.secure_predict_transaction) against an already-running
+server, until `--requests` total transactions have completed. Samples the
+server process's CPU% and RSS throughout via crypto.instrumentation.ResourceSampler.
+
+For the unprotected "control" configuration, performs plain POST /predict
+calls instead (no handshake, no crypto).
+
+Writes one CSV row per request. Columns are a superset across configs; rows
+for "control" leave the crypto-specific columns empty.
+
+Usage:
+    python -m bench.runner \
+        --configuration full-pqc \
+        --concurrency 10 \
+        --requests 100 \
+        --repetition 1 \
+        --server-pid 12345 \
+        --output results/raw/full-pqc-c10-r1.csv
+"""
+
+from __future__ import annotations
 
 import argparse
 import asyncio
+import csv
 import json
-import os
-from pathlib import Path
-import resource
-from time import perf_counter
+import time
 
 import httpx
-from cryptography.exceptions import InvalidSignature
-from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import ec, padding
 
-from bench.metrics import RequestMetric, write_metrics
-from crypto.config_a_classical import b64, pack_envelope, unb64, unpack_envelope
-from crypto.oqs_kem import MlKem768
-from crypto.oqs_sig import MlDsa65
+from api.secure_client import secure_predict_transaction
+from crypto.instrumentation import ResourceSampler
 
-DEFAULT_FEATURES = [0.0] * 64
+DEFAULT_FEATURES = [
+    0, 0, 5, 13, 9, 1, 0, 0, 0, 0, 13, 15, 10, 15, 5, 0, 0, 3, 15, 2, 0, 11, 8, 0,
+    0, 4, 12, 0, 0, 8, 8, 0, 0, 5, 8, 0, 0, 9, 8, 0, 0, 4, 11, 0, 1, 12, 7, 0,
+    0, 2, 14, 5, 10, 12, 0, 0, 0, 0, 6, 13, 10, 0, 0, 0,
+]
+
+CONFIG_TO_MODULE_NAME = {
+    "control": "control",
+    "classical": "classical",
+    "hybrid": "hybrid",
+    "full-pqc": "full_pqc",
+}
+
+CSV_FIELDS = [
+    "config", "concurrency", "repetition", "request_index",
+    "rtt_ms", "handshake_ms", "total_ms",
+    "client_establish_ms", "verify_ms", "valid_signature",
+    "kex_blob_bytes", "signature_bytes",
+    "server_decapsulate_ms", "server_inference_ms", "server_encrypt_ms",
+    "server_sign_ms", "server_crypto_ms", "server_total_ms",
+    "prediction", "error",
+]
 
 
-async def control_request(client: httpx.AsyncClient) -> tuple[float, float, float]:
-    started = perf_counter()
-    response = await client.post("/predict", json={"input": DEFAULT_FEATURES})
-    response.raise_for_status()
-    return (perf_counter() - started) * 1000, 0.0, 0.0
-
-
-async def classical_request(client: httpx.AsyncClient) -> tuple[float, float, float]:
-    handshake_started = perf_counter()
-    handshake_response = await client.get("/secure/handshake")
-    handshake_response.raise_for_status()
-    handshake = handshake_response.json()
-    handshake_ms = (perf_counter() - handshake_started) * 1000
-    rsa_key = serialization.load_pem_public_key(handshake["key_exchange_public_key"].encode())
-    signing_key = serialization.load_pem_public_key(handshake["signing_public_key"].encode())
-    session_key = os.urandom(32)
-    encrypted_key = rsa_key.encrypt(session_key, padding.OAEP(
-        mgf=padding.MGF1(hashes.SHA256()), algorithm=hashes.SHA256(), label=None
-    ))
-    envelope = pack_envelope(session_key, json.dumps({"input": DEFAULT_FEATURES}).encode())
-    started = perf_counter()
-    response = await client.post("/secure/predict", json={
-        "encrypted_key": b64(encrypted_key), "envelope": b64(envelope)
-    })
-    response.raise_for_status()
-    rtt_ms = (perf_counter() - started) * 1000
-    payload = response.json()
-    encrypted_response = unb64(payload["envelope"])
+async def _control_transaction(client: httpx.AsyncClient, base_url: str) -> dict:
+    row = {"config": "control", "error": None}
+    t0 = time.perf_counter()
     try:
-        signing_key.verify(unb64(payload["signature"]), encrypted_response, ec.ECDSA(hashes.SHA256()))
-    except InvalidSignature as exc:
-        raise ValueError("Signature verification failed") from exc
-    unpack_envelope(session_key, encrypted_response)  # verify AEAD integrity
-    return rtt_ms, handshake_ms, float(payload["crypto_ms"])
+        resp = await client.post(f"{base_url}/predict", json={"input": DEFAULT_FEATURES})
+        rtt_ms = (time.perf_counter() - t0) * 1000
+        row["rtt_ms"] = rtt_ms
+        row["total_ms"] = rtt_ms
+        row["handshake_ms"] = 0.0
+        if resp.status_code == 200:
+            row["prediction"] = resp.json().get("prediction")
+        else:
+            row["error"] = f"HTTP {resp.status_code}"
+    except Exception as exc:
+        row["error"] = f"{type(exc).__name__}: {exc}"
+    return row
 
 
-async def kem_request(client: httpx.AsyncClient, full_pqc: bool) -> tuple[float, float, float]:
-    handshake_started = perf_counter()
-    handshake_response = await client.get("/secure/handshake")
-    handshake_response.raise_for_status()
-    handshake = handshake_response.json()
-    handshake_ms = (perf_counter() - handshake_started) * 1000
-    kem_ciphertext, session_key = MlKem768().encapsulate(unb64(handshake["kem_public_key"]))
-    envelope = pack_envelope(session_key, json.dumps({"input": DEFAULT_FEATURES}).encode())
-    started = perf_counter()
-    response = await client.post("/secure/predict", json={
-        "kem_ciphertext": b64(kem_ciphertext), "envelope": b64(envelope)
-    })
-    response.raise_for_status()
-    rtt_ms = (perf_counter() - started) * 1000
-    payload = response.json()
-    encrypted_response = unb64(payload["envelope"])
-    signature = unb64(payload["signature"])
-    if full_pqc:
-        if not MlDsa65().verify(encrypted_response, signature, unb64(handshake["signing_public_key"])):
-            raise ValueError("Signature verification failed")
-    else:
-        signing_key = serialization.load_pem_public_key(handshake["signing_public_key"].encode())
-        try:
-            signing_key.verify(signature, encrypted_response, ec.ECDSA(hashes.SHA256()))
-        except InvalidSignature as exc:
-            raise ValueError("Signature verification failed") from exc
-    unpack_envelope(session_key, encrypted_response)
-    return rtt_ms, handshake_ms, float(payload["crypto_ms"])
+def _flatten(row: dict, config_name: str, concurrency: int, repetition: int, idx: int) -> dict:
+    server_timing = row.get("server_timing_ms", {}) or {}
+    return {
+        "config": config_name,
+        "concurrency": concurrency,
+        "repetition": repetition,
+        "request_index": idx,
+        "rtt_ms": row.get("rtt_ms"),
+        "handshake_ms": row.get("handshake_ms"),
+        "total_ms": row.get("total_ms"),
+        "client_establish_ms": row.get("client_establish_ms"),
+        "verify_ms": row.get("verify_ms"),
+        "valid_signature": row.get("valid_signature"),
+        "kex_blob_bytes": row.get("kex_blob_bytes"),
+        "signature_bytes": row.get("signature_bytes"),
+        "server_decapsulate_ms": server_timing.get("decapsulate_ms"),
+        "server_inference_ms": server_timing.get("inference_ms"),
+        "server_encrypt_ms": server_timing.get("encrypt_ms"),
+        "server_sign_ms": server_timing.get("sign_ms"),
+        "server_crypto_ms": server_timing.get("server_crypto_ms"),
+        "server_total_ms": server_timing.get("server_total_ms"),
+        "prediction": row.get("prediction"),
+        "error": row.get("error"),
+    }
 
 
-async def run_cell(base_url: str, configuration: str, concurrency: int, requests: int, repetition: int) -> list[RequestMetric]:
+async def run_sweep_cell(
+    base_url: str,
+    config_name: str,
+    concurrency: int,
+    n_requests: int,
+    repetition: int,
+    reuse_handshake: bool = False,
+) -> list[dict]:
+    """Runs one (config, concurrency, repetition) cell and returns flattened rows."""
+    results: list[dict] = []
     semaphore = asyncio.Semaphore(concurrency)
-    metrics: list[RequestMetric] = []
+    counter = {"n": 0}
+    counter_lock = asyncio.Lock()
 
-    def resource_snapshot() -> tuple[float, int]:
-        usage = resource.getrusage(resource.RUSAGE_SELF)
-        # macOS reports ru_maxrss in bytes; Linux reports KiB.
-        rss = int(usage.ru_maxrss if os.uname().sysname == "Darwin" else usage.ru_maxrss * 1024)
-        return usage.ru_utime + usage.ru_stime, rss
+    limits = httpx.Limits(max_connections=concurrency + 10, max_keepalive_connections=concurrency)
+    async with httpx.AsyncClient(timeout=30.0, limits=limits) as client:
+        cached_handshake = None
+        if reuse_handshake and config_name != "control":
+            from api.secure_client import do_handshake
 
-    async with httpx.AsyncClient(base_url=base_url, timeout=30.0) as client:
-        async def one(index: int) -> None:
-            async with semaphore:
-                try:
-                    if configuration == "control":
-                        rtt_ms, handshake_ms, crypto_ms = await control_request(client)
-                    elif configuration == "classical":
-                        rtt_ms, handshake_ms, crypto_ms = await classical_request(client)
+            cached_handshake, _ = await do_handshake(client, base_url)
+
+        async def worker():
+            while True:
+                async with counter_lock:
+                    if counter["n"] >= n_requests:
+                        return
+                    idx = counter["n"]
+                    counter["n"] += 1
+                async with semaphore:
+                    if config_name == "control":
+                        row = await _control_transaction(client, base_url)
                     else:
-                        rtt_ms, handshake_ms, crypto_ms = await kem_request(
-                            client, full_pqc=configuration == "full-pqc"
+                        row = await secure_predict_transaction(
+                            client, base_url, config_name, DEFAULT_FEATURES,
+                            cached_handshake=cached_handshake,
                         )
-                    cpu_seconds, rss = resource_snapshot()
-                    metrics.append(RequestMetric(configuration, concurrency, repetition, index, rtt_ms,
-                        handshake_ms, crypto_ms, cpu_seconds, rss, True))
-                except Exception as exc:
-                    cpu_seconds, rss = resource_snapshot()
-                    metrics.append(RequestMetric(configuration, concurrency, repetition, index, 0.0,
-                        0.0, 0.0, cpu_seconds, rss, False, str(exc)))
-        await asyncio.gather(*(one(index) for index in range(requests)))
-    return metrics
+                    results.append(_flatten(row, config_name, concurrency, repetition, idx))
+
+        workers = [asyncio.create_task(worker()) for _ in range(concurrency)]
+        await asyncio.gather(*workers)
+
+    return results
 
 
-async def main() -> None:
-    parser = argparse.ArgumentParser(description="Record raw PQ-Shield benchmark metrics.")
-    parser.add_argument("--url", default="http://127.0.0.1:8000")
-    parser.add_argument(
-        "--configuration", choices=["control", "classical", "hybrid", "full-pqc"], required=True
-    )
-    parser.add_argument("--concurrency", type=int, default=10)
-    parser.add_argument("--requests", type=int, default=100)
+def write_csv(rows: list[dict], output_path: str) -> None:
+    import os
+
+    os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
+    with open(output_path, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=CSV_FIELDS)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def main():
+    parser = argparse.ArgumentParser(description="PQ-Shield single-cell benchmark runner")
+    parser.add_argument("--configuration", required=True, choices=list(CONFIG_TO_MODULE_NAME.keys()))
+    parser.add_argument("--concurrency", type=int, required=True)
+    parser.add_argument("--requests", type=int, required=True, help="Total requests for this cell")
     parser.add_argument("--repetition", type=int, default=1)
-    parser.add_argument("--output", type=Path, default=Path("results/raw/metrics.csv"))
+    parser.add_argument("--url", default="http://127.0.0.1:8000")
+    parser.add_argument("--server-pid", type=int, default=None, help="PID to sample CPU/RSS from")
+    parser.add_argument("--reuse-handshake", action="store_true")
+    parser.add_argument("--warmup-fraction", type=float, default=0.05)
+    parser.add_argument("--output", required=True)
     args = parser.parse_args()
-    if min(args.concurrency, args.requests, args.repetition) < 1:
-        parser.error("concurrency, requests, and repetition must be positive")
-    metrics = await run_cell(args.url, args.configuration, args.concurrency, args.requests, args.repetition)
-    write_metrics(metrics, args.output)
-    print(f"Wrote {len(metrics)} records to {args.output} ({sum(metric.ok for metric in metrics)} successful)")
+
+    config_name = CONFIG_TO_MODULE_NAME[args.configuration]
+
+    sampler = None
+    if args.server_pid:
+        sampler = ResourceSampler(pid=args.server_pid, interval_s=0.25)
+        sampler.start()
+
+    t0 = time.perf_counter()
+    rows = asyncio.run(
+        run_sweep_cell(
+            args.url, config_name, args.concurrency, args.requests, args.repetition,
+            reuse_handshake=args.reuse_handshake,
+        )
+    )
+    wall_s = time.perf_counter() - t0
+
+    resource_summary = {}
+    if sampler is not None:
+        sampler.stop()
+        resource_summary = sampler.summary()
+
+    rows.sort(key=lambda r: r["request_index"])
+    n_warmup = max(1, int(len(rows) * args.warmup_fraction)) if len(rows) > 20 else 0
+    n_errors = sum(1 for r in rows if r["error"])
+
+    write_csv(rows, args.output)
+
+    summary = {
+        "configuration": args.configuration,
+        "concurrency": args.concurrency,
+        "requests": args.requests,
+        "repetition": args.repetition,
+        "wall_seconds": wall_s,
+        "throughput_rps": len(rows) / wall_s if wall_s > 0 else None,
+        "n_errors": n_errors,
+        "n_warmup_discarded_downstream": n_warmup,
+        "output": args.output,
+        "resource_summary": resource_summary,
+    }
+    print(json.dumps(summary, indent=2))
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

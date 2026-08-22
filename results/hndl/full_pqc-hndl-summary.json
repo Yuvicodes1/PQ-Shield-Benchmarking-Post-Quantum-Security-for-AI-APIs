@@ -1,0 +1,11 @@
+{
+  "config": "full_pqc",
+  "n_requests": 200,
+  "n_ok": 200,
+  "total_bytes_stored": 899800,
+  "bytes_per_request_mean": 4499.0,
+  "kex_bytes_per_request": 1088,
+  "signature_bytes_per_request": 3309,
+  "kex_decryptable_under_future_crqc": false,
+  "projected_bytes_per_1000_requests": 4499000.0
+}

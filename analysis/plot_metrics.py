@@ -1,75 +1,80 @@
-"""Create a concise comparison chart from PQ-Shield raw benchmark CSV files."""
+"""Generates the aggregate 'smoke-test' comparison chart referenced in the
+project README: mean +/- standard deviation error bars for protected-request
+RTT, handshake time, and reported server crypto+inference time, across
+whichever raw CSVs are present. Unlike analysis/figures.py (the full paper
+figure set, which expects the complete matrix), this is meant to be run at
+any point during development to sanity-check partial results.
+
+Usage:
+    python -m analysis.plot_metrics
+    python -m analysis.plot_metrics --input results/raw/classical-c10-r1.csv results/raw/full-pqc-c10-r1.csv --output outputs/c10-comparison.png
+"""
+
+from __future__ import annotations
 
 import argparse
-import csv
-from collections import defaultdict
-from pathlib import Path
-from statistics import mean, stdev
+import glob
+import os
 
+import matplotlib
+
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+CONFIG_ORDER = ["control", "classical", "hybrid", "full_pqc"]
+CONFIG_COLORS = {"control": "#888888", "classical": "#c0392b", "hybrid": "#e67e22", "full_pqc": "#2471a3"}
 
 
-METRICS = (
-    ("rtt_ms", "Protected request RTT (ms)"),
-    ("handshake_ms", "Handshake time (ms)"),
-    ("server_crypto_ms", "Server crypto + inference (ms)"),
-)
-CONFIGURATION_ORDER = ("control", "classical", "hybrid", "full-pqc")
-CONFIGURATION_LABELS = {
-    "control": "Control", "classical": "Classical", "hybrid": "Hybrid", "full-pqc": "Full PQC",
-}
-
-
-def load_records(paths: list[Path]) -> dict[str, list[dict[str, float]]]:
-    records: dict[str, list[dict[str, float]]] = defaultdict(list)
-    for path in paths:
-        with path.open(newline="", encoding="utf-8") as stream:
-            for row in csv.DictReader(stream):
-                if row["ok"].lower() == "true":
-                    records[row["configuration"]].append({
-                        metric: float(row[metric]) for metric, _ in METRICS
-                    })
-    return records
-
-
-def plot(records: dict[str, list[dict[str, float]]], output: Path) -> None:
-    configurations = [name for name in CONFIGURATION_ORDER if records.get(name)]
-    if not configurations:
-        raise ValueError("No successful benchmark records were found")
-
-    figure, axes = plt.subplots(1, len(METRICS), figsize=(15, 4.8), constrained_layout=True)
-    colors = ["#4C78A8", "#F58518", "#54A24B", "#B279A2"]
-    for axis, (metric, title) in zip(axes, METRICS):
-        values = [mean(record[metric] for record in records[name]) for name in configurations]
-        errors = [
-            stdev(record[metric] for record in records[name]) if len(records[name]) > 1 else 0
-            for name in configurations
-        ]
-        bars = axis.bar(
-            [CONFIGURATION_LABELS[name] for name in configurations], values,
-            yerr=errors, capsize=4, color=colors[:len(configurations)], edgecolor="#333333",
-        )
-        axis.set_title(title)
-        axis.set_ylabel("Milliseconds")
-        axis.grid(axis="y", alpha=0.25)
-        axis.set_axisbelow(True)
-        for bar, value in zip(bars, values):
-            axis.text(bar.get_x() + bar.get_width() / 2, value, f"{value:.1f}",
-                      ha="center", va="bottom", fontsize=9)
-
-    sample_count = sum(len(records[name]) for name in configurations)
-    figure.suptitle(f"PQ-Shield benchmark comparison ({sample_count} successful requests)", fontsize=14)
-    output.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(output, dpi=180, bbox_inches="tight")
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Plot aggregate PQ-Shield benchmark metrics.")
-    parser.add_argument("--input", type=Path, nargs="+", default=sorted(Path("results/raw").glob("*.csv")))
-    parser.add_argument("--output", type=Path, default=Path("outputs/benchmark-comparison.png"))
+def main():
+    parser = argparse.ArgumentParser(description="PQ-Shield quick metrics comparison plot")
+    parser.add_argument("--input", nargs="*", default=None, help="Specific CSV files; default = all of results/raw/*.csv")
+    parser.add_argument("--output", default="outputs/benchmark-comparison.png")
     args = parser.parse_args()
-    plot(load_records(args.input), args.output)
+
+    paths = args.input or sorted(glob.glob("results/raw/*.csv"))
+    if not paths:
+        raise SystemExit("No CSV files found. Run bench.orchestrator or bench.runner first.")
+
+    df = pd.concat([pd.read_csv(p) for p in paths], ignore_index=True)
+    ok = df[df["error"].isna() | (df["error"] == "")]
+
+    metrics = [
+        ("rtt_ms", "RTT (ms)"),
+        ("handshake_ms", "Handshake time (ms)"),
+        ("server_total_ms", "Server crypto + inference time (ms)"),
+    ]
+    configs = [c for c in CONFIG_ORDER if c in ok["config"].unique()]
+
+    fig, axes = plt.subplots(1, len(metrics), figsize=(5 * len(metrics), 4.5))
+    if len(metrics) == 1:
+        axes = [axes]
+
+    for ax, (metric, label) in zip(axes, metrics):
+        if metric not in ok.columns:
+            continue
+        means, stds = [], []
+        for c in configs:
+            vals = ok[ok["config"] == c][metric].dropna().values
+            means.append(np.mean(vals) if len(vals) else 0)
+            stds.append(np.std(vals) if len(vals) else 0)
+        x = np.arange(len(configs))
+        colors = [CONFIG_COLORS[c] for c in configs]
+        ax.bar(x, means, yerr=stds, capsize=4, color=colors)
+        ax.set_xticks(x)
+        ax.set_xticklabels(configs, rotation=20, fontsize=8)
+        ax.set_ylabel(label)
+        ax.set_title(label)
+        ax.grid(True, alpha=0.3, axis="y")
+
+    fig.suptitle(f"PQ-Shield benchmark comparison ({len(paths)} CSV file(s), {len(ok)} valid requests)")
+    os.makedirs(os.path.dirname(args.output) or ".", exist_ok=True)
+    fig.savefig(args.output, dpi=150, bbox_inches="tight")
     print(f"Wrote {args.output}")
+    print("NOTE: treat this as a smoke-test visualization -- overlapping error bars mean small")
+    print("differences are not yet statistically meaningful. See analysis/aggregate.py for the")
+    print("Mann-Whitney U significance tests used in the paper.")
 
 
 if __name__ == "__main__":
