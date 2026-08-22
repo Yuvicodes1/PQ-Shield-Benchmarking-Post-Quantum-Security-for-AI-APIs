@@ -1,0 +1,12 @@
+{
+  "model": "RandomForestClassifier",
+  "n_estimators": 100,
+  "dataset": "UCI Optical Recognition of Handwritten Digits (sklearn.datasets.load_digits)",
+  "n_samples": 1797,
+  "n_features": 64,
+  "n_classes": 10,
+  "test_accuracy": 0.9611111111111111,
+  "train_ms": 239.18865600001027,
+  "request_payload_bytes_approx": 345,
+  "response_payload_bytes_approx": 93
+}
