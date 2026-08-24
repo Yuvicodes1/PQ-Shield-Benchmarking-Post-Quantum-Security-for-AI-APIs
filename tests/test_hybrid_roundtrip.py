@@ -12,8 +12,8 @@ from crypto.oqs_kem import MlKem768
 def test_hybrid_api_round_trip():
     with TestClient(app) as client:
         handshake = client.get("/secure/handshake").json()
-        kem_ciphertext, session_key = MlKem768().encapsulate(unb64(handshake["kem_public_key"]))
-        signing_key = serialization.load_pem_public_key(handshake["signing_public_key"].encode())
+        kem_ciphertext, session_key = MlKem768().encapsulate(unb64(handshake["kex_public_key"]))
+        signing_key = serialization.load_pem_public_key(handshake["sig_public_key"].encode())
         envelope = pack_envelope(session_key, json.dumps({"input": [0.0] * 64}).encode())
         response = client.post("/secure/predict", json={
             "kem_ciphertext": b64(kem_ciphertext), "envelope": b64(envelope)

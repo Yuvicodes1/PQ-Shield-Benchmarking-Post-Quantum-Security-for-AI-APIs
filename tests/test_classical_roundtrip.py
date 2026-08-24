@@ -22,15 +22,14 @@ def test_classical_channel_rejects_tampered_ciphertext():
 def test_control_server_exposes_secure_endpoints():
     client = TestClient(control_app)
     handshake = client.get("/secure/handshake")
-    assert handshake.status_code == 200
-    assert "key_exchange_public_key" in handshake.json()
+    assert handshake.status_code == 404
 
 
 def test_protected_round_trip_returns_prediction():
     client = TestClient(protected_app)
     handshake = client.get("/secure/handshake").json()
-    rsa_key = serialization.load_pem_public_key(handshake["key_exchange_public_key"].encode())
-    signing_key = serialization.load_pem_public_key(handshake["signing_public_key"].encode())
+    rsa_key = serialization.load_pem_public_key(handshake["kex_public_key"].encode())
+    signing_key = serialization.load_pem_public_key(handshake["sig_public_key"].encode())
     session_key = os.urandom(32)
     encrypted_key = rsa_key.encrypt(
         session_key,

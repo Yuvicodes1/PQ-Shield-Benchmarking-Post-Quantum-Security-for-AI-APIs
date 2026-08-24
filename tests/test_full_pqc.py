@@ -22,8 +22,8 @@ def test_ml_dsa_65_round_trip_and_tamper_detection():
 def test_full_pqc_api_round_trip():
     with TestClient(app) as client:
         handshake = client.get("/secure/handshake").json()
-        kem_ciphertext, session_key = MlKem768().encapsulate(unb64(handshake["kem_public_key"]))
-        signing_key = unb64(handshake["signing_public_key"])
+        kem_ciphertext, session_key = MlKem768().encapsulate(unb64(handshake["kex_public_key"]))
+        signing_key = unb64(handshake["sig_public_key"])
         envelope = pack_envelope(session_key, json.dumps({"input": [0.0] * 64}).encode())
         response = client.post("/secure/predict", json={
             "kem_ciphertext": b64(kem_ciphertext), "envelope": b64(envelope)
