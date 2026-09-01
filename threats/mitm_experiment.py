@@ -37,7 +37,8 @@ import os
 import httpx
 
 from api.secure_client import secure_predict_transaction
-from bench.runner import DEFAULT_FEATURES, CONFIG_TO_MODULE_NAME
+from bench.runner import CONFIG_TO_MODULE_NAME
+from model.profiles.registry import get_profile
 
 
 async def run(config_name: str, proxy_url: str, n_requests: int, tamper_target: str) -> list[dict]:
@@ -45,7 +46,7 @@ async def run(config_name: str, proxy_url: str, n_requests: int, tamper_target: 
     async with httpx.AsyncClient(timeout=30.0) as client:
         for i in range(n_requests):
             row = await secure_predict_transaction(
-                client, proxy_url, config_name, DEFAULT_FEATURES, debug_metrics=True
+                client, proxy_url, config_name, get_profile().sample_request(), debug_metrics=True
             )
             detected = False
             detection_layer = None

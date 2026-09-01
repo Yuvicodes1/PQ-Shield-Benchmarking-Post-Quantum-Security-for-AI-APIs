@@ -45,11 +45,15 @@ async def secure_predict_transaction(
     client: httpx.AsyncClient,
     base_url: str,
     config_name: str,
-    features: list[float],
+    request_body: dict,
     debug_metrics: bool = False,
     cached_handshake: dict | None = None,
 ) -> dict:
     """Performs one full protected transaction. Returns a flat result/metrics dict.
+
+    `request_body` is a JSON-serializable dict matching whatever payload
+    profile the server is currently configured for (model/profiles/*) --
+    the protocol layer itself does not know or care about payload shape.
 
     If `cached_handshake` is provided (the dict returned by do_handshake's
     response .json()), the GET /secure/handshake round trip is skipped --
@@ -74,7 +78,8 @@ async def secure_predict_transaction(
         row["client_establish_ms"] = est.meta.get("handshake_encrypt_ms", 0.0)
         row["kex_blob_bytes"] = len(est.kex_blob)
 
-        request_plaintext = json.dumps({"input": features}).encode()
+        request_plaintext = json.dumps(request_body).encode()
+        row["request_plaintext_bytes"] = len(request_plaintext)
         req_aead = aead_encrypt(est.session_key, request_plaintext)
 
         payload = {
@@ -114,6 +119,7 @@ async def secure_predict_transaction(
             plaintext = aead_decrypt(est.session_key, resp_nonce, resp_ciphertext)
             result = json.loads(plaintext)
             row["prediction"] = result.get("prediction")
+            row["response_plaintext_bytes"] = len(plaintext)
         except AEADError:
             row["error"] = "response AEAD authentication failed (tampered response)"
 

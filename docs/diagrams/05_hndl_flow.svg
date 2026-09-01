@@ -1,0 +1,30 @@
+<svg width="100%" viewBox="0 0 900 520" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
+  <rect width="900" height="520" fill="#ffffff"/>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1L8 5L1 9Z" fill="#64748b"/></marker></defs>
+  <rect x="50" y="60" width="240" height="64" rx="9" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="1.5"/>
+  <text x="170.0" y="83.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#4c1d95">Running protected server</text>
+  <text x="170.0" y="104.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="12" fill="#6d28d9">Config A, B, or C</text>
+  <rect x="330" y="60" width="260" height="64" rx="9" fill="#fef2f2" stroke="#ef4444" stroke-width="1.5"/>
+  <text x="460.0" y="83.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#7f1d1d">threats/hndl_capture.py</text>
+  <text x="460.0" y="104.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="11" fill="#b91c1c">1000 transactions, X-Debug-Metrics: true</text>
+  <line x1="290" y1="92.0" x2="330" y2="92.0" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="310.0" y="48" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="11.5" fill="#94a3b8">kex_blob, ciphertext, signature byte sizes</text>
+  <rect x="330" y="178" width="260" height="56" rx="9" fill="#fef2f2" stroke="#ef4444" stroke-width="1.5"/>
+  <text x="460.0" y="197.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#7f1d1d">KEX_DECRYPTABLE_UNDER_CRQC</text>
+  <text x="460.0" y="218.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="11" fill="#b91c1c">per configuration</text>
+  <line x1="460.0" y1="124" x2="460.0" y2="178" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <rect x="480" y="270" width="360" height="70" rx="9" fill="#fef2f2" stroke="#ef4444" stroke-width="1.5"/>
+  <text x="660.0" y="296.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#7f1d1d">Classical: True</text>
+  <text x="660.0" y="317.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="11.5" fill="#b91c1c">RSA broken by Shor, eventually decryptable</text>
+  <rect x="80" y="270" width="360" height="70" rx="9" fill="#f0fdf4" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="260.0" y="296.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#14532d">Hybrid / Full PQC: False</text>
+  <text x="260.0" y="317.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="11.5" fill="#15803d">ML-KEM is lattice-based, not decryptable</text>
+  <line x1="360" y1="234" x2="260.0" y2="270" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <line x1="560" y1="234" x2="660.0" y2="270" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <rect x="330" y="390" width="260" height="50" rx="9" fill="#fefce8" stroke="#eab308" stroke-width="1.5"/>
+  <text x="460.0" y="420.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="600" fill="#713f12">results/hndl/{config}-hndl.csv</text>
+  <line x1="260.0" y1="340" x2="360" y2="400" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <line x1="660.0" y1="340" x2="560" y2="400" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="450" y="468" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="11.5" fill="#475569">AES-256-GCM payload ciphertext is treated as not practically CRQC-decryptable in any</text>
+  <text x="450" y="486" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="11.5" fill="#475569">configuration (Grover only halves AES's effective security level) — only key establishment differs by config.</text>
+</svg>

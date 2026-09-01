@@ -1,0 +1,26 @@
+# Optional dependencies for real (non-synthetic) LLM streaming backends.
+#
+# The core PQ-Shield benchmark (requirements.txt) does NOT need any of this --
+# the streaming protocol itself works out of the box against the synthetic
+# backend with zero extra dependencies. Only install this file if you want
+# to run docs/STREAMING.md's experiments against a real model.
+#
+# Install ONLY what you need -- these two backends are alternatives to each
+# other, not both required:
+#
+#   pip install -r requirements-streaming.txt          # installs both
+#   pip install llama-cpp-python                        # llama.cpp backend only
+#   pip install transformers torch                      # transformers backend only
+
+# --- llama.cpp backend (model/streaming_backends/llama_cpp_backend.py) ---
+# Compiles a C++ extension on install; on most machines this "just works"
+# with a CPU-only build. See docs/STREAMING.md for GPU-acceleration flags.
+llama-cpp-python==0.3.4
+
+# --- transformers backend (model/streaming_backends/transformers_backend.py) ---
+# CPU-only torch by default. If you have a CUDA GPU, install a matching
+# torch build from https://pytorch.org/get-started/locally/ BEFORE this file,
+# then re-run this file with --no-deps to avoid it being overwritten with
+# the CPU wheel.
+transformers==4.46.3
+torch==2.5.1
