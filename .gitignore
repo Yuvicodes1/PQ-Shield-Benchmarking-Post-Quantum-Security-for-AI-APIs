@@ -8,6 +8,7 @@ model/artifacts/*.pkl
 results/raw/*.csv
 results/hndl/*.csv
 results/mitm/*.csv
+results/streaming/*.csv
 results/server_logs/
 results/*.json
 outputs/*.png
@@ -18,4 +19,8 @@ outputs/*.png
 .agents/
 .claude/
 work/
+
+# Downloaded model weights for the real streaming backend (docs/STREAMING.md
+# Option A1/B) -- multi-GB GGUF/HF files, never belong in git.
+models/
 

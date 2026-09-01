@@ -1,8 +1,8 @@
 {
   "config": "hybrid",
-  "tamper_target": "ciphertext",
+  "tamper_target": "signature",
   "n_requests": 25,
   "n_detected": 25,
   "detection_rate": 1.0,
-  "detection_ms_mean": 9.980114914942533
+  "detection_ms_mean": 0.09198496351018548
 }

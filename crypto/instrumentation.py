@@ -89,7 +89,10 @@ class ResourceSampler:
 
     def summary(self) -> dict:
         if not self.samples:
-            return {"cpu_percent_mean": None, "rss_mb_mean": None, "rss_mb_max": None}
+            return {
+                "cpu_percent_mean": None, "cpu_percent_max": None,
+                "rss_mb_mean": None, "rss_mb_max": None, "n_samples": 0,
+            }
         cpu_vals = [s.cpu_percent for s in self.samples]
         rss_vals = [s.rss_mb for s in self.samples]
         return {

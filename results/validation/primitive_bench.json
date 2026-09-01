@@ -1,0 +1,233 @@
+{
+  "iterations": 200,
+  "ml_kem_768": {
+    "keygen": {
+      "iterations": 200,
+      "mean_us": 13.118025000977696,
+      "median_us": 11.636499991141136,
+      "stdev_us": 3.7625927396145262,
+      "p95_us": 20.819999974719394,
+      "p99_us": 29.24700001472047,
+      "min_us": 11.31900000927999,
+      "max_us": 38.45399999136134,
+      "ops_per_second": 76230.98750958848
+    },
+    "encaps": {
+      "iterations": 200,
+      "mean_us": 13.867279998862614,
+      "median_us": 12.731500007134855,
+      "stdev_us": 3.933923328368772,
+      "p95_us": 18.72799998636765,
+      "p99_us": 28.35800000866584,
+      "min_us": 12.48199998826749,
+      "max_us": 53.68399999383655,
+      "ops_per_second": 72112.19504344178
+    },
+    "decaps": {
+      "iterations": 200,
+      "mean_us": 17.218525000401996,
+      "median_us": 14.73849999911181,
+      "stdev_us": 4.3582406021243845,
+      "p95_us": 24.577000004910587,
+      "p99_us": 30.036999987714808,
+      "min_us": 13.874999979179847,
+      "max_us": 47.932000001083,
+      "ops_per_second": 58076.98394471381
+    }
+  },
+  "ml_dsa_65": {
+    "keygen": {
+      "iterations": 200,
+      "mean_us": 37.69625499984386,
+      "median_us": 34.45600000873128,
+      "stdev_us": 6.049486168845244,
+      "p95_us": 49.24000000983142,
+      "p99_us": 57.62600000025486,
+      "min_us": 33.12100000130158,
+      "max_us": 66.28399998476198,
+      "ops_per_second": 26527.83413111308
+    },
+    "sign": {
+      "iterations": 200,
+      "mean_us": 120.50486000148906,
+      "median_us": 104.55249999097305,
+      "stdev_us": 67.63664626754081,
+      "p95_us": 256.7239999962112,
+      "p99_us": 316.1500000032902,
+      "min_us": 47.3000000056345,
+      "max_us": 446.82300000431496,
+      "ops_per_second": 8298.420495137234
+    },
+    "verify": {
+      "iterations": 200,
+      "mean_us": 38.149460000482804,
+      "median_us": 36.26249998944786,
+      "stdev_us": 5.161556056856365,
+      "p95_us": 48.41700001634308,
+      "p99_us": 54.96100001778359,
+      "min_us": 33.3059999775287,
+      "max_us": 55.75000000135333,
+      "ops_per_second": 26212.69082150427
+    }
+  },
+  "classical": {
+    "rsa2048_keygen": {
+      "iterations": 5,
+      "mean_us": 62891.752799993126,
+      "median_us": 53800.96299998627,
+      "stdev_us": 20623.30925882975,
+      "p95_us": 81359.91599999671,
+      "p99_us": 81359.91599999671,
+      "min_us": 40065.11800000112,
+      "max_us": 87865.64999999768,
+      "ops_per_second": 15.900335981733193
+    },
+    "rsa2048_oaep_encrypt": {
+      "iterations": 200,
+      "mean_us": 29.213345000158597,
+      "median_us": 26.064500005418267,
+      "stdev_us": 4.675976341469885,
+      "p95_us": 39.29199999674893,
+      "p99_us": 41.6370000095867,
+      "min_us": 24.69800000426403,
+      "max_us": 43.30100000515813,
+      "ops_per_second": 34230.931103390285
+    },
+    "rsa2048_oaep_decrypt": {
+      "iterations": 200,
+      "mean_us": 390.5525399989074,
+      "median_us": 377.720999992448,
+      "stdev_us": 83.15044122558085,
+      "p95_us": 407.4070000115171,
+      "p99_us": 704.3429999953332,
+      "min_us": 353.42000001037377,
+      "max_us": 1265.5799999947703,
+      "ops_per_second": 2560.474961967467
+    },
+    "ecdsa_p256_keygen": {
+      "iterations": 200,
+      "mean_us": 16.40870000088057,
+      "median_us": 15.606499999876178,
+      "stdev_us": 2.8355313506789472,
+      "p95_us": 19.185000013521858,
+      "p99_us": 31.668999980638546,
+      "min_us": 15.122000007750103,
+      "max_us": 39.61900000604146,
+      "ops_per_second": 60943.28008595044
+    },
+    "ecdsa_p256_sign": {
+      "iterations": 200,
+      "mean_us": 29.614969999869345,
+      "median_us": 28.288999985193186,
+      "stdev_us": 3.4775234558019705,
+      "p95_us": 35.156000024016976,
+      "p99_us": 44.33999998809668,
+      "min_us": 27.85700002050362,
+      "max_us": 49.22599998735677,
+      "ops_per_second": 33766.706500273736
+    },
+    "ecdsa_p256_verify": {
+      "iterations": 200,
+      "mean_us": 85.2810800000725,
+      "median_us": 82.73400001712616,
+      "stdev_us": 6.1018080780889,
+      "p95_us": 97.93500001364919,
+      "p99_us": 102.91999998912615,
+      "min_us": 79.04200001007666,
+      "max_us": 113.31700000027922,
+      "ops_per_second": 11725.930300122252
+    }
+  },
+  "qualitative_ordering_checks": [
+    {
+      "claim": "ML-DSA-65 verification is faster than ML-DSA-65 signing",
+      "holds": true,
+      "evidence": {
+        "ml_dsa_65_sign_mean_us": 120.50486000148906,
+        "ml_dsa_65_verify_mean_us": 38.149460000482804,
+        "sign_p99_us": 316.1500000032902,
+        "sign_p99_over_median": 3.023839698052043
+      },
+      "rationale": "ML-DSA signing uses Fiat-Shamir with Aborts: rejection sampling means signing repeats until a norm check passes (expected ~5.1 iterations at security level 3), while verification is single-pass and deterministic.",
+      "source": "FIPS 204 Sec. 6; Benchmarking ML-KEM/ML-DSA on Cortex-M0+, arXiv:2603.19340, Sec. IV-B (signing variance, deterministic verification)."
+    },
+    {
+      "claim": "ML-KEM-768 key generation is faster than RSA-2048 key generation",
+      "holds": true,
+      "evidence": {
+        "ml_kem_768_keygen_mean_us": 13.118025000977696,
+        "rsa2048_keygen_mean_us": 62891.752799993126,
+        "speedup_factor": 4794.300422152402
+      },
+      "rationale": "RSA keygen requires probabilistic prime search; ML-KEM keygen is deterministic-time polynomial arithmetic. This is the mechanism behind PQ-Shield's availability finding at high concurrency.",
+      "source": "A Practical Performance Benchmark of Post-Quantum Cryptography Across Heterogeneous Computing Environments, Cryptography 9(1):12, 2025."
+    },
+    {
+      "claim": "ML-DSA-65 verification is not slower than ECDSA P-256 verification (H4)",
+      "holds": true,
+      "evidence": {
+        "ml_dsa_65_verify_mean_us": 38.149460000482804,
+        "ecdsa_p256_verify_mean_us": 85.2810800000725,
+        "ratio_mldsa_over_ecdsa": 0.44733790895296316
+      },
+      "rationale": "This is PQ-Shield's own H4. It is listed here as a primitive-level check so the application-level result can be corroborated at the algorithm level on the same host.",
+      "source": "PQ-Shield docs/DESIGN.md H4; cf. Schemitt et al. (2025) on ML-DSA verification speed."
+    }
+  ],
+  "calibration_vs_published": [
+    {
+      "algorithm": "ML-KEM-768",
+      "operation": "keygen",
+      "this_host_ops_per_second": 76230.98750958848,
+      "published_platform": "Raspberry Pi 4B (ARM Cortex-A72)",
+      "published_ops_per_second": 2539.0,
+      "this_host_relative_speed": 30.024020287352688,
+      "source": "Post-Quantum Migration of Tor, arXiv:2503.10238, Table 8 (liboqs)."
+    },
+    {
+      "algorithm": "ML-KEM-768",
+      "operation": "encaps",
+      "this_host_ops_per_second": 72112.19504344178,
+      "published_platform": "Raspberry Pi 4B (ARM Cortex-A72)",
+      "published_ops_per_second": 3905.0,
+      "this_host_relative_speed": 18.466631253122095,
+      "source": "Post-Quantum Migration of Tor, arXiv:2503.10238, Table 8 (liboqs)."
+    },
+    {
+      "algorithm": "ML-KEM-768",
+      "operation": "decaps",
+      "this_host_ops_per_second": 58076.98394471381,
+      "published_platform": "Raspberry Pi 4B (ARM Cortex-A72)",
+      "published_ops_per_second": 2571.5,
+      "this_host_relative_speed": 22.584866398877622,
+      "source": "Post-Quantum Migration of Tor, arXiv:2503.10238, Table 8 (liboqs)."
+    },
+    {
+      "algorithm": "ML-KEM-768",
+      "operation": "keygen",
+      "this_host_ops_per_second": 76230.98750958848,
+      "published_platform": "Raspberry Pi 5 (ARM Cortex-A76)",
+      "published_ops_per_second": 13976.6,
+      "this_host_relative_speed": 5.454186820084175,
+      "source": "Post-Quantum Migration of Tor, arXiv:2503.10238, Table 8 (liboqs)."
+    },
+    {
+      "algorithm": "ML-KEM-768",
+      "operation": "encaps",
+      "this_host_ops_per_second": 72112.19504344178,
+      "published_platform": "Raspberry Pi 5 (ARM Cortex-A76)",
+      "published_ops_per_second": 11900.6,
+      "this_host_relative_speed": 6.059542799811924,
+      "source": "Post-Quantum Migration of Tor, arXiv:2503.10238, Table 8 (liboqs)."
+    },
+    {
+      "algorithm": "ML-KEM-768",
+      "operation": "decaps",
+      "this_host_ops_per_second": 58076.98394471381,
+      "published_platform": "Raspberry Pi 5 (ARM Cortex-A76)",
+      "published_ops_per_second": 9614.3,
+      "this_host_relative_speed": 6.040687719825033,
+      "source": "Post-Quantum Migration of Tor, arXiv:2503.10238, Table 8 (liboqs)."
+    }
+  ]
+}
