@@ -1,50 +1,35 @@
-"""Loads the serialized RandomForest model once per process and exposes a
-single `predict` call. Shared by the control server and all three protected
-configurations so inference logic is identical across every benchmark arm --
-the crypto wrapper is the only thing that differs between server processes.
+"""Thin dispatcher to the active payload profile (model/profiles/*),
+selected once per process via the PQ_SHIELD_PAYLOAD_PROFILE environment
+variable (default: tabular_small). Every server (control + Configs A/B/C)
+imports this module rather than a profile directly, so swapping which AI
+workload is being benchmarked is one environment variable, not a code
+change to the server or the protocol layer.
 """
 
 from __future__ import annotations
 
-import os
-import time
-
-import joblib
-import numpy as np
-
-MODEL_PATH = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "model", "artifacts", "model.pkl"
-)
-
-_model = None
+from model.profiles.registry import get_profile
 
 
-def _get_model():
-    global _model
-    if _model is None:
-        if not os.path.isfile(MODEL_PATH):
-            raise RuntimeError(
-                f"Model artifact not found at {MODEL_PATH}. Run `python -m model.train` first."
-            )
-        _model = joblib.load(MODEL_PATH)
-    return _model
+def predict(request_body: dict) -> dict:
+    return get_profile().predict(request_body)
 
 
-def predict(features: list[float]) -> dict:
-    """Runs inference and returns the response payload plus server-side timing."""
-    model = _get_model()
-    t0 = time.perf_counter()
-    x = np.array(features, dtype=float).reshape(1, -1)
-    pred = int(model.predict(x)[0])
-    proba = model.predict_proba(x)[0].tolist()
-    inference_ms = (time.perf_counter() - t0) * 1000
-    return {
-        "prediction": pred,
-        "probabilities": proba,
-        "_inference_ms": inference_ms,
-    }
+def sample_request() -> dict:
+    return get_profile().sample_request()
 
 
 def warm_up() -> None:
-    """Loads the model and runs one dummy prediction at server startup."""
-    predict([0.0] * 64)
+    predict(sample_request())
+
+
+def active_profile_name() -> str:
+    return get_profile().name
+
+
+def active_profile_description() -> str:
+    return get_profile().description
+
+
+def active_profile_real_inference() -> bool:
+    return get_profile().real_inference

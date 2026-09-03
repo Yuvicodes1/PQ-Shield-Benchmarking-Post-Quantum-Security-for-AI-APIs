@@ -1,0 +1,8 @@
+{
+  "config": "full_pqc",
+  "tamper_target": "ciphertext",
+  "n_requests": 25,
+  "n_detected": 25,
+  "detection_rate": 1.0,
+  "detection_ms_mean": 9.64847328606993
+}

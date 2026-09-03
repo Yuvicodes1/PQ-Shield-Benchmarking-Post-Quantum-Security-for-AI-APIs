@@ -121,6 +121,14 @@ this is a per-transaction spot check, not the full statistically-powered
 sweep; see `results/aggregate_stats.csv` and
 `results/significance_vs_control.csv` for the actual reported result.
 
+H3 above is measured for one small, fixed-size response. For a streamed
+response, the same key-establishment session is reused across every chunk
+of a potentially long-running stream, which makes H3's exposure grow with
+response length rather than stay fixed-size — see `docs/STREAMING.md`
+§10 for the streaming-specific capture and measured numbers
+(`threats/streaming_hndl_experiment.py`). This is the same H3 finding, not
+a new one, made length-dependent by streaming's protocol shape.
+
 ## 6. Statistical methodology
 
 - 5 repetitions per (configuration × concurrency) cell.

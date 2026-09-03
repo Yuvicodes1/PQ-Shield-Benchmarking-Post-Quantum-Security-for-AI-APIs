@@ -12,6 +12,7 @@ import plotly.graph_objects as go
 import streamlit as st
 from plotly.subplots import make_subplots
 
+from analysis import streaming_analysis
 from webapp import data_loader as dl
 
 st.set_page_config(page_title="PQ-Shield — Results Dashboard", page_icon="📊", layout="wide")
@@ -21,13 +22,40 @@ CONFIG_COLORS = {"control": "#888888", "classical": "#c0392b", "hybrid": "#e67e2
 
 refresh = st.button("🔄 Refresh data")
 
-trimmed, summary = dl.get_trimmed_and_summary(warmup_fraction=0.05)
+all_runs, latest_run = dl.get_available_runs()
 
-if trimmed is None:
+if not all_runs:
     st.warning(
         "No results/raw/*.csv found yet. Run the **Benchmark Runner** page, or "
         "`python -m bench.orchestrator` from the CLI, then come back and refresh."
     )
+    st.stop()
+
+ALL_RUNS_OPTION = "__all__"
+run_options = [ALL_RUNS_OPTION] + all_runs
+run_labels = {ALL_RUNS_OPTION: f"All runs combined ({len(all_runs)} runs)"}
+run_labels.update({r: dl.run_label(r) for r in all_runs})
+
+default_index = run_options.index(latest_run) if latest_run in run_options else 0
+selected_run = st.selectbox(
+    "Data source",
+    options=run_options,
+    index=default_index,
+    format_func=lambda r: run_labels[r],
+    help=(
+        "results/raw/ accumulates every sweep ever run, with no automatic cleanup. "
+        "Defaults to your most recent run; switch to 'All runs combined' to reproduce "
+        "the CLI's analysis.aggregate behavior over everything on disk."
+    ),
+)
+
+trimmed, summary = dl.get_trimmed_and_summary(
+    warmup_fraction=0.05,
+    run_id=None if selected_run == ALL_RUNS_OPTION else selected_run,
+)
+
+if trimmed is None:
+    st.warning("No data in the selected run after warm-up trimming.")
     st.stop()
 
 ok = trimmed[trimmed["error"].isna() | (trimmed["error"] == "")]
@@ -118,6 +146,240 @@ else:
     st.info("No protected-configuration byte data yet.")
 
 # ---------------------------------------------------------------------------
+# Server resource usage (CPU% / RSS per config, sampled during each cell)
+# ---------------------------------------------------------------------------
+st.divider()
+st.subheader("Server Resource Usage")
+st.caption(
+    "Server-process CPU% and RSS sampled every 0.25s during each cell "
+    "(crypto.instrumentation.ResourceSampler), attributed to the config whose server "
+    "was running at the time -- not available for cells run before this was added, "
+    "or for cells too short to catch a sample."
+)
+
+resource_df = dl.load_sweep_summaries(run_id=None if selected_run == ALL_RUNS_OPTION else selected_run)
+resource_df = resource_df[resource_df["cpu_percent_mean"].notna()] if not resource_df.empty else resource_df
+
+if resource_df.empty:
+    st.info(
+        "No resource-usage data for this selection -- either it predates resource sampling, "
+        "or every cell was too short to catch a 0.25s sample."
+    )
+else:
+    cpu_by_config = resource_df.groupby("config")["cpu_percent_mean"].mean()
+    rss_by_config = resource_df.groupby("config")["rss_mb_mean"].mean()
+    configs_present = [c for c in ["control", "classical", "hybrid", "full-pqc"] if c in cpu_by_config.index]
+    fig_res = make_subplots(specs=[[{"secondary_y": True}]])
+    fig_res.add_trace(go.Bar(name="Mean server CPU %", x=configs_present,
+                              y=[cpu_by_config[c] for c in configs_present], marker_color="#c0392b"),
+                       secondary_y=False)
+    fig_res.add_trace(go.Scatter(name="Mean server RSS (MB)", x=configs_present,
+                                  y=[rss_by_config[c] for c in configs_present],
+                                  mode="markers+lines", marker=dict(size=10, color="#2471a3")),
+                       secondary_y=True)
+    fig_res.update_yaxes(title_text="CPU %", secondary_y=False)
+    fig_res.update_yaxes(title_text="RSS (MB)", secondary_y=True)
+    fig_res.update_layout(height=350)
+    st.plotly_chart(fig_res, width='stretch')
+
+# ---------------------------------------------------------------------------
+# Streaming (SSE) response overhead -- separate data source (results/streaming/),
+# not scoped by the run_id selector above since it's a different sweep entirely
+# (bench.streaming_runner, not bench.orchestrator) -- see docs/STREAMING.md.
+# ---------------------------------------------------------------------------
+st.divider()
+st.subheader("🌊 Streaming Response Overhead")
+st.caption(
+    "From `results/streaming/*.csv` (bench.streaming_runner — the Benchmark Runner page's "
+    "'Streaming Sweep' tab, or `python -m bench.streaming_runner` from the CLI). Compares the "
+    "three SSE signing strategies (crypto/streaming.py) on time-to-first-token and total "
+    "signature-byte overhead, independent of the concurrency sweep above."
+)
+
+streaming_df = dl.load_streaming_df()
+
+if streaming_df is None or streaming_df.empty:
+    st.info(
+        "No streaming sweep data yet. Run one from the **Benchmark Runner** page's "
+        "'Streaming Sweep' tab, or `python -m bench.streaming_runner` from the CLI."
+    )
+else:
+    streaming_ok = streaming_df[streaming_df["error"].isna() | (streaming_df["error"] == "")]
+    n_stream_total = len(streaming_df)
+    n_stream_errors = n_stream_total - len(streaming_ok)
+    all_verified = bool(streaming_ok["stream_fully_verified"].astype(bool).all()) if len(streaming_ok) else None
+
+    sm1, sm2, sm3 = st.columns(3)
+    sm1.metric("Streaming transactions", f"{n_stream_total:,}")
+    sm2.metric("Errors", f"{n_stream_errors:,}",
+               delta=f"{n_stream_errors / n_stream_total:.1%}" if n_stream_total else None,
+               delta_color="inverse")
+    sm3.metric("All verified", "✅ Yes" if all_verified else ("❌ No" if all_verified is False else "—"))
+
+    stream_summary = streaming_analysis.summarize(streaming_df)
+    stream_configs_present = [c for c in dl.CONFIG_ORDER if c in stream_summary["config"].unique()]
+    available_max_tokens = sorted(stream_summary["max_tokens"].unique())
+    available_chunk_sizes = sorted(stream_summary["chunk_size_tokens"].unique())
+
+    sc1, sc2 = st.columns(2)
+    with sc1:
+        sel_max_tokens = st.select_slider(
+            "Response length (max tokens)", options=available_max_tokens, value=available_max_tokens[-1],
+        )
+    with sc2:
+        sel_chunk_size = st.select_slider("Chunk size (tokens)", options=available_chunk_sizes,
+                                           value=available_chunk_sizes[0])
+
+    slice_df = stream_summary[
+        (stream_summary["max_tokens"] == sel_max_tokens) & (stream_summary["chunk_size_tokens"] == sel_chunk_size)
+    ]
+    STRATEGY_COLORS = {"buffer_and_sign": "#888888", "per_chunk": "#c0392b", "hash_chain": "#2471a3"}
+    STRATEGY_ORDER = ["buffer_and_sign", "per_chunk", "hash_chain"]
+
+    if slice_df.empty or not stream_configs_present:
+        st.info("No streaming rows at this response length / chunk size combination.")
+    else:
+        col_ttft, col_sig = st.columns(2)
+
+        with col_ttft:
+            fig_ttft = go.Figure()
+            for strategy in STRATEGY_ORDER:
+                sub = slice_df[slice_df["strategy"] == strategy]
+                sub = sub.set_index("config").reindex(stream_configs_present)
+                fig_ttft.add_trace(go.Bar(
+                    name=strategy, x=[dl.CONFIG_LABELS[c] for c in stream_configs_present],
+                    y=sub["ttft_ms_mean"], marker_color=STRATEGY_COLORS[strategy],
+                ))
+            fig_ttft.update_layout(
+                barmode="group", yaxis_title="Time to first token (ms)", height=380,
+                title=f"TTFT at {sel_max_tokens} max tokens, chunk={sel_chunk_size}",
+                legend=dict(orientation="h", yanchor="bottom", y=-0.35),
+            )
+            st.plotly_chart(fig_ttft, width='stretch')
+
+        with col_sig:
+            fig_sig = go.Figure()
+            for strategy in STRATEGY_ORDER:
+                sub = slice_df[slice_df["strategy"] == strategy]
+                sub = sub.set_index("config").reindex(stream_configs_present)
+                fig_sig.add_trace(go.Bar(
+                    name=strategy, x=[dl.CONFIG_LABELS[c] for c in stream_configs_present],
+                    y=sub["total_signature_bytes_mean"], marker_color=STRATEGY_COLORS[strategy],
+                ))
+            fig_sig.update_layout(
+                barmode="group", yaxis_title="Total signature bytes (log scale)", yaxis_type="log", height=380,
+                title=f"Signature overhead at {sel_max_tokens} max tokens, chunk={sel_chunk_size}",
+                legend=dict(orientation="h", yanchor="bottom", y=-0.35),
+            )
+            st.plotly_chart(fig_sig, width='stretch')
+
+    st.markdown("**Strategy comparison** (speedup / byte-reduction relative to the baseline strategies)")
+    highlight_config = st.selectbox(
+        "Configuration", stream_configs_present,
+        format_func=lambda c: dl.CONFIG_LABELS.get(c, c), key="stream_highlight_config",
+    )
+    comparison = streaming_analysis.strategy_comparison_at(
+        streaming_df, highlight_config, sel_max_tokens, sel_chunk_size
+    )
+    if comparison.empty:
+        st.info("No rows for this exact (configuration, response length, chunk size) combination.")
+    else:
+        st.dataframe(
+            comparison.style.format({
+                "ttft_ms_mean": "{:.1f}",
+                "ttft_speedup_vs_buffer_and_sign": "{:.2f}x",
+                "total_signature_bytes_mean": "{:,.0f}",
+                "signature_bytes_reduction_vs_per_chunk": "{:.1%}",
+            }, na_rep="—"),
+            width='stretch',
+        )
+
+    with st.expander("Full streaming summary table"):
+        st.dataframe(stream_summary, width='stretch')
+
+# ---------------------------------------------------------------------------
+# Cryptographic validation -- ground-truth checks independent of the
+# benchmark sweeps above: NIST's own ACVP known-answer vectors for the raw
+# primitives, and an analytical signature-cost model for the streaming
+# result (see docs/STREAMING.md sections 9-10 for the full methodology).
+# ---------------------------------------------------------------------------
+st.divider()
+st.subheader("🔬 Cryptographic Validation")
+st.caption(
+    "Ground-truth checks, not benchmark results: do PQ-Shield's own liboqs bindings match NIST's "
+    "official test vectors, and does the streaming signature-cost harness measure exactly what "
+    "the signing strategies' own arithmetic says it should?"
+)
+
+vc1, vc2 = st.columns(2)
+
+with vc1:
+    st.markdown("**NIST ACVP Known-Answer Tests** (ML-KEM-768 / ML-DSA-65 vs. NIST's own vectors)")
+    try:
+        from validation.nist_kat import run_all as run_nist_kat
+
+        with st.spinner("Running KAT vectors..."):
+            kat_results = run_nist_kat()
+        kat_summary = kat_results["summary"]
+        k1, k2 = st.columns(2)
+        k1.metric("Vectors passed", f"{kat_summary['passed']}/{kat_summary['total_checks']}")
+        k2.metric("All pass?", "✅ Yes" if kat_summary["all_passed"] else "❌ No")
+        st.dataframe(
+            [
+                {"check": "ML-KEM-768 keyGen", "passed": kat_results["ml_kem_768_keygen"]["passed"],
+                 "total": kat_results["ml_kem_768_keygen"]["total"]},
+                {"check": "ML-KEM-768 encapsulation", "passed": kat_results["ml_kem_768_encap_decap"]["encapsulation"]["passed"],
+                 "total": kat_results["ml_kem_768_encap_decap"]["encapsulation"]["total"]},
+                {"check": "ML-KEM-768 decapsulation", "passed": kat_results["ml_kem_768_encap_decap"]["decapsulation"]["passed"],
+                 "total": kat_results["ml_kem_768_encap_decap"]["decapsulation"]["total"]},
+                {"check": "ML-DSA-65 signature verification", "passed": kat_results["ml_dsa_65_sigver"]["passed"],
+                 "total": kat_results["ml_dsa_65_sigver"]["total"]},
+            ],
+            width='stretch', hide_index=True,
+        )
+        with st.expander("Not achievable through liboqs's public API (documented, not skipped)"):
+            st.json(kat_results["not_achievable"])
+        with st.expander("Full KAT results JSON"):
+            st.json(kat_results)
+    except Exception as exc:
+        st.warning(f"NIST KAT check unavailable: {exc}")
+
+with vc2:
+    st.markdown("**Streaming Signature-Cost Model Validation** (measured vs. predicted from primitive costs)")
+    primitive_bench_path = os.path.join(dl.REPO_ROOT, "results", "validation", "primitive_bench.json")
+    if streaming_df is None or streaming_df.empty:
+        st.info("No streaming sweep data yet -- see the streaming section above.")
+    elif not os.path.isfile(primitive_bench_path):
+        st.info(
+            f"No `{os.path.relpath(primitive_bench_path, dl.REPO_ROOT)}` yet -- run "
+            "`python -m validation.primitive_bench --output results/validation/primitive_bench.json` first."
+        )
+    else:
+        try:
+            from analysis.streaming_model_validation import run_validation as run_streaming_model_validation
+
+            with st.spinner("Validating measured signature bytes/timing against the analytical model..."):
+                mv = run_streaming_model_validation(dl.STREAMING_DIR, primitive_bench_path)
+            mvs = mv["summary"]
+            mv1, mv2, mv3 = st.columns(3)
+            mv1.metric("Bytes: exact/in-range", f"{mvs['bytes_ok']}/{mvs['validated_rows']}",
+                       delta="ALL OK" if mvs["bytes_all_ok"] else "mismatches", delta_color="off")
+            mv2.metric("Timing (warm-loop baseline)", f"{mvs['timing_ok']}/{mvs['validated_rows']}")
+            mv3.metric("Timing (best applicable baseline)", f"{mvs['timing_ok_best']}/{mvs['validated_rows']}")
+            st.dataframe(mv["per_group"], width='stretch', hide_index=True)
+            st.caption(
+                "'Best applicable baseline' uses a cold-start-process correction for "
+                "`buffer_and_sign` (see docs/STREAMING.md section 9 for why ECDSA specifically "
+                "needs one and ML-DSA-65 doesn't) and the ordinary warm-loop mean elsewhere. "
+                "Byte agreement is the strongest, fully-validated claim regardless of the timing "
+                "baseline used."
+            )
+            with st.expander("Full validation results JSON (per-row detail)"):
+                st.json(mv)
+        except Exception as exc:
+            st.warning(f"Streaming model validation unavailable: {exc}")
+
+# ---------------------------------------------------------------------------
 # Aggregate stats + significance tables
 # ---------------------------------------------------------------------------
 st.divider()
@@ -176,3 +438,39 @@ else:
         .style.format({"composite_score": "{:.3f}", "normalized_latency_overhead": "{:.1%}"}),
         width='stretch',
     )
+
+# ---------------------------------------------------------------------------
+# AI summary
+# ---------------------------------------------------------------------------
+st.divider()
+st.subheader("🤖 AI Summary")
+
+from webapp import ai_summary
+
+if not ai_summary.api_key_present():
+    st.info(
+        "Set `ANTHROPIC_API_KEY` in `.env` (repo root) to enable an AI-generated "
+        "summary of the results above."
+    )
+else:
+    st.caption(
+        "Sends the aggregate statistics, significance tests, and trade-off matrix "
+        "shown above (not raw per-request rows) to Claude for a plain-language summary."
+    )
+    if st.button("Generate AI summary", type="primary"):
+        context = ai_summary.build_dashboard_context(
+            n_total=n_total,
+            n_ok=n_ok,
+            n_errors=n_errors,
+            summary_df=summary,
+            significance_df=sig,
+            tradeoff_df=matrix if not matrix.empty else None,
+            w_sec=w_sec,
+            resource_df=resource_df if not resource_df.empty else None,
+        )
+        try:
+            with st.spinner("Asking Claude..."):
+                text = ai_summary.generate_dashboard_summary(context)
+            st.markdown(text)
+        except Exception as exc:
+            st.error(f"AI summary failed: {exc}")

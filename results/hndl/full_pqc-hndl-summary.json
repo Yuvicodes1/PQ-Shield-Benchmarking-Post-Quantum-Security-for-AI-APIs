@@ -1,8 +1,8 @@
 {
   "config": "full_pqc",
-  "n_requests": 200,
-  "n_ok": 200,
-  "total_bytes_stored": 899800,
+  "n_requests": 500,
+  "n_ok": 500,
+  "total_bytes_stored": 2249500,
   "bytes_per_request_mean": 4499.0,
   "kex_bytes_per_request": 1088,
   "signature_bytes_per_request": 3309,

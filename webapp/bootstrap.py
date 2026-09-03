@@ -33,4 +33,15 @@ def load_dotenv_if_needed() -> None:
             if not line or line.startswith("#") or "=" not in line:
                 continue
             key, _, val = line.partition("=")
-            os.environ.setdefault(key.strip(), val.strip())
+            val = val.strip()
+            # Strip one matching pair of surrounding quotes, e.g. KEY="value" -- the
+            # standard .env convention (python-dotenv does the same). Without this,
+            # a quoted value like ANTHROPIC_API_KEY="sk-ant-..." is set *including*
+            # the literal quote characters whenever this parser is the one setting
+            # it (i.e. anything launched without going through scripts/run_webapp.sh's
+            # shell-level `export $(... | xargs)`, which happens to dequote correctly
+            # on its own) -- producing a silently-wrong value that fails downstream
+            # as e.g. Anthropic's "invalid x-api-key" rather than an obvious parse error.
+            if len(val) >= 2 and val[0] == val[-1] and val[0] in "'\"":
+                val = val[1:-1]
+            os.environ.setdefault(key.strip(), val)

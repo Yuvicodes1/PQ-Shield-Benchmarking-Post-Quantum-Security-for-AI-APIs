@@ -59,6 +59,21 @@ proposal.
   (the weighted composite-score decision matrix, reported at three
   weightings), `analysis/figures.py` (the full paper figure set), and
   `analysis/plot_metrics.py` (a quick smoke-test comparison chart).
+- **Payload profiles** (`model/profiles/*`) — the request/response shape
+  every server dispatches through, swappable per process via
+  `PQ_SHIELD_PAYLOAD_PROFILE`: `tabular_small` (the digit classifier above,
+  default), `image_cnn` (a ~4KB image payload against real NumPy
+  convolution compute), `embedding`, and `llm_completion`, for the
+  payload-shape sensitivity question in `docs/DESIGN.md`.
+- **Token streaming** (`crypto/streaming.py`, `POST
+  /secure/predict/stream`, `api/secure_streaming_client.py`,
+  `model/streaming_backends/*`) — SSE token-by-token responses with three
+  signing strategies (buffer-and-sign, per-chunk, hash-chain); see
+  `docs/STREAMING.md`.
+- **Primitive validation** (`validation/`) — `primitive_bench.py` and
+  `spec_conformance.py` check the liboqs-backed ML-KEM-768/ML-DSA-65
+  implementation against known-answer test vectors, independent of the
+  benchmark/protocol layer above.
 - **Dockerfile** for reproducible builds (liboqs build + pinned deps +
   self-test + pytest, all run at image-build time).
 
@@ -215,6 +230,40 @@ at three weightings (security-priority, balanced, performance-priority)
 rather than one arbitrary weighting — see `docs/DESIGN.md` §5 for the
 explicit, defended `security_score` ordinal mapping.
 
+## Payload profiles (beyond the digit classifier)
+
+Every server dispatches its request/response shape through a pluggable
+`model/profiles/*` profile (`model/profiles/registry.py`), selected once per
+process via `PQ_SHIELD_PAYLOAD_PROFILE` (default: `tabular_small`, the
+64-feature digit classifier used throughout this README). `python -m
+bench.orchestrator --payload-profile {tabular_small,image_cnn,embedding,
+llm_completion}` sweeps a different workload shape end-to-end — larger
+request/response payloads change the crypto-overhead-to-payload-size ratio,
+which is the sensitivity question raised in `docs/DESIGN.md`.
+
+## Preparing a live demo (e.g. a review/panel presentation)
+
+```bash
+bash scripts/preflight_check.sh   # verifies self-test, model, tests, ports, data — fix any ❌
+bash scripts/run_webapp.sh        # launch the dashboard, warm it up yourself first
+```
+
+See `docs/PRESENTER_GUIDE.md` for a page-by-page demo script with timing,
+talking points anchored to this project's actual measured numbers, and
+answers to likely panel questions (including how to honestly present a
+counterintuitive or still-being-verified result rather than overclaiming it).
+
+## Streaming signatures (LLM-style token streams)
+
+The above benchmarks single-shot JSON responses. For token-by-token SSE
+streaming responses — the shape a real chat-completion API actually uses —
+`POST /secure/predict/stream` (`api/secure_app.py`) streams Server-Sent
+Events instead of one JSON body. See `docs/STREAMING.md`, which covers three
+signing strategies (buffer-and-sign, per-chunk, hash-chain), their
+time-to-first-token and signature-byte-overhead trade-offs, and how to run
+the real vs. synthetic generation backends (`model/streaming_backends/*`;
+`requirements-streaming.txt` for the optional real-model dependencies).
+
 ## Docker
 
 ```bash
@@ -277,44 +326,61 @@ pq-shield/
 │   ├── hybrid.py                # Config B
 │   ├── full_pqc.py              # Config C
 │   ├── registry.py               # name -> crypto class lookup
-│   └── instrumentation.py         # Timer, ResourceSampler (CPU%/RSS)
+│   ├── instrumentation.py         # Timer, ResourceSampler (CPU%/RSS)
+│   └── streaming.py                # SSE signing strategies (buffer/per-chunk/hash-chain)
 ├── model/
 │   ├── train.py                 # trains + serializes the RandomForest
-│   └── artifacts/                # model.pkl, model_metadata.json (gitignored)
+│   ├── artifacts/                # model.pkl, model_metadata.json (gitignored)
+│   ├── profiles/                 # tabular_small, image_cnn, embedding, llm_completion
+│   └── streaming_backends/        # synthetic + real (llama.cpp/transformers) token backends
 ├── api/
-│   ├── model_service.py         # shared inference call
+│   ├── model_service.py         # dispatches to the active payload profile
 │   ├── schemas.py                 # pydantic request/response models
 │   ├── server.py                   # control (unprotected)
-│   ├── secure_app.py                # shared handshake+predict endpoint logic
+│   ├── secure_app.py                # shared handshake+predict(+stream) endpoint logic
 │   ├── server_config_{a,b,c}.py      # thin per-config wrappers
 │   ├── secure_client.py                # shared async client transaction logic
-│   ├── _client_cli.py                   # shared CLI plumbing
-│   └── client{,_hybrid,_full_pqc}.py     # per-config CLI entrypoints
+│   ├── secure_streaming_client.py       # client-side SSE stream consumption
+│   ├── async_bridge.py                   # sync generator -> async iterator bridge
+│   ├── _client_cli.py                     # shared CLI plumbing
+│   └── client{,_hybrid,_full_pqc}.py       # per-config CLI entrypoints
 ├── bench/
 │   ├── runner.py                # single-cell async load generator
-│   └── orchestrator.py           # full matrix: manages server lifecycle + sweep
+│   ├── orchestrator.py           # full matrix: manages server lifecycle + sweep
+│   └── streaming_runner.py        # streaming-mode load generator
 ├── threats/
 │   ├── hndl_capture.py          # Threat Scenario 1
 │   ├── mitm_harness.py           # Threat Scenario 2 -- tampering proxy
 │   └── mitm_experiment.py         # Threat Scenario 2 -- driver + detection stats
+├── validation/                   # ML-KEM-768/ML-DSA-65 vs. known-answer test vectors
+│   ├── primitive_bench.py
+│   ├── reference_data.py
+│   └── spec_conformance.py
 ├── analysis/
 │   ├── aggregate.py              # summary stats + Mann-Whitney U
 │   ├── tradeoff_matrix.py         # weighted composite decision matrix
 │   ├── figures.py                  # full paper figure set
-│   └── plot_metrics.py              # quick comparison chart
+│   ├── plot_metrics.py              # quick comparison chart
+│   └── streaming_analysis.py         # time-to-first-token / signing-overhead analysis
 ├── webapp/
 │   ├── bootstrap.py               # repo-root sys.path + .env loading (import first, always)
 │   ├── server_manager.py           # demo server lifecycle (ports 8100-8103)
 │   ├── demo_transaction.py          # tamper-capable live transaction logic
-│   └── data_loader.py                # cached results loading for the dashboard
+│   ├── data_loader.py                # cached results loading for the dashboard
+│   └── ai_summary.py                  # on-demand Claude-generated dashboard summary
 ├── pages/                        # Streamlit multipage app (Live Demo, Benchmark Runner,
 │                                    Results Dashboard, Threat Scenarios)
 ├── app.py                        # Streamlit entrypoint (Home page)
-├── tests/test_crypto_roundtrip.py  # 13 protocol tests
+├── tests/test_crypto_roundtrip.py  # 13 protocol tests (+ payload-profile/streaming/validation tests)
 ├── scripts/
 │   ├── install_oqs.sh            # builds liboqs (minimal, ML-KEM-768 + ML-DSA-65)
-│   └── run_threat_experiments.sh  # HNDL + MITM convenience wrapper
-├── docs/DESIGN.md                # protocol design, hypotheses, divergences from proposal
+│   ├── run_threat_experiments.sh  # HNDL + MITM convenience wrapper
+│   └── preflight_check.sh          # pre-demo sanity check (self-test, model, tests, ports)
+├── docs/
+│   ├── DESIGN.md                 # protocol design, hypotheses, divergences from proposal
+│   ├── STREAMING.md               # SSE signing strategies + backend setup
+│   ├── PRESENTER_GUIDE.md          # page-by-page live-demo script
+│   └── diagrams/                   # architecture SVGs referenced from ARCHITECTURE.md
 ├── results/                      # raw CSVs, aggregates, trade-off matrix (gitignored)
 ├── outputs/                       # generated figures (gitignored)
 └── Dockerfile
@@ -323,8 +389,11 @@ pq-shield/
 ## Current status / next steps
 
 Implemented and passing: crypto layer, protocol tests, all four servers,
-CLI clients, benchmark orchestrator, HNDL and MITM threat scripts, and the
-full analysis/figures pipeline. A full A/B/C/control × {10,100,1000}
+CLI clients, benchmark orchestrator, HNDL and MITM threat scripts, the
+full analysis/figures pipeline, the pluggable payload-profile system
+(`model/profiles/*`), SSE token streaming with three signing strategies
+(`crypto/streaming.py`, `docs/STREAMING.md`), and primitive-level validation
+against known-answer test vectors (`validation/`). A full A/B/C/control × {10,100,1000}
 concurrency × 5-repetition sweep and the HNDL/MITM experiments have been
 run once end-to-end on the development host; see `results/` for the actual
 output and `docs/DESIGN.md` §7 for host-specific caveats (this repo was
@@ -337,9 +406,11 @@ Remaining for the full Review 2 / paper-ready deliverable:
 
 1. Re-run the full matrix on multi-core, non-sandboxed hardware for
    production-representative absolute latency numbers.
-2. Add the CIFAR-10 CNN sensitivity workload (larger payloads) referenced
-   in the Review 1 proposal, to test whether findings hold beyond the
-   64-feature digit model.
+2. `model/profiles/image_cnn.py` covers the larger-payload sensitivity
+   question with a real (untrained, deterministically-seeded) NumPy conv
+   net rather than the CIFAR-10-trained CNN the Review 1 proposal
+   envisioned — swap in a trained CIFAR-10 model there if classification
+   accuracy itself needs to be defensible, not just the payload shape/cost.
 3. Expand `analysis/figures.py`'s CPU/RSS heatmap (currently a no-op
    placeholder — resource sampling is wired into `bench/runner.py`'s
    single-cell mode via `--server-pid` but not yet threaded through the

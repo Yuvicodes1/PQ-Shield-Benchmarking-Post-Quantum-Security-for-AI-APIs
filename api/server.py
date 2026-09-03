@@ -4,16 +4,20 @@ This is the "zero overhead" floor every protected configuration is measured
 against (design doc Phase 1 checkpoint). Run with:
 
     uvicorn api.server:app --port 8000
+
+Accepts a generic JSON body on /predict, dispatched to whichever payload
+profile is active (PQ_SHIELD_PAYLOAD_PROFILE env var) -- request/response
+shape varies by profile, so this endpoint no longer enforces a fixed
+pydantic schema.
 """
 
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 
 from api import model_service
-from api.schemas import PredictRequest, PredictResponse
 
 
 @asynccontextmanager
@@ -27,10 +31,16 @@ app = FastAPI(title="PQ-Shield Control API (unprotected)", lifespan=lifespan)
 
 @app.get("/healthz")
 def healthz():
-    return {"status": "ok", "config": "control"}
+    return {
+        "status": "ok",
+        "config": "control",
+        "payload_profile": model_service.active_profile_name(),
+    }
 
 
-@app.post("/predict", response_model=PredictResponse)
-def predict(req: PredictRequest):
-    result = model_service.predict(req.input)
-    return PredictResponse(prediction=result["prediction"], probabilities=result["probabilities"])
+@app.post("/predict")
+async def predict(request: Request):
+    body = await request.json()
+    result = model_service.predict(body)
+    result.pop("_inference_ms", None)
+    return result

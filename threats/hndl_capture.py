@@ -38,7 +38,8 @@ import os
 import httpx
 
 from api.secure_client import secure_predict_transaction
-from bench.runner import DEFAULT_FEATURES, CONFIG_TO_MODULE_NAME
+from bench.runner import CONFIG_TO_MODULE_NAME
+from model.profiles.registry import get_profile
 
 # Whether the key-establishment ciphertext becomes decryptable once a CRQC
 # exists, per configuration. This is the core H3 distinction: "bytes
@@ -61,7 +62,7 @@ async def capture(config_name: str, base_url: str, n_requests: int) -> list[dict
     async with httpx.AsyncClient(timeout=30.0) as client:
         for i in range(n_requests):
             row = await secure_predict_transaction(
-                client, base_url, config_name, DEFAULT_FEATURES, debug_metrics=True
+                client, base_url, config_name, get_profile().sample_request(), debug_metrics=True
             )
             debug = row.get("debug") or {}
             kex_bytes = debug.get("kex_blob_bytes") or row.get("kex_blob_bytes") or 0

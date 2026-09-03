@@ -34,12 +34,7 @@ import httpx
 
 from api.secure_client import secure_predict_transaction
 from crypto.instrumentation import ResourceSampler
-
-DEFAULT_FEATURES = [
-    0, 0, 5, 13, 9, 1, 0, 0, 0, 0, 13, 15, 10, 15, 5, 0, 0, 3, 15, 2, 0, 11, 8, 0,
-    0, 4, 12, 0, 0, 8, 8, 0, 0, 5, 8, 0, 0, 9, 8, 0, 0, 4, 11, 0, 1, 12, 7, 0,
-    0, 2, 14, 5, 10, 12, 0, 0, 0, 0, 6, 13, 10, 0, 0, 0,
-]
+from model.profiles.registry import get_profile
 
 CONFIG_TO_MODULE_NAME = {
     "control": "control",
@@ -49,26 +44,50 @@ CONFIG_TO_MODULE_NAME = {
 }
 
 CSV_FIELDS = [
-    "config", "concurrency", "repetition", "request_index",
+    "run_id", "config", "payload_profile", "concurrency", "repetition", "request_index",
     "rtt_ms", "handshake_ms", "total_ms",
     "client_establish_ms", "verify_ms", "valid_signature",
     "kex_blob_bytes", "signature_bytes",
+    "request_plaintext_bytes", "response_plaintext_bytes", "response_ciphertext_bytes",
     "server_decapsulate_ms", "server_inference_ms", "server_encrypt_ms",
     "server_sign_ms", "server_crypto_ms", "server_total_ms",
     "prediction", "error",
 ]
 
 
+def new_run_id() -> str:
+    """One run_id per sweep invocation (shared across every cell/config in
+    that sweep) so results/raw/ -- which accumulates every sweep ever run,
+    forever, with no other separation between them -- can be filtered back
+    down to "just this run" instead of silently blending in every prior
+    run's data. Sortable lexicographically (== chronologically)."""
+    import time
+
+    return time.strftime("%Y%m%dT%H%M%S")
+
+
+def _sample_request() -> dict:
+    """Generates one request body matching whichever payload profile the
+    PQ_SHIELD_PAYLOAD_PROFILE env var selects (default: tabular_small).
+    Called fresh per request so profiles with multiple sample texts/images
+    vary across a sweep rather than sending byte-identical requests."""
+    return get_profile().sample_request()
+
+
 async def _control_transaction(client: httpx.AsyncClient, base_url: str) -> dict:
     row = {"config": "control", "error": None}
+    body = _sample_request()
+    request_bytes = len(json.dumps(body).encode())
     t0 = time.perf_counter()
     try:
-        resp = await client.post(f"{base_url}/predict", json={"input": DEFAULT_FEATURES})
+        resp = await client.post(f"{base_url}/predict", json=body)
         rtt_ms = (time.perf_counter() - t0) * 1000
         row["rtt_ms"] = rtt_ms
         row["total_ms"] = rtt_ms
         row["handshake_ms"] = 0.0
+        row["request_plaintext_bytes"] = request_bytes
         if resp.status_code == 200:
+            row["response_plaintext_bytes"] = len(resp.content)
             row["prediction"] = resp.json().get("prediction")
         else:
             row["error"] = f"HTTP {resp.status_code}"
@@ -77,10 +96,13 @@ async def _control_transaction(client: httpx.AsyncClient, base_url: str) -> dict
     return row
 
 
-def _flatten(row: dict, config_name: str, concurrency: int, repetition: int, idx: int) -> dict:
+def _flatten(row: dict, config_name: str, concurrency: int, repetition: int, idx: int, run_id: str) -> dict:
     server_timing = row.get("server_timing_ms", {}) or {}
+    debug = row.get("debug") or {}
     return {
+        "run_id": run_id,
         "config": config_name,
+        "payload_profile": get_profile().name,
         "concurrency": concurrency,
         "repetition": repetition,
         "request_index": idx,
@@ -92,6 +114,9 @@ def _flatten(row: dict, config_name: str, concurrency: int, repetition: int, idx
         "valid_signature": row.get("valid_signature"),
         "kex_blob_bytes": row.get("kex_blob_bytes"),
         "signature_bytes": row.get("signature_bytes"),
+        "request_plaintext_bytes": row.get("request_plaintext_bytes"),
+        "response_plaintext_bytes": row.get("response_plaintext_bytes"),
+        "response_ciphertext_bytes": debug.get("response_ciphertext_bytes"),
         "server_decapsulate_ms": server_timing.get("decapsulate_ms"),
         "server_inference_ms": server_timing.get("inference_ms"),
         "server_encrypt_ms": server_timing.get("encrypt_ms"),
@@ -110,8 +135,15 @@ async def run_sweep_cell(
     n_requests: int,
     repetition: int,
     reuse_handshake: bool = False,
+    run_id: str | None = None,
 ) -> list[dict]:
-    """Runs one (config, concurrency, repetition) cell and returns flattened rows."""
+    """Runs one (config, concurrency, repetition) cell and returns flattened rows.
+
+    `run_id` should be shared across every cell/config of one sweep (the
+    caller generates it once via `new_run_id()` and passes it into every
+    call) so the whole sweep is filterable as a single unit later. Defaults
+    to a fresh id here only for standalone single-cell invocations."""
+    run_id = run_id or new_run_id()
     results: list[dict] = []
     semaphore = asyncio.Semaphore(concurrency)
     counter = {"n": 0}
@@ -137,10 +169,10 @@ async def run_sweep_cell(
                         row = await _control_transaction(client, base_url)
                     else:
                         row = await secure_predict_transaction(
-                            client, base_url, config_name, DEFAULT_FEATURES,
-                            cached_handshake=cached_handshake,
+                            client, base_url, config_name, _sample_request(),
+                            debug_metrics=True, cached_handshake=cached_handshake,
                         )
-                    results.append(_flatten(row, config_name, concurrency, repetition, idx))
+                    results.append(_flatten(row, config_name, concurrency, repetition, idx, run_id))
 
         workers = [asyncio.create_task(worker()) for _ in range(concurrency)]
         await asyncio.gather(*workers)

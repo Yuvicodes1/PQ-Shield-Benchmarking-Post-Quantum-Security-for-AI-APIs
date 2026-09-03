@@ -26,7 +26,8 @@ import time
 
 import httpx
 
-from bench.runner import run_sweep_cell, write_csv
+from bench.runner import new_run_id, run_sweep_cell, write_csv
+from crypto.instrumentation import ResourceSampler
 
 SERVER_MODULES = {
     "control": "api.server:app",
@@ -41,9 +42,11 @@ if not os.path.isfile(PYTHON_BIN):
     PYTHON_BIN = sys.executable
 
 
-def _start_server(config_key: str, port: int, log_path: str) -> subprocess.Popen:
+def _start_server(config_key: str, port: int, log_path: str, extra_env: dict | None = None) -> subprocess.Popen:
     module = SERVER_MODULES[config_key]
     env = os.environ.copy()
+    if extra_env:
+        env.update(extra_env)
     log_f = open(log_path, "w")
     proc = subprocess.Popen(
         [PYTHON_BIN, "-m", "uvicorn", module, "--port", str(port), "--log-level", "warning"],
@@ -94,16 +97,29 @@ def run_full_sweep(
     port: int,
     raw_dir: str,
     log_dir: str,
+    summary_dir: str | None = None,
+    payload_profile: str = "tabular_small",
 ) -> list[dict]:
     os.makedirs(raw_dir, exist_ok=True)
     os.makedirs(log_dir, exist_ok=True)
+    summary_dir = summary_dir or os.path.join(REPO_ROOT, "results", "sweep_summaries")
+    os.makedirs(summary_dir, exist_ok=True)
     base_url = f"http://127.0.0.1:{port}"
     all_cell_summaries = []
+    run_id = new_run_id()
+    print(f"run_id={run_id}", flush=True)
+
+    extra_env = {"PQ_SHIELD_PAYLOAD_PROFILE": payload_profile}
+    # Also set it in *this* process's environment: run_sweep_cell's client-side
+    # request generation (model.profiles.registry.get_profile()) runs in-process
+    # here, not in the server subprocess, so both must agree on the profile.
+    os.environ["PQ_SHIELD_PAYLOAD_PROFILE"] = payload_profile
 
     for config_key in configs:
         log_path = os.path.join(log_dir, f"server-{config_key}.log")
-        print(f"\n=== Starting server: {config_key} ({SERVER_MODULES[config_key]}) ===", flush=True)
-        proc = _start_server(config_key, port, log_path)
+        print(f"\n=== Starting server: {config_key} ({SERVER_MODULES[config_key]}), "
+              f"payload_profile={payload_profile} ===", flush=True)
+        proc = _start_server(config_key, port, log_path, extra_env=extra_env)
         try:
             _wait_healthy(base_url)
             print(f"Server healthy (pid={proc.pid}).", flush=True)
@@ -118,14 +134,21 @@ def run_full_sweep(
                         f"| requests={n_requests}",
                         flush=True,
                     )
+                    sampler = ResourceSampler(pid=proc.pid, interval_s=0.25)
+                    sampler.start()
                     t0 = time.perf_counter()
                     rows = asyncio.run(
-                        run_sweep_cell(base_url, _crypto_name(config_key), concurrency, n_requests, repetition)
+                        run_sweep_cell(
+                            base_url, _crypto_name(config_key), concurrency, n_requests, repetition,
+                            run_id=run_id,
+                        )
                     )
                     wall_s = time.perf_counter() - t0
+                    resource_summary = sampler.summary()  # server-process CPU%/RSS during this cell
                     write_csv(rows, out_path)
                     n_errors = sum(1 for r in rows if r["error"])
                     summary = {
+                        "run_id": run_id,
                         "config": config_key,
                         "concurrency": concurrency,
                         "repetition": repetition,
@@ -134,17 +157,26 @@ def run_full_sweep(
                         "throughput_rps": len(rows) / wall_s if wall_s > 0 else None,
                         "n_errors": n_errors,
                         "output": out_path,
+                        **resource_summary,
                     }
                     all_cell_summaries.append(summary)
+                    cpu_mean = resource_summary.get("cpu_percent_mean")
+                    cpu_str = f"{cpu_mean:.0f}% CPU" if cpu_mean is not None else "no CPU samples (cell too short)"
                     print(
                         f"     done in {wall_s:.2f}s, {summary['throughput_rps']:.1f} req/s, "
-                        f"{n_errors} errors -> {out_path}",
+                        f"{n_errors} errors, server {cpu_str} -> {out_path}",
                         flush=True,
                     )
         finally:
             print(f"Stopping server: {config_key}", flush=True)
             _stop_server(proc)
             time.sleep(1.0)
+
+    if all_cell_summaries:
+        summary_path = os.path.join(summary_dir, f"{run_id}.json")
+        with open(summary_path, "w") as f:
+            json.dump(all_cell_summaries, f, indent=2)
+        print(f"\nWrote per-cell summary (incl. resource usage) to {summary_path}", flush=True)
 
     return all_cell_summaries
 
@@ -166,6 +198,10 @@ def main():
     parser.add_argument("--raw-dir", default=os.path.join(REPO_ROOT, "results", "raw"))
     parser.add_argument("--log-dir", default=os.path.join(REPO_ROOT, "results", "server_logs"))
     parser.add_argument("--summary-out", default=os.path.join(REPO_ROOT, "results", "sweep_summary.json"))
+    parser.add_argument(
+        "--payload-profile", default="tabular_small",
+        choices=["tabular_small", "image_cnn", "embedding", "llm_completion"],
+    )
     args = parser.parse_args()
 
     configs = [c.strip() for c in args.configs.split(",") if c.strip()]
@@ -180,6 +216,7 @@ def main():
         port=args.port,
         raw_dir=args.raw_dir,
         log_dir=args.log_dir,
+        payload_profile=args.payload_profile,
     )
 
     os.makedirs(os.path.dirname(args.summary_out), exist_ok=True)

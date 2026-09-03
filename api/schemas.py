@@ -1,23 +1,13 @@
-"""Pydantic models for the control (unprotected) endpoint and the protected
-handshake/predict envelope shared by Configurations A/B/C.
-
-Field names are deliberately generic (kex_public_key / sig_public_key,
-kex_blob) so the same schema serves RSA, ML-KEM, ECDSA, and ML-DSA without
-config-specific request/response types.
+"""Pydantic models for the protected handshake/predict envelope shared by
+Configurations A/B/C. The control server's /predict accepts a generic JSON
+body directly (api/server.py) since its shape varies by payload profile
+(model/profiles/*) -- only the encrypted envelope below has a fixed shape,
+because it carries opaque bytes regardless of which profile produced them.
 """
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
-
-
-class PredictRequest(BaseModel):
-    input: list[float] = Field(..., description="64 pixel values (8x8 image, 0-16) for the control endpoint")
-
-
-class PredictResponse(BaseModel):
-    prediction: int
-    probabilities: list[float]
+from pydantic import BaseModel
 
 
 class HandshakeResponse(BaseModel):
