@@ -70,10 +70,34 @@ proposal.
   `model/streaming_backends/*`) — SSE token-by-token responses with three
   signing strategies (buffer-and-sign, per-chunk, hash-chain); see
   `docs/STREAMING.md`.
-- **Primitive validation** (`validation/`) — `primitive_bench.py` and
-  `spec_conformance.py` check the liboqs-backed ML-KEM-768/ML-DSA-65
-  implementation against known-answer test vectors, independent of the
-  benchmark/protocol layer above.
+- **Primitive validation** (`validation/`) — `spec_conformance.py` checks
+  measured byte sizes against FIPS 203/204; `primitive_bench.py` benchmarks
+  raw operation cost (and, via `bench_cold_start_signing()`, the ~8ms
+  one-time ECDSA backend-initialization cost a warm loop can't see — see
+  `docs/STREAMING.md` §9); `nist_kat.py` + `kat_vectors.py` +
+  `vectors/*.json` byte-exact-match the liboqs bindings against **NIST's
+  own ACVP known-answer test vectors** (the vectors used for FIPS 140
+  certification) — 75/75 pass for ML-KEM-768 keyGen/encaps/decaps and
+  ML-DSA-65 signature verification, with the (documented, not silently
+  skipped) cases liboqs's public API can't reproduce — ML-DSA-65
+  keyGen/sigGen — stated plainly rather than faked.
+- **Streaming signature-cost model validation**
+  (`analysis/streaming_model_validation.py`) — since no external dataset
+  measures PQC signature overhead on streamed responses, this validates the
+  measurement *instrument* instead: predicts signature bytes and signing
+  time analytically from the KAT-verified primitive costs, and checks that
+  `bench/streaming_runner.py`'s live sweep matches exactly (bytes) or
+  within a stated, data-derived tolerance (timing). See `docs/STREAMING.md`
+  §9 for the full diagnostic history, including a confirmed root cause for
+  an initial 300x+ timing discrepancy.
+- **Streaming HNDL exposure scaling** (`threats/streaming_hndl_experiment.py`)
+  — extends the HNDL threat model to streaming: one handshake's session key
+  is reused across an entire stream, so a broken handshake exposes
+  everything that stream ever sent, not one small reply. Measures that
+  exposure scaling with response length (linear, 100% for classical; flat
+  0% for hybrid/full_pqc regardless of length) and empirically checks that
+  confidentiality exposure doesn't depend on signing strategy. See
+  `docs/STREAMING.md` §10.
 - **Dockerfile** for reproducible builds (liboqs build + pinned deps +
   self-test + pytest, all run at image-build time).
 
@@ -100,7 +124,11 @@ bash scripts/install_oqs.sh
 export PQ_SHIELD_OQS_LIB=<repo>/oqs-prefix/lib/liboqs.so   # add to your shell profile
 
 python -m model.train
-python -m pytest -q   # 13 passed
+python -m pytest -q
+# 106 passed, 4 failed -- the 4 failures are pre-existing legacy tests
+# (test_classical_roundtrip.py, test_full_pqc.py, test_hybrid_roundtrip.py)
+# predating the current schema, unrelated to any change; everything else,
+# including the NIST KAT and streaming validation suites, passes clean.
 ```
 
 `install_oqs.sh` clones liboqs and builds *only* ML-KEM-768 and ML-DSA-65
@@ -209,6 +237,54 @@ the AEAD authentication layer, before signature verification is reached);
 ECDSA vs. ML-DSA-65 tamper-detection latency specifically (this is the
 number RQ4/H4 is about).
 
+**Streaming HNDL exposure scaling** (against an already-running streaming
+server, or self-managed with `--configs`):
+
+```bash
+uvicorn api.server_config_c:app --port 8000 &
+python -m threats.streaming_hndl_experiment --configuration full-pqc \
+  --url http://127.0.0.1:8000 --max-tokens 50,200,500,2000 \
+  --output results/hndl/streaming/full_pqc-streaming-hndl.csv
+
+# or, starting/stopping each config's server itself:
+python -m threats.streaming_hndl_experiment \
+  --configs classical,hybrid,full-pqc --max-tokens 50,200,500,2000
+```
+
+## Validate against ground truth
+
+Two checks independent of the benchmark sweeps above, answering "is the
+measurement instrument itself correct," not "how fast is it":
+
+```bash
+# Byte-exact against NIST's own ACVP known-answer test vectors
+python -m validation.nist_kat
+python -m validation.nist_kat --output results/validation/nist_kat.json
+
+# Streaming signature-cost model vs. the live streaming sweep
+python -m validation.primitive_bench --output results/validation/primitive_bench.json
+python -m analysis.streaming_model_validation
+```
+
+`nist_kat.py` reports 25/25 ML-KEM-768 keyGen, 25/25 encapsulation, 10/10
+decapsulation (including implicit-rejection cases), and 15/15 ML-DSA-65
+signature verification — byte-exact matches, or correct accept/reject
+verdicts, against NIST's own reference vectors — and states plainly which
+checks (ML-DSA-65 keyGen/sigGen) liboqs's public API cannot reproduce,
+rather than skipping them silently.
+
+`streaming_model_validation.py` predicts each streaming transaction's
+signature bytes and signing time purely from arithmetic over the
+KAT-verified primitive costs, then checks that against
+`bench/streaming_runner.py`'s live measurements — signature bytes match
+exactly (fixed-length ML-DSA-65) or fall within an exact integer range
+(variable-length ECDSA DER encoding) on every row measured so far. See
+`docs/STREAMING.md` §9 for why this is the right substitute for an
+external ground truth, and for the full diagnosis of an initial 300x+
+timing discrepancy (root cause: a one-time ~8ms ECDSA backend
+initialization cost a warm benchmarking loop never pays but a live
+server's first sign call does).
+
 ## Analyze results
 
 ```bash
@@ -303,11 +379,16 @@ Four pages:
 - **Results Dashboard** — interactive Plotly charts (RTT vs. concurrency,
   overhead decomposition, bytes per request) and tables (aggregate stats,
   Mann-Whitney U significance) built from whatever is currently in
-  `results/raw/`, plus a live security/performance trade-off matrix with a
-  slider for the security-weight/performance-weight trade-off.
+  `results/raw/`, a streaming response-overhead section, a live
+  security/performance trade-off matrix with a slider for the
+  security-weight/performance-weight trade-off, and a **Cryptographic
+  Validation** section running the NIST ACVP KAT check and the streaming
+  signature-cost model validation live, in the browser.
 - **Threat Scenarios** — HNDL storage-growth and MITM detection results
-  from disk, plus buttons to run either experiment on demand against a
-  live server and save the result.
+  from disk, plus a streaming sequence-integrity-attack tab and a
+  **streaming HNDL exposure** tab (exposure-vs-response-length chart,
+  strategy-independence check), each with a button to run the experiment
+  on demand against a live server and save the result.
 
 All four pages import directly from `crypto/`, `api/`, `bench/`,
 `threats/`, and `analysis/` — there is no separate "demo" implementation of
@@ -351,17 +432,23 @@ pq-shield/
 ├── threats/
 │   ├── hndl_capture.py          # Threat Scenario 1
 │   ├── mitm_harness.py           # Threat Scenario 2 -- tampering proxy
-│   └── mitm_experiment.py         # Threat Scenario 2 -- driver + detection stats
-├── validation/                   # ML-KEM-768/ML-DSA-65 vs. known-answer test vectors
-│   ├── primitive_bench.py
-│   ├── reference_data.py
-│   └── spec_conformance.py
+│   ├── mitm_experiment.py         # Threat Scenario 2 -- driver + detection stats
+│   ├── streaming_mitm_experiment.py # streaming sequence-integrity (drop/reorder) attack
+│   └── streaming_hndl_experiment.py  # streaming HNDL exposure-vs-response-length
+├── validation/                   # ground truth: FIPS conformance, NIST's own KAT vectors
+│   ├── primitive_bench.py          # op cost + cold-start (first-sign-in-a-process) cost
+│   ├── reference_data.py            # published FIPS 203/204 constants
+│   ├── spec_conformance.py           # measured byte sizes vs. FIPS 203/204
+│   ├── nist_kat.py                    # vs. NIST ACVP known-answer test vectors
+│   ├── kat_vectors.py                  # loads/parses the trimmed vector files
+│   └── vectors/                         # trimmed NIST ACVP JSON + fetch.sh (full upstream)
 ├── analysis/
 │   ├── aggregate.py              # summary stats + Mann-Whitney U
 │   ├── tradeoff_matrix.py         # weighted composite decision matrix
 │   ├── figures.py                  # full paper figure set
 │   ├── plot_metrics.py              # quick comparison chart
-│   └── streaming_analysis.py         # time-to-first-token / signing-overhead analysis
+│   ├── streaming_analysis.py         # time-to-first-token / signing-overhead analysis
+│   └── streaming_model_validation.py  # analytical signature-cost model vs. the live sweep
 ├── webapp/
 │   ├── bootstrap.py               # repo-root sys.path + .env loading (import first, always)
 │   ├── server_manager.py           # demo server lifecycle (ports 8100-8103)
@@ -371,17 +458,28 @@ pq-shield/
 ├── pages/                        # Streamlit multipage app (Live Demo, Benchmark Runner,
 │                                    Results Dashboard, Threat Scenarios)
 ├── app.py                        # Streamlit entrypoint (Home page)
-├── tests/test_crypto_roundtrip.py  # 13 protocol tests (+ payload-profile/streaming/validation tests)
+├── tests/                        # 106 passed + 4 pre-existing legacy failures (see Setup)
+│   ├── test_crypto_roundtrip.py    # core protocol round-trips + tamper detection
+│   ├── test_streaming_signing.py    # crypto/streaming.py's three signing strategies
+│   ├── test_payload_profiles.py      # model/profiles/* shape/size checks
+│   ├── test_validation.py             # spec_conformance.py + primitive_bench.py checks
+│   ├── test_nist_kat.py                # validation/nist_kat.py vs. NIST's ACVP vectors
+│   ├── test_streaming_model_validation.py # analysis/streaming_model_validation.py
+│   └── test_streaming_hndl.py           # threats/streaming_hndl_experiment.py
 ├── scripts/
 │   ├── install_oqs.sh            # builds liboqs (minimal, ML-KEM-768 + ML-DSA-65)
 │   ├── run_threat_experiments.sh  # HNDL + MITM convenience wrapper
 │   └── preflight_check.sh          # pre-demo sanity check (self-test, model, tests, ports)
 ├── docs/
 │   ├── DESIGN.md                 # protocol design, hypotheses, divergences from proposal
-│   ├── STREAMING.md               # SSE signing strategies + backend setup
-│   ├── PRESENTER_GUIDE.md          # page-by-page live-demo script
-│   └── diagrams/                   # architecture SVGs referenced from ARCHITECTURE.md
-├── results/                      # raw CSVs, aggregates, trade-off matrix (gitignored)
+│   ├── STREAMING.md               # signing strategies, backend setup, ground-truth validation
+│   ├── STREAMING_HOW_IT_WORKS.md   # mechanism-level walkthrough: how streaming works end-to-end
+│   ├── STREAMING_INTEGRATION.md     # dated log of the streaming feature's build/integration
+│   ├── PRESENTER_GUIDE.md            # page-by-page live-demo script
+│   └── diagrams/                       # architecture SVGs referenced from ARCHITECTURE.md
+├── results/                      # raw per-request CSVs are gitignored; summary
+│                                    JSONs (hndl/mitm/streaming-hndl) and
+│                                    validation/*.json are committed for the dashboard
 ├── outputs/                       # generated figures (gitignored)
 └── Dockerfile
 ```
@@ -389,11 +487,19 @@ pq-shield/
 ## Current status / next steps
 
 Implemented and passing: crypto layer, protocol tests, all four servers,
-CLI clients, benchmark orchestrator, HNDL and MITM threat scripts, the
-full analysis/figures pipeline, the pluggable payload-profile system
-(`model/profiles/*`), SSE token streaming with three signing strategies
-(`crypto/streaming.py`, `docs/STREAMING.md`), and primitive-level validation
-against known-answer test vectors (`validation/`). A full A/B/C/control × {10,100,1000}
+CLI clients, benchmark orchestrator, HNDL and MITM threat scripts (plus
+their streaming counterparts — sequence-integrity and HNDL-exposure-scaling
+— `threats/streaming_*.py`), the full analysis/figures pipeline, the
+pluggable payload-profile system (`model/profiles/*`), SSE token streaming
+with three signing strategies (`crypto/streaming.py`, `docs/STREAMING.md`),
+and two independent layers of ground-truth validation (`validation/`,
+`analysis/streaming_model_validation.py`): PQ-Shield's liboqs bindings are
+byte-exact against NIST's own ACVP known-answer test vectors, and the
+streaming benchmark's signature-byte overhead matches an analytical model
+derived from those same primitive costs exactly, on every row measured —
+see `docs/STREAMING.md` §§9–10 for the full methodology and a from-scratch
+diagnosis of an initial signing-*time* discrepancy down to a confirmed,
+specific cause (not hand-waved away). A full A/B/C/control × {10,100,1000}
 concurrency × 5-repetition sweep and the HNDL/MITM experiments have been
 run once end-to-end on the development host; see `results/` for the actual
 output and `docs/DESIGN.md` §7 for host-specific caveats (this repo was
@@ -417,7 +523,13 @@ Remaining for the full Review 2 / paper-ready deliverable:
    full-matrix `bench/orchestrator.py` path).
 4. Push the `--reuse-handshake` "warm connection" variant through the full
    sweep as a secondary result, per `docs/DESIGN.md` §3.
-5. Publish to IEEE Access / an ACM CCS workshop per the Review 1 proposal's
+5. Close the remaining streaming signing-*time* validation gap
+   (`hash_chain` and `classical`/`hybrid` `per_chunk`) with a
+   higher-repetition sweep — see `docs/STREAMING.md` §9's per-row
+   breakdown of what's confirmed noise vs. still-open, and don't cite
+   those specific numbers as validated until then (signature-*byte*
+   overhead and `buffer_and_sign` timing are already fully validated).
+6. Publish to IEEE Access / an ACM CCS workshop per the Review 1 proposal's
    target venue, and tag a release for the open-source artifact.
 
 ## Security scope
