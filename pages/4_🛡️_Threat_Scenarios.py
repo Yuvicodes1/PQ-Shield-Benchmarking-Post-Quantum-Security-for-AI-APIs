@@ -18,8 +18,9 @@ from webapp import demo_transaction, server_manager
 st.set_page_config(page_title="PQ-Shield — Threat Scenarios", page_icon="🛡️", layout="wide")
 st.title("🛡️ Threat Scenarios")
 
-tab_hndl, tab_mitm, tab_streaming_mitm = st.tabs([
+tab_hndl, tab_mitm, tab_streaming_mitm, tab_streaming_hndl = st.tabs([
     "Harvest-Now-Decrypt-Later (HNDL)", "Man-in-the-Middle (MITM)", "🌊 Streaming Sequence Attack",
+    "🌊 Streaming HNDL Exposure",
 ])
 
 # ---------------------------------------------------------------------------
@@ -292,6 +293,115 @@ with tab_streaming_mitm:
             st.json(sm_trial_rows)
 
 # ---------------------------------------------------------------------------
+# Streaming HNDL exposure scaling (confidentiality, NOT sequence integrity --
+# see docs/STREAMING.md section 10 for why this is a distinct finding from
+# the tab above, and why signature/chain-hash bytes are excluded here)
+# ---------------------------------------------------------------------------
+with tab_streaming_hndl:
+    st.markdown(
+        "The **HNDL** tab above measures one small, fixed-size response. A streamed response "
+        "reuses **one handshake's session key across every chunk of a potentially long-running "
+        "stream** — so if that handshake is later broken, an adversary who harvested the whole "
+        "session recovers *everything it ever streamed*, not one small reply. This is **not a new "
+        "vulnerability class** — it's the same Shor's-algorithm-breaks-RSA/ECDH threat, made worse "
+        "in direct proportion to response length. Only `kex_blob` and each chunk's `(nonce, "
+        "ciphertext)` count toward *harvestable* bytes here — signatures and chain hashes protect "
+        "authenticity, not confidentiality, and are tracked separately (see the strategy-"
+        "independence check below, and the *separate* 🌊 Streaming Sequence Attack tab for what "
+        "signatures/chain-hash timing metadata actually exposes)."
+    )
+
+    existing_stream_hndl = dl.load_streaming_hndl_summaries()
+    if existing_stream_hndl:
+        st.markdown("**Existing results (from `results/hndl/streaming/*-streaming-hndl-summary.json`):**")
+        fig_exposure = go.Figure()
+        for s in existing_stream_hndl:
+            color = "#c0392b" if s.get("kex_decryptable_under_future_crqc") else "#2471a3"
+            fig_exposure.add_trace(go.Scatter(
+                x=s.get("max_tokens_values", []),
+                y=s.get("decryptable_bytes_under_future_crqc_by_length", []),
+                mode="lines+markers", name=s["config"], line=dict(color=color), marker=dict(color=color),
+            ))
+        fig_exposure.update_layout(
+            xaxis_title="Response length (max_tokens)", yaxis_title="Bytes decryptable under a future CRQC",
+            height=380, legend=dict(orientation="h", yanchor="bottom", y=-0.3),
+        )
+        st.plotly_chart(fig_exposure, width='stretch')
+        st.caption(
+            "Red = key-establishment decryptable under a future CRQC (RSA/ECDH); blue = not "
+            "(ML-KEM-768, lattice-based). Hybrid and full_pqc's lines overlap at zero regardless "
+            "of length — both fully protect confidentiality here."
+        )
+        st.dataframe(existing_stream_hndl, width='stretch')
+
+        existing_independence = dl.load_streaming_hndl_independence()
+        if existing_independence:
+            st.markdown("**Strategy-independence check** (does signing strategy affect confidentiality exposure?)")
+            for ind in existing_independence:
+                match = "✅ exact match" if ind.get("exact_match_across_strategies") else "see byte deltas below"
+                st.markdown(f"- **{ind['config']}** @ max_tokens={ind['max_tokens']}: "
+                             f"`{ind['total_bytes_harvestable_by_strategy']}` — {match}")
+            with st.expander("Full strategy-independence details (AEAD-envelope-overhead explanation)"):
+                st.json(existing_independence)
+    else:
+        st.info("No streaming HNDL results on disk yet.")
+
+    st.divider()
+    st.markdown("**Run a new streaming HNDL length sweep:**")
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col1:
+        sh_config = st.selectbox("Configuration", ["classical", "hybrid", "full_pqc"], key="sh_config")
+    with col2:
+        sh_max_tokens = st.text_input("Response lengths (comma-separated)", value="50,200,500,2000", key="sh_max_tokens")
+    with col3:
+        sh_chunk_size = st.number_input("Chunk size (tokens)", min_value=1, max_value=50, value=5, key="sh_chunk_size")
+    sh_run = st.button("Run streaming HNDL sweep", type="primary")
+
+    if sh_run:
+        from threats.streaming_hndl_experiment import run_one_config
+
+        try:
+            sh_lengths = [int(x.strip()) for x in sh_max_tokens.split(",") if x.strip()]
+        except ValueError:
+            sh_lengths = []
+
+        if not sh_lengths:
+            st.error("Enter at least one valid response length.")
+        else:
+            with st.spinner(f"Starting {server_manager.DISPLAY_NAME[sh_config]} server if needed..."):
+                base_url = server_manager.ensure_server(sh_config)
+
+            with st.spinner(f"Sweeping {len(sh_lengths)} response lengths + strategy-independence check..."):
+                sh_result = asyncio.run(run_one_config(base_url, sh_config, sh_lengths, int(sh_chunk_size), "per_chunk"))
+
+            sh_summary = sh_result["sweep_summary"]
+            st.success(
+                f"kex_decryptable_under_future_crqc = {sh_summary['kex_decryptable_under_future_crqc']}  "
+                f"({sh_summary['fraction_of_harvested_bytes_eventually_decryptable']:.0%} of harvested bytes "
+                f"eventually decryptable)"
+            )
+            m1, m2, m3 = st.columns(3)
+            m1.metric("Response lengths swept", sh_summary["n_lengths"])
+            m2.metric("Harvestable bytes (longest)", f"{sh_summary['total_bytes_harvestable_by_length'][-1]:,}"
+                       if sh_summary["total_bytes_harvestable_by_length"] else "—")
+            m3.metric("Monotonic in length?", "✅ Yes" if sh_summary["harvestable_bytes_monotonic_in_length"] else "❌ No")
+
+            ind = sh_result["strategy_independence"]
+            st.markdown("**Strategy-independence check:**")
+            st.json({k: v for k, v in ind.items() if k != "rows"})
+
+            os.makedirs(dl.STREAMING_HNDL_DIR, exist_ok=True)
+            crypto_name = sh_config
+            from threats.streaming_hndl_experiment import _write_csv
+
+            _write_csv(sh_result["sweep_rows"], os.path.join(dl.STREAMING_HNDL_DIR, f"{crypto_name}-streaming-hndl.csv"))
+            with open(os.path.join(dl.STREAMING_HNDL_DIR, f"{crypto_name}-streaming-hndl-summary.json"), "w") as f:
+                json.dump(sh_summary, f, indent=2)
+            with open(os.path.join(dl.STREAMING_HNDL_DIR, f"{crypto_name}-strategy-independence.json"), "w") as f:
+                json.dump({k: v for k, v in ind.items() if k != "rows"}, f, indent=2)
+            st.caption(f"Saved to {dl.STREAMING_HNDL_DIR}/. Refresh the page to see it in the chart above.")
+
+# ---------------------------------------------------------------------------
 # AI summary
 # ---------------------------------------------------------------------------
 st.divider()
@@ -306,14 +416,16 @@ if not ai_summary.api_key_present():
     )
 else:
     st.caption(
-        "Sends the HNDL, MITM, and streaming sequence-attack summary JSON shown above (not raw "
-        "per-trial records) to Claude for a plain-language security readout."
+        "Sends the HNDL, MITM, streaming sequence-attack, and streaming HNDL summary JSON shown "
+        "above (not raw per-trial records) to Claude for a plain-language security readout."
     )
     if st.button("Generate AI summary", type="primary", key="threat_ai_summary_btn"):
         context = ai_summary.build_threat_context(
             hndl_summaries=dl.load_hndl_summaries(),
             mitm_summaries=dl.load_mitm_summaries(),
             streaming_mitm_summaries=dl.load_streaming_mitm_summaries(),
+            streaming_hndl_summaries=dl.load_streaming_hndl_summaries(),
+            streaming_hndl_independence=dl.load_streaming_hndl_independence(),
         )
         try:
             with st.spinner("Asking Claude..."):

@@ -1,0 +1,5 @@
+config,strategy,max_tokens,chunk_size_tokens,error,kex_blob_bytes,total_ciphertext_bytes,total_bytes_harvestable,total_integrity_bytes,n_wire_events,n_chunks,wire_event_bytes_min,wire_event_bytes_max,wire_event_bytes_mean,kex_decryptable_under_future_crqc,payload_decryptable_under_future_crqc,decryptable_bytes_under_future_crqc
+classical,per_chunk,50,5,,256,729,985,711,10,10,136,152,144.0,True,False,729
+classical,per_chunk,200,5,,256,2953,3209,2846,40,40,136,160,144.975,True,False,2953
+classical,per_chunk,500,5,,256,7400,7656,7098,100,100,136,160,144.98,True,False,7400
+classical,per_chunk,2000,5,,256,29674,29930,28411,400,400,130,159,145.2125,True,False,29674

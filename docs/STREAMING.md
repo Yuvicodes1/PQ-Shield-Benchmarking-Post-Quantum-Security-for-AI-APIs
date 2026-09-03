@@ -367,7 +367,305 @@ calls concurrently via `asyncio.gather` in a small driver script, but
 report it as a separate result with its own caveats, not blended into
 either existing sweep.
 
-## 9. Known limitations / honest gaps
+## 9. Validating the measurement instrument itself
+
+There is no published external dataset measuring PQC signature overhead on
+*streamed* AI responses. That absence is this project's own novelty claim —
+if such a dataset existed, this work would be redundant. So "validate
+against an external ground truth," the approach `validation/nist_kat.py`
+takes for the raw primitives (byte-exact match against NIST's own ACVP
+known-answer vectors), is not achievable for the streaming result the same
+way.
+
+What is validated instead is the **measurement instrument itself**. The
+signing strategies in `crypto/streaming.py` implement pure, deterministic
+arithmetic on top of primitives (ML-KEM-768, ML-DSA-65, ECDSA-P256) that are
+already proven correct. Given the number of chunks a transaction actually
+produced, the number of signatures each strategy issues and the number of
+bytes each signature costs follow by construction, not by measurement —
+`per_chunk` signs once per chunk, `hash_chain` signs once per checkpoint (or
+once total), `buffer_and_sign` signs once, full stop. If predictions
+computed purely from that arithmetic and the independently-measured
+primitive costs (`results/validation/primitive_bench.json`) match what the
+live benchmark harness (`bench/streaming_runner.py`) actually recorded, that
+proves the harness introduces no unaccounted overhead, no double-counting,
+and no silent divergence between what the strategy is supposed to do and
+what it measurably does.
+
+This is the correct and defensible substitute for an external dataset — not
+"we couldn't find ground truth so we made do," but "the ground truth for a
+measurement-instrument validation is the arithmetic the instrument is
+supposed to implement." State it this way in the paper's methodology
+section, not as an apology.
+
+`analysis/streaming_model_validation.py` implements this check:
+
+```bash
+python -m analysis.streaming_model_validation
+python -m analysis.streaming_model_validation --json --output results/streaming_model_validation.json
+```
+
+For each row of `results/streaming/*.csv`, it predicts the number of
+signatures the recorded strategy must have issued (from that row's own
+measured `n_chunks` — not from `ceil(max_tokens / chunk_size_tokens)`, since
+a real generation backend's text pieces don't map 1:1 to a token count the
+way the synthetic backend's do), then predicts the byte and timing
+consequences of that count:
+
+- **Signature bytes are checked as exactly as each scheme's own encoding
+  allows.** ML-DSA-65 has a FIPS-204-fixed 3,309-byte signature (confirmed
+  byte-exact by `validation/nist_kat.py`), so `full_pqc` predictions are
+  checked for **exact** equality — any deviation is a real bug. ECDSA-P256's
+  DER encoding is genuinely variable-length (70–72 bytes, a property of the
+  SEC1/RFC 3279 ASN.1 encoding, not implementation noise), so `classical`
+  and `hybrid` predictions are checked against an **exact integer range**
+  (`n_signatures × 70` to `n_signatures × 72`) instead of a single scalar —
+  still zero-tolerance arithmetic, just bounded rather than pinned.
+- **Signing time is never checked for exact equality.** ML-DSA-65's
+  Fiat-Shamir-with-Aborts rejection sampling gives it a genuinely
+  right-skewed distribution; the acceptance window used is each scheme's own
+  measured p99/median ratio from `primitive_bench.json`, so the tolerance is
+  itself derived from measured data rather than picked by hand.
+
+On this project's own data (see the run log in `docs/STREAMING_INTEGRATION.md`
+for provenance), **signature-byte predictions matched exactly or fell within
+the exact ECDSA range on 100% of validated rows**, across both the committed
+real-Llama-3.2-3B sweep and an independent synthetic-backend sweep run at a
+different chunk count and repetition depth — the byte arithmetic holds
+regardless of what produced the underlying text.
+
+Signing-*time* agreement was initially markedly worse (1/9 rows within
+tolerance) and was diagnosed rather than smoothed over. Two hypotheses were
+tested directly and ruled out by measurement, not argument, before the real
+cause was found:
+
+- **"First use of a freshly generated key is slower"** — refuted.
+  Isolated fresh-key-vs.-warm-key timing showed at most a ~1.4× effect for
+  ECDSA and ~1.0× for ML-DSA-65, nowhere near the observed multi-hundred-x
+  gaps.
+- **"Signing cost scales with message size in a way the warm-loop benchmark
+  doesn't capture"** — refuted. Signing messages from 32 B to 8 KB in the
+  same warm loop `validation/primitive_bench.py` uses moved ECDSA's mean by
+  only ~12% (37.75 µs → 42.26 µs) and showed no size trend for ML-DSA-65 at
+  all. This could not explain a 30×+ *within-single-call* gap between two
+  same-call-count rows (`buffer_and_sign` vs. `hash_chain`, both exactly one
+  signature) that differ mainly in message size.
+
+**Confirmed cause: a one-time, per-process ECDSA backend-initialization
+cost the warm-loop benchmark cannot see by construction.** Python's
+`cryptography` library lazily initializes its OpenSSL-backed EC-signing
+support on the *first* ECDSA operation of a process. Measured directly
+across 8 independent fresh Python processes, each performing exactly one
+ECDSA-P256 sign: **7.7–9.3 ms, consistently**, regardless of message size
+(confirmed separately at both 32 B and 2,500 B). The same test against
+ML-DSA-65 (this project's from-scratch liboqs ctypes binding, no external
+backend to lazily load) showed **0.13–0.33 ms — no cold-start penalty at
+all**, actually at or below its own warm-loop mean. `validation/primitive_bench.py`'s
+warm loop pays this cost once, on iteration 1 of 200+, invisibly averaged
+into a mean that is overwhelmingly the *warm* number; a live server's
+`buffer_and_sign` request — the first strategy in `bench/streaming_runner.py`'s
+default order, and so typically the very first ECDSA sign call a freshly
+started server process ever performs — pays the *full* cold cost, every
+time.
+
+This is now implemented as a second, explicit baseline
+(`validation.primitive_bench.bench_cold_start_signing()`, `analysis.streaming_model_validation.cold_start_ms_and_tolerance()`),
+applied specifically to `buffer_and_sign` rows (not `per_chunk`/`hash_chain`,
+which normally run after `buffer_and_sign` against an already-warmed
+process in the same sweep — applying the correction there would overclaim
+a mechanism not confirmed for those cases). Re-validated against the same
+9-row dataset:
+
+| Row | Warm-loop ratio | Cold-start ratio |
+|---|---|---|
+| classical/buffer_and_sign | 281.24× (tol 1.03×, **FAIL**) | 1.33× (tol 1.50×, **OK**) |
+| hybrid/buffer_and_sign | 297.11× (tol 1.03×, **FAIL**) | 1.41× (tol 1.50×, **OK**) |
+| full_pqc/buffer_and_sign | 6.00× (tol 3.17×, **FAIL**) | 4.70× (tol 1.78×, **FAIL**) |
+
+The two ECDSA rows — the two largest discrepancies in the entire original
+table (281×, 297×) — are fully resolved by the correct baseline.
+`full_pqc/buffer_and_sign` stays outside tolerance under *either* baseline,
+consistent with the direct measurement showing ML-DSA-65 has no cold-start
+effect to correct for.
+
+### Is the remaining 6-row gap noise, or a second systematic effect?
+
+The six remaining out-of-tolerance rows (`classical`/`hybrid` ×
+`hash_chain`/`per_chunk`, plus `full_pqc/buffer_and_sign`) were initially
+attributed, without a direct test, to "ordinary live-server-vs.-tight-loop
+scheduling noise." That label was checked the same way the two earlier
+hypotheses were: by measurement. A 5-repetition sweep (synthetic backend,
+same reasoning as the cold-start isolation test — this is a
+measurement-stability question, not one that needs real generation
+content) gives per-repetition ratios, not just a mean:
+
+| Row | Tolerance | Ratios across 5 reps | Pass/5 | Spread (max/min) |
+|---|---|---|---|---|
+| `full_pqc/per_chunk` | 3.17× | 2.26, 1.67, 2.64, 2.56, 2.80 | **5/5** | 1.68× |
+| `full_pqc/buffer_and_sign` | 3.17× | 5.26, 4.28, **3.07**, 5.73, 3.65 | 1/5 | 1.87× |
+| `hybrid/per_chunk` | 1.03× | 2.28, 4.15, 3.72, 3.78, 3.57 | 0/5 | 1.82× |
+| `classical/per_chunk` | 1.03× | 1.60, 1.57, 1.70, 1.76, 1.58 | 0/5 | **1.12×** |
+| `hybrid/hash_chain` | 1.03× | 9.89, 9.46, 8.28, 13.16, **5.24** | 0/5 | 2.51× |
+| `classical/hash_chain` | 1.03× | 9.34, 8.95, 12.55, **4.07**, 8.53 | 0/5 | 3.09× |
+
+This does not land as one verdict for all six rows — reported per-row,
+honestly, rather than forced into a single label:
+
+- **`full_pqc/per_chunk`: noise, confirmed and resolved.** Every one of
+  the 5 repetitions falls *within* tolerance on its own; the original
+  single-repetition failure was an unlucky draw, not a real effect. Fixed
+  simply by running ≥3 repetitions and validating against the mean —
+  matching this project's own convention elsewhere (the main concurrency
+  benchmark already uses 5 repetitions for exactly this reason).
+- **`full_pqc/buffer_and_sign`: noise-dominated, not yet fully resolved.**
+  One of 5 repetitions (3.07×) lands inside tolerance (3.17×), and the
+  spread (1.87×) is real — consistent with genuine sampling variance, not
+  a fixed multiplier. The mean is still outside tolerance at n=5; more
+  repetitions would plausibly close it the way they did for `per_chunk`,
+  but this has not yet been confirmed at higher n.
+- **`classical/per_chunk`: looks systematic, not noise.** The tightest
+  spread of the six (1.12×, ratios clustered at 1.57×–1.76× across all 5
+  reps) is the opposite of what sampling noise should look like — a
+  genuinely noisy quantity would not reproduce this consistently. This
+  reads as a small (~1.6×), real, repeatable effect distinct from both the
+  cold-start finding (message-size- and backend-independent, unlike this)
+  and from noise.
+- **`hybrid/per_chunk`: mixed, leans toward a smaller version of the same
+  effect as classical/per_chunk.** More spread (1.82×) than `classical/per_chunk`
+  but the same order of magnitude and direction.
+- **`classical/hash_chain` and `hybrid/hash_chain`: genuinely noisy, but
+  with a floor noise alone doesn't explain.** These show the largest
+  rep-to-rep spread of the six (2.5×–3.1×, close to the magnitude that
+  would usually indicate real sampling variance) — but even their
+  *lowest* observed repetition (4.07×, 5.24×) remains several-fold above
+  tolerance. Noise is clearly present here, but it cannot be the *whole*
+  story: a purely-noisy quantity centered near the tolerance boundary
+  would occasionally dip near or under it at n=5, and neither row does.
+
+**Conclusion: not purely single-repetition noise, and not purely a second
+systematic effect either — a genuine mix, confirmed by measurement rather
+than assumed.** One row is fully resolved by repetition count alone, one
+more is likely to be with further repetitions, and the remaining four show
+either a small but clearly reproducible systematic residual
+(`classical/per_chunk`, and to a lesser extent `hybrid/per_chunk`) or a
+noisy-but-persistently-elevated pattern that repetition count alone will
+not fully resolve (`classical/hash_chain`, `hybrid/hash_chain`).
+
+This residual is recorded here, not chased further right now. One
+candidate hypothesis for future work, deliberately not tested in this
+pass: `per_chunk` and (to a lesser extent) `hash_chain` make many
+individual ctypes calls with fresh buffer allocations
+(`.from_buffer_copy()`) per call — `validation/primitive_bench.py`'s
+isolated loop already pays this same ctypes-marshalling cost on every
+iteration, so the open question is not whether ctypes overhead exists (it
+does, in both measurements), but whether a *live async server's* memory/GC
+pressure (many concurrent live objects from ordinary request handling)
+makes each marshal/allocate step measurably slower than the same call
+running in an otherwise-idle benchmark process.
+
+**Bottom line for the paper**: signature-*byte* overhead is fully
+validated (9/9 exact-or-in-range, unaffected by any of this). Per-signature
+*timing* overhead is validated for `buffer_and_sign` on ECDSA configs
+(`classical`, `hybrid` — the cold-start-corrected baseline) and for
+`full_pqc/per_chunk` (resolved by repetition count). `hash_chain` timing
+validation, `classical`/`hybrid` `per_chunk` timing validation, and
+`full_pqc/buffer_and_sign` timing validation remain open — cite them as
+"validation ongoing," not as confirmed, until a higher-repetition sweep or
+further isolation closes the remaining gaps identified above.
+
+## 10. Streaming makes the existing HNDL exposure worse, in proportion to session length
+
+`threats/hndl_capture.py` already establishes PQ-Shield's core
+harvest-now-decrypt-later (HNDL) finding — see `docs/DESIGN.md` H3 — for
+one small, fixed-size classifier response: a passive adversary who records
+the key-establishment blob and the response ciphertext gets nothing usable
+under Configuration B/C (ML-KEM-768 is not broken by Shor's algorithm) and
+everything usable under Configuration A (RSA-2048 is). That result is
+bounded and fixed-size by construction.
+
+`threats/streaming_hndl_experiment.py` extends it to what actually changes
+for a streaming AI API: **a single handshake's session key is established
+once and reused for every chunk of a potentially long-running stream** (a
+multi-turn chat session, an agent's full reasoning trace, a long
+completion). This is **not a new vulnerability class** — it is the same
+Shor's-algorithm-breaks-RSA/ECDH threat, made worse in direct proportion to
+how long the stream runs, because streaming's whole design point (one
+handshake, many chunks) is exactly what maximizes the payoff of harvesting
+a single broken handshake.
+
+**Measured result** (live capture against all three configs, synthetic
+generation backend for fast/deterministic verification — the finding
+depends only on ciphertext byte counts, not on what produced the
+plaintext, exactly as the byte-level streaming-signature findings above
+do not depend on backend either):
+
+| max_tokens | classical: bytes decryptable under future CRQC | hybrid / full_pqc: bytes decryptable under future CRQC |
+|---|---|---|
+| 50 | 729 | 0 |
+| 200 | 2,953 | 0 |
+| 500 | 7,400 | 0 |
+| 2,000 | 29,674 | 0 |
+
+Classical's exposure is **100% of harvested response content, at every
+length, growing linearly with response length** — once RSA-2048 key
+transport is broken, the one session key it protected decrypts everything
+that session ever streamed. Hybrid and full_pqc's exposure is **0%,
+regardless of length** — both use ML-KEM-768 for key establishment, which
+is what confidentiality depends on here, so both are **equally and
+completely effective** against this threat; classical is **completely
+ineffective**, and the cost of that ineffectiveness compounds with every
+additional token streamed, unlike the bounded exposure the single-shot
+experiment measures.
+
+**What an HNDL adversary's stored-bytes figure does and does not include**:
+`kex_blob` (once per session) and every chunk's `(nonce, ciphertext)` pair
+— never signatures or chain hashes, which protect authenticity, not
+confidentiality, and buy an eavesdropper nothing towards decrypting content
+later. (`threats/hndl_capture.py`'s own `total_bytes_stored` figure, by
+contrast, does include signature bytes — a reasonable choice for "total
+artifact volume an adversary would archive," but a different question from
+"bytes that become decryptable." The streaming experiment reports the two
+separately and does not follow that convention where they'd diverge.)
+
+**Strategy-independence check, run empirically rather than assumed**: at
+one fixed response length, `per_chunk` and `hash_chain` produced
+byte-identical confidentiality exposure (both chunk the same generated
+content into the same number of independent AEAD envelopes). `buffer_and_sign`
+did **not** match exactly — it was smaller by precisely
+`(n_chunks - 1) x 28 bytes` (a 12-byte GCM nonce + 16-byte authentication
+tag per additional AEAD envelope; `buffer_and_sign` pays this once, for the
+whole response, while `per_chunk`/`hash_chain` pay it once per chunk). This
+is real, fully explained by AES-GCM's per-envelope overhead, and confirmed
+against the live measurement (10 chunks, predicted delta 252 B, measured
+delta 252 B) — not a bug, and not a confidentiality difference between
+strategies in the sense that matters here: which bytes are recoverable
+under a future CRQC is unaffected (kex-decryptability alone drives the
+0%-vs-100% finding above), only the small fixed per-envelope overhead
+differs.
+
+### A separate, unrelated finding surfaced by the same capture: traffic-shape metadata exposure
+
+This is **not an HNDL/confidentiality finding** — do not read it as one, and
+do not sum its byte counts into the table above. `per_chunk` and
+`hash_chain` both put one wire-visible SSE event on *every* chunk (a
+signature, or a chain hash, riding alongside that chunk's ciphertext),
+which reveals the exact chunk count and inter-chunk arrival timing to a
+passive network observer with **zero cryptanalysis** — timing that
+plausibly correlates with generation rate/content. `buffer_and_sign`
+reveals only one final event, with no intermediate wire structure exposed
+during generation.
+
+This is a caveat on `hash_chain`'s otherwise-strong recommendation from
+section 2 above, not a reversal of it: `hash_chain` still wins decisively
+on signature-byte cost and still fully protects confidentiality (see
+above); it simply also happens to reveal stream cadence to a passive
+observer, exactly as much as `per_chunk` does and strictly more than
+`buffer_and_sign` does. If a deployment's threat model cares about hiding
+*that a stream is happening at a given cadence* (not just its content),
+that is a reason to prefer `buffer_and_sign` specifically, independent of
+its worse time-to-first-token and independent of the HNDL finding above.
+
+## 11. Known limitations / honest gaps
 
 - **Not yet wired into the Streamlit dashboard.** The `webapp/` pages don't
   have a streaming view yet. The CLI/Python path above is fully functional;

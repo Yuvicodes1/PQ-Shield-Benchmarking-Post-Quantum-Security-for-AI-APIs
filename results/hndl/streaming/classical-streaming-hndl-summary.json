@@ -1,0 +1,26 @@
+{
+  "config": "classical",
+  "strategy": "per_chunk",
+  "n_lengths": 4,
+  "max_tokens_values": [
+    50,
+    200,
+    500,
+    2000
+  ],
+  "total_bytes_harvestable_by_length": [
+    985,
+    3209,
+    7656,
+    29930
+  ],
+  "decryptable_bytes_under_future_crqc_by_length": [
+    729,
+    2953,
+    7400,
+    29674
+  ],
+  "kex_decryptable_under_future_crqc": true,
+  "harvestable_bytes_monotonic_in_length": true,
+  "fraction_of_harvested_bytes_eventually_decryptable": 1.0
+}

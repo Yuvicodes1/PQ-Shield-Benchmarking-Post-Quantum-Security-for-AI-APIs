@@ -298,6 +298,88 @@ else:
         st.dataframe(stream_summary, width='stretch')
 
 # ---------------------------------------------------------------------------
+# Cryptographic validation -- ground-truth checks independent of the
+# benchmark sweeps above: NIST's own ACVP known-answer vectors for the raw
+# primitives, and an analytical signature-cost model for the streaming
+# result (see docs/STREAMING.md sections 9-10 for the full methodology).
+# ---------------------------------------------------------------------------
+st.divider()
+st.subheader("🔬 Cryptographic Validation")
+st.caption(
+    "Ground-truth checks, not benchmark results: do PQ-Shield's own liboqs bindings match NIST's "
+    "official test vectors, and does the streaming signature-cost harness measure exactly what "
+    "the signing strategies' own arithmetic says it should?"
+)
+
+vc1, vc2 = st.columns(2)
+
+with vc1:
+    st.markdown("**NIST ACVP Known-Answer Tests** (ML-KEM-768 / ML-DSA-65 vs. NIST's own vectors)")
+    try:
+        from validation.nist_kat import run_all as run_nist_kat
+
+        with st.spinner("Running KAT vectors..."):
+            kat_results = run_nist_kat()
+        kat_summary = kat_results["summary"]
+        k1, k2 = st.columns(2)
+        k1.metric("Vectors passed", f"{kat_summary['passed']}/{kat_summary['total_checks']}")
+        k2.metric("All pass?", "✅ Yes" if kat_summary["all_passed"] else "❌ No")
+        st.dataframe(
+            [
+                {"check": "ML-KEM-768 keyGen", "passed": kat_results["ml_kem_768_keygen"]["passed"],
+                 "total": kat_results["ml_kem_768_keygen"]["total"]},
+                {"check": "ML-KEM-768 encapsulation", "passed": kat_results["ml_kem_768_encap_decap"]["encapsulation"]["passed"],
+                 "total": kat_results["ml_kem_768_encap_decap"]["encapsulation"]["total"]},
+                {"check": "ML-KEM-768 decapsulation", "passed": kat_results["ml_kem_768_encap_decap"]["decapsulation"]["passed"],
+                 "total": kat_results["ml_kem_768_encap_decap"]["decapsulation"]["total"]},
+                {"check": "ML-DSA-65 signature verification", "passed": kat_results["ml_dsa_65_sigver"]["passed"],
+                 "total": kat_results["ml_dsa_65_sigver"]["total"]},
+            ],
+            width='stretch', hide_index=True,
+        )
+        with st.expander("Not achievable through liboqs's public API (documented, not skipped)"):
+            st.json(kat_results["not_achievable"])
+        with st.expander("Full KAT results JSON"):
+            st.json(kat_results)
+    except Exception as exc:
+        st.warning(f"NIST KAT check unavailable: {exc}")
+
+with vc2:
+    st.markdown("**Streaming Signature-Cost Model Validation** (measured vs. predicted from primitive costs)")
+    primitive_bench_path = os.path.join(dl.REPO_ROOT, "results", "validation", "primitive_bench.json")
+    if streaming_df is None or streaming_df.empty:
+        st.info("No streaming sweep data yet -- see the streaming section above.")
+    elif not os.path.isfile(primitive_bench_path):
+        st.info(
+            f"No `{os.path.relpath(primitive_bench_path, dl.REPO_ROOT)}` yet -- run "
+            "`python -m validation.primitive_bench --output results/validation/primitive_bench.json` first."
+        )
+    else:
+        try:
+            from analysis.streaming_model_validation import run_validation as run_streaming_model_validation
+
+            with st.spinner("Validating measured signature bytes/timing against the analytical model..."):
+                mv = run_streaming_model_validation(dl.STREAMING_DIR, primitive_bench_path)
+            mvs = mv["summary"]
+            mv1, mv2, mv3 = st.columns(3)
+            mv1.metric("Bytes: exact/in-range", f"{mvs['bytes_ok']}/{mvs['validated_rows']}",
+                       delta="ALL OK" if mvs["bytes_all_ok"] else "mismatches", delta_color="off")
+            mv2.metric("Timing (warm-loop baseline)", f"{mvs['timing_ok']}/{mvs['validated_rows']}")
+            mv3.metric("Timing (best applicable baseline)", f"{mvs['timing_ok_best']}/{mvs['validated_rows']}")
+            st.dataframe(mv["per_group"], width='stretch', hide_index=True)
+            st.caption(
+                "'Best applicable baseline' uses a cold-start-process correction for "
+                "`buffer_and_sign` (see docs/STREAMING.md section 9 for why ECDSA specifically "
+                "needs one and ML-DSA-65 doesn't) and the ordinary warm-loop mean elsewhere. "
+                "Byte agreement is the strongest, fully-validated claim regardless of the timing "
+                "baseline used."
+            )
+            with st.expander("Full validation results JSON (per-row detail)"):
+                st.json(mv)
+        except Exception as exc:
+            st.warning(f"Streaming model validation unavailable: {exc}")
+
+# ---------------------------------------------------------------------------
 # Aggregate stats + significance tables
 # ---------------------------------------------------------------------------
 st.divider()

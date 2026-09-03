@@ -158,15 +158,21 @@ def generate_dashboard_summary(context: dict) -> str:
 def build_threat_context(
     hndl_summaries: list[dict], mitm_summaries: list[dict],
     streaming_mitm_summaries: list[dict] | None = None,
+    streaming_hndl_summaries: list[dict] | None = None,
+    streaming_hndl_independence: list[dict] | None = None,
 ) -> dict:
-    """hndl_summaries / mitm_summaries / streaming_mitm_summaries are exactly
-    the lists returned by webapp.data_loader.load_hndl_summaries() /
-    load_mitm_summaries() / load_streaming_mitm_summaries() --
+    """hndl_summaries / mitm_summaries / streaming_mitm_summaries /
+    streaming_hndl_summaries / streaming_hndl_independence are exactly the
+    lists returned by webapp.data_loader.load_hndl_summaries() /
+    load_mitm_summaries() / load_streaming_mitm_summaries() /
+    load_streaming_hndl_summaries() / load_streaming_hndl_independence() --
     already-computed per-config JSON summaries, not raw trial records."""
     return {
         "hndl_harvest_now_decrypt_later": hndl_summaries,
         "mitm_tamper_detection": mitm_summaries,
         "streaming_sequence_integrity_attack": streaming_mitm_summaries or [],
+        "streaming_hndl_exposure_scaling": streaming_hndl_summaries or [],
+        "streaming_hndl_strategy_independence": streaming_hndl_independence or [],
     }
 
 
@@ -208,7 +214,24 @@ SYSTEM_PROMPT_THREATS = (
     "is hash_chain's known, documented trade-off for its lower signature-byte cost, not a "
     "security failure; only flag it as concerning if detection_rate itself (not "
     "mid_stream_detection_rate) is below 1.0, since that would mean the attack went completely "
-    "undetected even at the end.\n\n"
+    "undetected even at the end.\n"
+    "- streaming_hndl_exposure_scaling: a THIRD, separate finding -- NOT about signing strategy "
+    "or tamper detection at all. It extends the plain hndl_harvest_now_decrypt_later finding "
+    "above (bounded, single small response) to a streamed response, where one handshake's "
+    "session key is reused across every chunk of a potentially long-running stream. Each entry "
+    "has max_tokens_values (response lengths swept) and the matching "
+    "decryptable_bytes_under_future_crqc_by_length list, plus "
+    "harvestable_bytes_monotonic_in_length and "
+    "fraction_of_harvested_bytes_eventually_decryptable (1.0 for 'classical', 0.0 for "
+    "'hybrid'/'full_pqc'). This is NOT a new vulnerability class -- it is the same RSA/ECDH-"
+    "broken-by-Shor threat as hndl_harvest_now_decrypt_later, made worse in direct proportion to "
+    "response length, because one broken handshake now exposes an entire accumulated stream "
+    "instead of one small reply. streaming_hndl_strategy_independence entries confirm (or refute) "
+    "that this exposure does not depend on which signing strategy was used -- "
+    "exact_match_across_strategies True means per_chunk and hash_chain produced identical "
+    "confidentiality exposure; a documented, expected AEAD-envelope-count byte difference from "
+    "buffer_and_sign (NOT a bug) may still show False even when the underlying finding holds -- "
+    "do not describe a False here as evidence any strategy is less secure.\n\n"
     "Write a concise report (under 450 words) with these sections, in order:\n"
     "1. HNDL exposure -- which config(s) are shown as eventually decryptable under "
     "a future CRQC, what the storage cost (bytes/request) is for the protected "
@@ -228,10 +251,19 @@ SYSTEM_PROMPT_THREATS = (
     "framed as hash_chain's documented latency/signature-cost trade-off, not a defect, unless "
     "detection_rate itself is below 1.0 for some entry (that IS a real, concerning finding -- "
     "lead with it if present).\n"
-    "4. Coverage gaps -- name any config, tamper_target, strategy, or attack combination that "
+    "4. Streaming HNDL exposure scaling -- if streaming_hndl_exposure_scaling is empty, say "
+    "plainly that this experiment has not been run yet and skip the rest of this section. "
+    "Otherwise: state which config(s) show fraction_of_harvested_bytes_eventually_decryptable "
+    "at 1.0 vs. 0.0, and name the length-dependence explicitly -- for the 1.0 config, how many "
+    "bytes become decryptable at the longest response length swept, framed as 'this exposure "
+    "grows with every additional token streamed,' not just a static number. State plainly that "
+    "this is the same underlying weakness as section 1 above (classical's RSA/ECDH key "
+    "establishment), not a new one. If streaming_hndl_strategy_independence data exists, note "
+    "briefly whether it confirmed strategy-independence.\n"
+    "5. Coverage gaps -- name any config, tamper_target, strategy, or attack combination that "
     "is entirely absent from the data (e.g. no full_pqc entry, only 'ciphertext' tested and "
     "never 'signature', or the streaming experiment missing entirely).\n"
-    "5. Bottom line -- end with exactly one short paragraph giving a direct, "
+    "6. Bottom line -- end with exactly one short paragraph giving a direct, "
     "plain-language verdict on which configuration is safest against these threats "
     "specifically, and note if that answer could differ from a pure "
     "performance recommendation (the Results Dashboard's separate AI summary) -- "

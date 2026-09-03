@@ -86,6 +86,21 @@ _lib.OQS_KEM_ml_kem_768_encaps.restype = c_int
 _lib.OQS_KEM_ml_kem_768_decaps.argtypes = [c_void_p, c_void_p, c_void_p]
 _lib.OQS_KEM_ml_kem_768_decaps.restype = c_int
 
+# Derandomized variants -- take the FIPS 203 randomness explicitly instead of
+# drawing it from the system RNG internally. Not used by the live crypto
+# configs (which want fresh randomness on every call, i.e. the functions
+# above); these exist solely so validation/nist_kat.py can reproduce NIST's
+# ACVP known-answer vectors, which fix the randomness and check the exact
+# resulting bytes. See kem_ml_kem.h for the C signatures.
+ML_KEM_768_KEYGEN_COINS_BYTES = 64  # d (32) || z (32), per FIPS 203 Algorithm 16
+ML_KEM_768_ENCAPS_COINS_BYTES = 32  # m, per FIPS 203 Algorithm 17
+
+_lib.OQS_KEM_ml_kem_768_keypair_derand.argtypes = [c_void_p, c_void_p, c_void_p]
+_lib.OQS_KEM_ml_kem_768_keypair_derand.restype = c_int
+
+_lib.OQS_KEM_ml_kem_768_encaps_derand.argtypes = [c_void_p, c_void_p, c_void_p, c_void_p]
+_lib.OQS_KEM_ml_kem_768_encaps_derand.restype = c_int
+
 
 @dataclass
 class KemKeypair:
@@ -145,6 +160,48 @@ class MLKEM768:
             raise OQSAdapterError("OQS_KEM_ml_kem_768_decaps failed")
         return bytes(ss)
 
+    @staticmethod
+    def keypair_derand(coins: bytes) -> KemKeypair:
+        """Deterministic keygen from explicit randomness -- for KAT
+        reproduction only (validation/nist_kat.py), not live traffic.
+        `coins` is 64 bytes: FIPS 203 Algorithm 16's `d || z`."""
+        if len(coins) != ML_KEM_768_KEYGEN_COINS_BYTES:
+            raise OQSAdapterError(
+                f"ML-KEM-768 keygen coins must be {ML_KEM_768_KEYGEN_COINS_BYTES} bytes, "
+                f"got {len(coins)}"
+            )
+        pk = (c_uint8 * ML_KEM_768_PUBLIC_KEY_BYTES)()
+        sk = (c_uint8 * ML_KEM_768_SECRET_KEY_BYTES)()
+        coins_buf = (c_uint8 * len(coins)).from_buffer_copy(coins)
+        rc = _lib.OQS_KEM_ml_kem_768_keypair_derand(byref(pk), byref(sk), byref(coins_buf))
+        if rc != OQS_SUCCESS:
+            raise OQSAdapterError("OQS_KEM_ml_kem_768_keypair_derand failed")
+        return KemKeypair(bytes(pk), bytes(sk))
+
+    @staticmethod
+    def encaps_derand(public_key: bytes, coins: bytes) -> tuple[bytes, bytes]:
+        """Deterministic encapsulation from explicit randomness -- for KAT
+        reproduction only. `coins` is 32 bytes: FIPS 203 Algorithm 17's `m`.
+        Returns (ciphertext, shared_secret)."""
+        if len(public_key) != ML_KEM_768_PUBLIC_KEY_BYTES:
+            raise OQSAdapterError(
+                f"ML-KEM-768 public key must be {ML_KEM_768_PUBLIC_KEY_BYTES} bytes, "
+                f"got {len(public_key)}"
+            )
+        if len(coins) != ML_KEM_768_ENCAPS_COINS_BYTES:
+            raise OQSAdapterError(
+                f"ML-KEM-768 encaps coins must be {ML_KEM_768_ENCAPS_COINS_BYTES} bytes, "
+                f"got {len(coins)}"
+            )
+        ct = (c_uint8 * ML_KEM_768_CIPHERTEXT_BYTES)()
+        ss = (c_uint8 * ML_KEM_768_SHARED_SECRET_BYTES)()
+        pk_buf = (c_uint8 * len(public_key)).from_buffer_copy(public_key)
+        coins_buf = (c_uint8 * len(coins)).from_buffer_copy(coins)
+        rc = _lib.OQS_KEM_ml_kem_768_encaps_derand(byref(ct), byref(ss), byref(pk_buf), byref(coins_buf))
+        if rc != OQS_SUCCESS:
+            raise OQSAdapterError("OQS_KEM_ml_kem_768_encaps_derand failed")
+        return bytes(ct), bytes(ss)
+
 
 # ---------------------------------------------------------------------------
 # ML-DSA-65 (FIPS 204) -- fixed byte lengths from sig_ml_dsa.h
@@ -165,6 +222,22 @@ _lib.OQS_SIG_ml_dsa_65_verify.argtypes = [
     c_void_p, c_size_t, c_void_p, c_size_t, c_void_p,
 ]
 _lib.OQS_SIG_ml_dsa_65_verify.restype = c_int
+
+# Context-string-aware verify -- FIPS 204's external interface (Algorithm 3,
+# ML-DSA.Verify) takes an optional context string bound into the signed
+# message via a domain-separator prefix. `verify()` above always passes an
+# implicit empty context (this project's live crypto configs never set one),
+# which is why it can only reproduce the subset of NIST's ACVP sigVer
+# vectors that happen to use an empty context -- see
+# validation/nist_kat.py's module docstring for the count. This binding
+# exposes the context parameter so the KAT harness can reproduce the rest.
+_lib.OQS_SIG_ml_dsa_65_verify_with_ctx_str.argtypes = [
+    c_void_p, c_size_t,  # message, message_len
+    c_void_p, c_size_t,  # signature, signature_len
+    c_void_p, c_size_t,  # ctx, ctxlen
+    c_void_p,            # public_key
+]
+_lib.OQS_SIG_ml_dsa_65_verify_with_ctx_str.restype = c_int
 
 
 @dataclass
@@ -214,6 +287,28 @@ class MLDSA65:
         pk_buf = (c_uint8 * len(public_key)).from_buffer_copy(public_key)
         rc = _lib.OQS_SIG_ml_dsa_65_verify(
             msg_buf, c_size_t(len(message)), byref(sig_buf), c_size_t(len(signature)), byref(pk_buf)
+        )
+        return rc == OQS_SUCCESS
+
+    @staticmethod
+    def verify_with_context(message: bytes, signature: bytes, context: bytes, public_key: bytes) -> bool:
+        """Same as verify(), but with an explicit FIPS 204 context string
+        bound into what's checked, instead of an implicit empty one. `verify()`
+        is left unchanged (used by every live crypto config); this exists for
+        validation/nist_kat.py, whose vectors mostly use a non-empty context."""
+        if len(public_key) != ML_DSA_65_PUBLIC_KEY_BYTES:
+            raise OQSAdapterError("ML-DSA-65 public key has unexpected length")
+        if len(context) > 255:
+            raise OQSAdapterError("ML-DSA-65 context string must be <= 255 bytes (FIPS 204)")
+        msg_buf = (c_uint8 * len(message)).from_buffer_copy(message) if message else None
+        sig_buf = (c_uint8 * len(signature)).from_buffer_copy(signature)
+        ctx_buf = (c_uint8 * len(context)).from_buffer_copy(context) if context else None
+        pk_buf = (c_uint8 * len(public_key)).from_buffer_copy(public_key)
+        rc = _lib.OQS_SIG_ml_dsa_65_verify_with_ctx_str(
+            msg_buf, c_size_t(len(message)),
+            byref(sig_buf), c_size_t(len(signature)),
+            ctx_buf, c_size_t(len(context)),
+            byref(pk_buf),
         )
         return rc == OQS_SUCCESS
 

@@ -1,0 +1,27 @@
+{
+  "config": "classical",
+  "max_tokens": 50,
+  "chunk_size_tokens": 5,
+  "total_bytes_harvestable_by_strategy": {
+    "buffer_and_sign": 733,
+    "per_chunk": 985,
+    "hash_chain": 985
+  },
+  "total_ciphertext_bytes_by_strategy": {
+    "buffer_and_sign": 477,
+    "per_chunk": 729,
+    "hash_chain": 729
+  },
+  "n_chunks_by_strategy": {
+    "buffer_and_sign": 0,
+    "per_chunk": 10,
+    "hash_chain": 10
+  },
+  "exact_match_across_strategies": false,
+  "expected_vs_actual_aead_tag_overhead_delta": {
+    "per_chunk": 252,
+    "per_chunk_actual_delta": 252,
+    "hash_chain": 252,
+    "hash_chain_actual_delta": 252
+  }
+}

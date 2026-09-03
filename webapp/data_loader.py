@@ -24,6 +24,7 @@ MITM_DIR = os.path.join(REPO_ROOT, "results", "mitm")
 SWEEP_SUMMARY_DIR = os.path.join(REPO_ROOT, "results", "sweep_summaries")
 STREAMING_DIR = os.path.join(REPO_ROOT, "results", "streaming")
 STREAMING_MITM_DIR = os.path.join(REPO_ROOT, "results", "streaming", "mitm")
+STREAMING_HNDL_DIR = os.path.join(REPO_ROOT, "results", "hndl", "streaming")
 
 CONFIG_ORDER = ["control", "classical", "hybrid", "full_pqc"]
 CONFIG_LABELS = {
@@ -252,6 +253,39 @@ def load_streaming_mitm_summaries() -> list[dict]:
     fraction_delivered_before_detection_mean) and mixing them would produce
     a confusing combined table."""
     paths = sorted(glob.glob(os.path.join(STREAMING_MITM_DIR, "*-summary.json")))
+    out = []
+    for p in paths:
+        try:
+            out.append(json.load(open(p)))
+        except Exception:
+            continue
+    return out
+
+
+def load_streaming_hndl_summaries() -> list[dict]:
+    """threats/streaming_hndl_experiment.py's per-config length-sweep
+    summaries (results/hndl/streaming/*-streaming-hndl-summary.json) -- kept
+    in their own directory/loader, distinct from load_hndl_summaries()'s
+    results/hndl/*-summary.json glob (non-recursive, so no collision) and
+    from load_streaming_mitm_summaries(), since this is a confidentiality/HNDL
+    finding, not the sequence-integrity one; see docs/STREAMING.md section 10
+    for why the two must not be mixed into one chart or one AI-summary claim."""
+    paths = sorted(glob.glob(os.path.join(STREAMING_HNDL_DIR, "*-streaming-hndl-summary.json")))
+    out = []
+    for p in paths:
+        try:
+            out.append(json.load(open(p)))
+        except Exception:
+            continue
+    return out
+
+
+def load_streaming_hndl_independence() -> list[dict]:
+    """threats/streaming_hndl_experiment.py's per-config strategy-independence
+    checks (results/hndl/streaming/*-strategy-independence.json) -- whether
+    total_bytes_harvestable actually matched across signing strategies at one
+    fixed response length, checked empirically rather than assumed."""
+    paths = sorted(glob.glob(os.path.join(STREAMING_HNDL_DIR, "*-strategy-independence.json")))
     out = []
     for p in paths:
         try:

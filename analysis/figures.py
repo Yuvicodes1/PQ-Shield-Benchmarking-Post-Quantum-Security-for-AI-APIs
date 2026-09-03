@@ -4,6 +4,7 @@
   2. Bar chart: handshake/sign/verify decomposed per config         -> "where overhead comes from"
   3. Bytes-per-request stacked bar (key + ciphertext + signature)   -> RQ3 (raw byte side)
   4. HNDL storage-volume-per-1000-requests bar                      -> RQ3 (storage growth)
+  4b. Streaming HNDL exposure vs. response length, by config         -> RQ3 (streaming scaling)
   5. MITM verify_ms comparison, tampered vs. untampered             -> RQ4
   6. Trade-off matrix heatmap (config x concurrency), one per weighting -> Layer 6 headline
   7. CPU% / RSS overhead bar (from bench.orchestrator resource sampling, if available)
@@ -155,6 +156,45 @@ def fig_hndl_storage(results_dir: str, output_dir: str) -> None:
     _save(fig, output_dir, "fig4_hndl_storage")
 
 
+def fig_streaming_hndl_exposure(results_dir: str, output_dir: str) -> None:
+    """Streaming counterpart to fig_hndl_storage: exposure vs. response
+    length, one line per config, from threats.streaming_hndl_experiment's
+    per-config *-streaming-hndl-summary.json files. Same red/blue
+    decryptable-under-future-CRQC color convention as fig4 -- this is the
+    same H3 finding as fig4, just made length-dependent, not a new one.
+
+    Plots `decryptable_bytes_under_future_crqc_by_length`, not raw
+    `total_bytes_harvestable_by_length` -- classical's decryptable bytes
+    equal its harvestable bytes (100% exposed) and grow with length;
+    hybrid/full_pqc's decryptable bytes are flat at zero regardless of how
+    many bytes were actually harvested, which is the point being made."""
+    summary_paths = sorted(glob.glob(os.path.join(results_dir, "hndl", "streaming", "*-streaming-hndl-summary.json")))
+    if not summary_paths:
+        print("No streaming-HNDL summary JSONs found -- skipping fig4b "
+              "(run threats.streaming_hndl_experiment first)")
+        return
+    summaries = [json.load(open(p)) for p in summary_paths]
+
+    fig, ax = plt.subplots(figsize=(7, 5))
+    for s in summaries:
+        config = s["config"]
+        color = "#c0392b" if s.get("kex_decryptable_under_future_crqc") else "#2471a3"
+        ax.plot(
+            s["max_tokens_values"], s["decryptable_bytes_under_future_crqc_by_length"],
+            marker="o", color=color, label=CONFIG_LABELS.get(config, config).replace("\n", " "),
+        )
+    ax.set_xlabel("Response length (max_tokens)")
+    ax.set_ylabel("Bytes decryptable under a future CRQC")
+    ax.set_title("Streaming HNDL Exposure vs. Response Length")
+    ax.grid(True, alpha=0.3)
+    handles = [
+        plt.Line2D([0], [0], color="#c0392b", marker="o", label="Decryptable (RSA/ECDH key establishment)"),
+        plt.Line2D([0], [0], color="#2471a3", marker="o", label="Not decryptable (ML-KEM-768 key establishment)"),
+    ]
+    ax.legend(handles=handles, fontsize=7, loc="upper left")
+    _save(fig, output_dir, "fig4b_streaming_hndl_exposure")
+
+
 def fig_mitm_detection(results_dir: str, output_dir: str) -> None:
     summary_paths = sorted(glob.glob(os.path.join(results_dir, "mitm", "*-summary.json")))
     if not summary_paths:
@@ -240,6 +280,7 @@ def main():
     fig_overhead_decomposition(df, args.output_dir)
     fig_bytes_per_request(df, args.output_dir)
     fig_hndl_storage(args.results_dir, args.output_dir)
+    fig_streaming_hndl_exposure(args.results_dir, args.output_dir)
     fig_mitm_detection(args.results_dir, args.output_dir)
     fig_tradeoff_heatmap(args.results_dir, args.output_dir)
     fig_resource_overhead(args.results_dir, args.output_dir)
