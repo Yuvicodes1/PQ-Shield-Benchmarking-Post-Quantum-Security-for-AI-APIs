@@ -42,7 +42,7 @@ Results Dashboard to show. **Fix every ❌ before you leave for the venue.**
 - [ ] Confirm `results/raw/` includes `full-pqc` data (run it yourself
       beforehand if you haven't: see README "Run the full benchmark
       matrix"). Without it, Configuration C has no aggregate chart data —
-      the Live Demo tab still works fine standalone, but the Results
+      the Live Streamer tab still works fine standalone, but the Results
       Dashboard's headline chart will be missing a line.
 - [ ] Have a **backup**: a screen recording of one full run-through, on a
       USB stick or offline on the laptop, in case of a live failure.
@@ -67,7 +67,7 @@ key, 3309B signature for ML-DSA-65).
 > library, built from source, running the actual FIPS 203 and FIPS 204
 > algorithms."
 
-### 2. Live Demo page (4 minutes — this is the centerpiece)
+### 2. Live Streamer page (4 minutes — this is the centerpiece)
 
 Pick a digit sample (any slider position). Run all four configurations
 **in this order**, reading the RTT/handshake numbers off the screen as

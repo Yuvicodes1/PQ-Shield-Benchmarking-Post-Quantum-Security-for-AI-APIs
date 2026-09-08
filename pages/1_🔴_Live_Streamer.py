@@ -13,8 +13,8 @@ import streamlit as st
 
 from webapp import demo_transaction, server_manager
 
-st.set_page_config(page_title="PQ-Shield — Live Demo", page_icon="🔴", layout="wide")
-st.title("🔴 Live Demo")
+st.set_page_config(page_title="PQ-Shield — Live Streamer", page_icon="🔴", layout="wide")
+st.title("🔴 Live Streamer")
 st.caption(
     "Sends one real HTTP request through an actual running server for the chosen "
     "configuration — the exact same server and client code as the benchmark, just one "

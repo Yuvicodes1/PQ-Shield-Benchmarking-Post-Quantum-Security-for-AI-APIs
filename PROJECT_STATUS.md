@@ -31,7 +31,7 @@ trade-off matrix.
 | `bench/` | `runner.py` (single-cell async load generator, `--server-pid` CPU/RSS sampling), `orchestrator.py` (full concurrency × repetition × config matrix), `streaming_runner.py` (streaming signing-strategy sweep), `metrics.py` (unused legacy) | Implemented |
 | `threats/` | `hndl_capture.py`, `mitm_harness.py` + `mitm_experiment.py` (single-shot tamper detection), `streaming_mitm_experiment.py` (streaming sequence-integrity attack — drop/reorder mid-stream) | Implemented |
 | `analysis/` | `aggregate.py` (stats + Mann-Whitney U vs. control), `tradeoff_matrix.py` (weighted composite score at 3 weightings), `figures.py` (paper figure set), `plot_metrics.py` (smoke-test chart), `streaming_analysis.py` (TTFT/signature-byte summary + strategy comparison) | Implemented; CPU/RSS heatmap in `figures.py` is still a no-op placeholder |
-| `webapp/` + `pages/` + `app.py` | 4-page Streamlit dashboard (Live Demo, Benchmark Runner, Results Dashboard, Threat Scenarios), each with a streaming-specific tab/section; `ai_summary.py` (on-demand Claude summaries) | Implemented — see [docs/STREAMING_INTEGRATION.md](docs/STREAMING_INTEGRATION.md) §4–8 |
+| `webapp/` + `pages/` + `app.py` | 4-page Streamlit dashboard (Live Streamer, Benchmark Runner, Results Dashboard, Threat Scenarios), each with a streaming-specific tab/section; `ai_summary.py` (on-demand Claude summaries) | Implemented — see [docs/STREAMING_INTEGRATION.md](docs/STREAMING_INTEGRATION.md) §4–8 |
 | `model/profiles/`, `model/streaming_backends/`, `validation/` | Pluggable payload-shape abstraction, synthetic + real (llama.cpp/transformers) token backends, ML-KEM-768/ML-DSA-65 known-answer-test conformance | Implemented |
 | `tests/` | `test_crypto_roundtrip.py` — 13 parametrized round-trip/tamper-detection tests across all 3 configs (current, canonical suite) | 13/13 passing |
 | `tests/` (legacy) | `test_classical_roundtrip.py`, `test_hybrid_kem.py`, `test_hybrid_roundtrip.py`, `test_full_pqc.py` — earlier per-config tests predating `test_crypto_roundtrip.py` | 4 of these fail against the current API response schema (`KeyError: 'kem_...'` etc.) — dead/stale, not part of the maintained suite; worth deleting or fixing so `pytest -q` is clean |
@@ -59,7 +59,7 @@ Full details, in order, with what broke and how each step was verified:
 2. Set up a real local LLM backend (Llama-3.2-3B-Instruct, Q4_K_M GGUF, via
    `llama-cpp-python` built from source with Metal on this M3 Air — the
    prebuilt wheel failed a CRC check) and ran a first real-generation sweep.
-3. Added a live SSE streaming panel to the **Live Demo** page (token-by-token
+3. Added a live SSE streaming panel to the **Live Streamer** page (token-by-token
    display, per-chunk verification badges, live tamper injection).
 4. Added a **Streaming Sweep** tab to the **Benchmark Runner** page
    (synthetic/real backend selector).
@@ -139,7 +139,7 @@ From the streaming integration pass — see
 [docs/STREAMING_INTEGRATION.md](docs/STREAMING_INTEGRATION.md) §11 for
 detail:
 
-9. Visually click through the Live Demo streaming panel in a real browser —
+9. Visually click through the Live Streamer streaming panel in a real browser —
    its logic is verified, its rendering isn't (no browser automation tool
    was available in this environment).
 10. Run the full documented streaming sweep (3 lengths × 3 chunk sizes ×

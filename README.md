@@ -364,7 +364,7 @@ bash scripts/run_webapp.sh        # http://localhost:8501
 
 Five pages:
 
-- **Live Demo** — pick a configuration and a test digit, click "Send
+- **Live Streamer** — pick a configuration and a test digit, click "Send
   request," and watch a real handshake → establish → AEAD-encrypt → POST →
   AEAD-decrypt → verify transaction run against an actual server the page
   starts on demand (ports 8100–8103, separate from the CLI's default 8000
@@ -472,7 +472,7 @@ pq-shield/
 │   ├── colors.py                      # single source for config/strategy chart colors
 │   ├── chart_explainer.py              # per-chart "Explain this chart" button
 │   └── ai_summary.py                    # on-demand Claude-generated dashboard/threat/chart summaries
-├── pages/                        # Streamlit multipage app: Live Demo, Benchmark Runner,
+├── pages/                        # Streamlit multipage app: Live Streamer, Benchmark Runner,
 │                                    Results Dashboard, Threat Scenarios, Cryptographic Validation
 ├── app.py                        # Streamlit entrypoint (Home page)
 ├── tests/                        # 106 passed + 4 pre-existing legacy failures (see Setup)

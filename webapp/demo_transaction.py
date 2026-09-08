@@ -1,4 +1,4 @@
-"""Transaction logic for the Streamlit "Live Demo" and "Threat Scenarios"
+"""Transaction logic for the Streamlit "Live Streamer" and "Threat Scenarios"
 pages. Reuses the exact same crypto and client code as the CLI clients
 (api/secure_client.py) and the CLI tests, plus threats/mitm_harness.py's
 tamper function, so a demo request runs through identical code paths to
@@ -179,7 +179,7 @@ async def run_streaming_transaction_live(
     tamper_target: str = "ciphertext",
 ) -> AsyncIterator[dict]:
     """Async generator counterpart to api/secure_streaming_client.py's
-    run_streaming_transaction, for the Live Demo page's streaming panel.
+    run_streaming_transaction, for the Live Streamer page's streaming panel.
 
     Instead of returning one flat metrics dict after the whole stream has
     been consumed, this yields one event dict *as each SSE chunk arrives*,

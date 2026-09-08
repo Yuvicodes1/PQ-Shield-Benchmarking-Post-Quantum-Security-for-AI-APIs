@@ -13,7 +13,7 @@
   <line x1="260" y1="79.0" x2="320" y2="79.0" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>
   <line x1="520" y1="79.0" x2="580" y2="79.0" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>
   <rect x="560" y="170" width="320" height="66" rx="9" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.5"/>
-  <text x="720.0" y="194.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="600" fill="#1e3a8a">Benchmark / Streamlit Live Demo</text>
+  <text x="720.0" y="194.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="600" fill="#1e3a8a">Benchmark / Streamlit Live Streamer</text>
   <text x="720.0" y="215.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="11" fill="#1d4ed8">bench.orchestrator, bench.runner</text>
   <path d="M 658.0 108 L 658.0 170" fill="none" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>
   <path d="M 784.0 170 L 762.0 108" fill="none" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>

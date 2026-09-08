@@ -1,5 +1,5 @@
 """Manages the four demo servers (control, classical, hybrid, full_pqc) that
-the Streamlit "Live Demo" and "Threat Scenarios" pages talk to over real
+the Streamlit "Live Streamer" and "Threat Scenarios" pages talk to over real
 HTTP -- reused directly from bench/orchestrator.py's subprocess helpers so
 the demo goes through exactly the same server code path as the paper's
 benchmark, just on dedicated ports (8100-8103) so it never collides with a

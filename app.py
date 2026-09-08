@@ -15,16 +15,19 @@ st.caption("Security-Performance Benchmarking of PQC Algorithms for AI API Prote
 
 st.markdown(
     """
-PQ-Shield wraps a real-time FastAPI digit-classifier inference API in three
-cryptographic configurations and measures the operational cost of migrating
-to NIST post-quantum cryptography (ML-KEM-768 / FIPS 203, ML-DSA-65 / FIPS 204),
-under concurrency and two adversarial threat scenarios.
+PQ-Shield benchmarks the real operational cost of migrating a production-style AI
+inference API to NIST-standardized post-quantum cryptography. A real-time FastAPI
+digit-classifier endpoint is wrapped in three cryptographic configurations —
+**classical** (RSA-2048 + ECDSA), **hybrid** (ML-KEM-768 / FIPS 203 + ECDSA), and
+**full PQC** (ML-KEM-768 + ML-DSA-65 / FIPS 204) — and measured against an
+unprotected control under concurrency, plus two adversarial threat scenarios.
 
-Use the pages in the sidebar to:
-- **Live Demo** — send a single request through any configuration in real time and see the full timing/byte breakdown, including a live tamper-detection demo.
+Navigate the sidebar pages:
+- **Live Streamer** — send a single request through any configuration in real time and see the full timing/byte breakdown, including a live tamper-detection demo.
 - **Benchmark Runner** — run a scoped concurrency sweep directly from the browser.
 - **Results Dashboard** — explore whatever benchmark data currently exists on disk, with an interactive security/performance trade-off matrix.
 - **Threat Scenarios** — HNDL storage-growth and MITM tamper-detection results, or run either experiment on demand.
+- **Cryptographic Validation** — verify the measurement instrument itself against NIST's official test vectors and the streaming signature-cost model.
 """
 )
 
