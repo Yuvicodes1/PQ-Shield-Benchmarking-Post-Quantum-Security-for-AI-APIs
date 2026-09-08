@@ -362,7 +362,7 @@ pip install -r requirements.txt   # includes streamlit + plotly
 bash scripts/run_webapp.sh        # http://localhost:8501
 ```
 
-Four pages:
+Five pages:
 
 - **Live Demo** — pick a configuration and a test digit, click "Send
   request," and watch a real handshake → establish → AEAD-encrypt → POST →
@@ -373,24 +373,38 @@ Four pages:
   corrupting the ciphertext is caught independently at both the AEAD layer
   and the signature layer, since the tampered envelope no longer matches
   what was signed.
-- **Benchmark Runner** — runs a scoped `bench.orchestrator` sweep directly
-  from the browser (small concurrency/repetition values recommended for an
-  interactive session; use the CLI for the full paper-scale matrix).
-- **Results Dashboard** — interactive Plotly charts (RTT vs. concurrency,
-  overhead decomposition, bytes per request) and tables (aggregate stats,
-  Mann-Whitney U significance) built from whatever is currently in
-  `results/raw/`, a streaming response-overhead section, a live
-  security/performance trade-off matrix with a slider for the
-  security-weight/performance-weight trade-off, and a **Cryptographic
-  Validation** section running the NIST ACVP KAT check and the streaming
-  signature-cost model validation live, in the browser.
+- **Benchmark Runner** — runs a scoped `bench.orchestrator` sweep, or a
+  `bench.streaming_runner` streaming sweep, directly from the browser
+  (small concurrency/repetition values recommended for an interactive
+  session; use the CLI for the full paper-scale matrix).
+- **Results Dashboard** — one chronologically-sorted "Data source" selector
+  covering *every* concurrency-sweep and streaming-sweep run ever collected
+  (interleaved, not two separate pickers), with shared panel structure
+  (chart type, layout) across both experiment types — only the underlying
+  metric, x-axis, and baseline change. Covers RTT/TTFT vs. scale, overhead
+  decomposition, wire bytes, server CPU%/RSS, aggregate stats + Mann-Whitney
+  significance (`vs. Control` for the concurrency sweep, `vs. Classical` for
+  streaming — it has no unprotected leg), and a security/performance
+  trade-off matrix with sliders for the security/performance weighting and
+  — for streaming runs — how much of the security score comes from the
+  *measured* sequence-integrity exposure window of the selected signing
+  strategy. Every chart has an on-demand "Explain this chart" button
+  (`webapp/chart_explainer.py`) alongside the page-level AI summary button.
+  See `docs/RESULTS_DASHBOARD.md` for the full section-by-section reference.
 - **Threat Scenarios** — HNDL storage-growth and MITM detection results
   from disk, plus a streaming sequence-integrity-attack tab and a
   **streaming HNDL exposure** tab (exposure-vs-response-length chart,
   strategy-independence check), each with a button to run the experiment
-  on demand against a live server and save the result.
+  on demand against a live server and save the result. See
+  `docs/THREAT_SCENARIOS.md` for the full reference.
+- **Cryptographic Validation** — ground-truth checks independent of any run
+  selector: the NIST ACVP KAT check and the streaming signature-cost model
+  validation, plus a security-score assumption check
+  (`analysis/security_validation.py`) that cross-checks the trade-off
+  matrix's categorical security mapping against real HNDL/MITM results
+  rather than asserting it once and never re-verifying it.
 
-All four pages import directly from `crypto/`, `api/`, `bench/`,
+All five pages import directly from `crypto/`, `api/`, `bench/`,
 `threats/`, and `analysis/` — there is no separate "demo" implementation of
 the protocol or the statistics; the dashboard is a thin interactive layer
 over the same code the CLI and the paper's results are built from.
@@ -443,8 +457,9 @@ pq-shield/
 │   ├── kat_vectors.py                  # loads/parses the trimmed vector files
 │   └── vectors/                         # trimmed NIST ACVP JSON + fetch.sh (full upstream)
 ├── analysis/
-│   ├── aggregate.py              # summary stats + Mann-Whitney U
-│   ├── tradeoff_matrix.py         # weighted composite decision matrix
+│   ├── aggregate.py              # summary stats + Mann-Whitney U (configurable baseline_config)
+│   ├── tradeoff_matrix.py         # weighted composite decision matrix (concurrency + streaming)
+│   ├── security_validation.py      # cross-checks the score's categorical axes vs. real HNDL/MITM data
 │   ├── figures.py                  # full paper figure set
 │   ├── plot_metrics.py              # quick comparison chart
 │   ├── streaming_analysis.py         # time-to-first-token / signing-overhead analysis
@@ -454,9 +469,11 @@ pq-shield/
 │   ├── server_manager.py           # demo server lifecycle (ports 8100-8103)
 │   ├── demo_transaction.py          # tamper-capable live transaction logic
 │   ├── data_loader.py                # cached results loading for the dashboard
-│   └── ai_summary.py                  # on-demand Claude-generated dashboard summary
-├── pages/                        # Streamlit multipage app (Live Demo, Benchmark Runner,
-│                                    Results Dashboard, Threat Scenarios)
+│   ├── colors.py                      # single source for config/strategy chart colors
+│   ├── chart_explainer.py              # per-chart "Explain this chart" button
+│   └── ai_summary.py                    # on-demand Claude-generated dashboard/threat/chart summaries
+├── pages/                        # Streamlit multipage app: Live Demo, Benchmark Runner,
+│                                    Results Dashboard, Threat Scenarios, Cryptographic Validation
 ├── app.py                        # Streamlit entrypoint (Home page)
 ├── tests/                        # 106 passed + 4 pre-existing legacy failures (see Setup)
 │   ├── test_crypto_roundtrip.py    # core protocol round-trips + tamper detection
@@ -475,10 +492,12 @@ pq-shield/
 │   ├── STREAMING.md               # signing strategies, backend setup, ground-truth validation
 │   ├── STREAMING_HOW_IT_WORKS.md   # mechanism-level walkthrough: how streaming works end-to-end
 │   ├── STREAMING_INTEGRATION.md     # dated log of the streaming feature's build/integration
-│   ├── PRESENTER_GUIDE.md            # page-by-page live-demo script
-│   └── diagrams/                       # architecture SVGs referenced from ARCHITECTURE.md
+│   ├── RESULTS_DASHBOARD.md          # ground-truth, section-by-section dashboard reference
+│   ├── THREAT_SCENARIOS.md            # ground-truth, tab-by-tab threat-scenarios page reference
+│   ├── PRESENTER_GUIDE.md              # page-by-page live-demo script
+│   └── diagrams/                         # architecture SVGs referenced from ARCHITECTURE.md
 ├── results/                      # raw per-request CSVs are gitignored; summary
-│                                    JSONs (hndl/mitm/streaming-hndl) and
+│                                    JSONs (hndl/mitm/streaming-hndl/sweep_summaries) and
 │                                    validation/*.json are committed for the dashboard
 ├── outputs/                       # generated figures (gitignored)
 └── Dockerfile
@@ -517,10 +536,14 @@ Remaining for the full Review 2 / paper-ready deliverable:
    net rather than the CIFAR-10-trained CNN the Review 1 proposal
    envisioned — swap in a trained CIFAR-10 model there if classification
    accuracy itself needs to be defensible, not just the payload shape/cost.
-3. Expand `analysis/figures.py`'s CPU/RSS heatmap (currently a no-op
-   placeholder — resource sampling is wired into `bench/runner.py`'s
-   single-cell mode via `--server-pid` but not yet threaded through the
-   full-matrix `bench/orchestrator.py` path).
+3. ~~Expand `analysis/figures.py`'s CPU/RSS heatmap~~ — resource sampling
+   (`crypto.instrumentation.ResourceSampler`) is now threaded through both
+   the full-matrix `bench/orchestrator.py` sweep and `bench/streaming_runner.py`
+   (per transaction), written to `results/sweep_summaries/*.json`, and
+   rendered as a real combo chart in the Results Dashboard's Server Resource
+   Usage panel for both run types. `analysis/figures.py`'s own static
+   matplotlib heatmap (item 7 in its docstring) is the one piece of this
+   still not wired up, if the paper needs a non-interactive figure for it.
 4. Push the `--reuse-handshake` "warm connection" variant through the full
    sweep as a secondary result, per `docs/DESIGN.md` §3.
 5. Close the remaining streaming signing-*time* validation gap
