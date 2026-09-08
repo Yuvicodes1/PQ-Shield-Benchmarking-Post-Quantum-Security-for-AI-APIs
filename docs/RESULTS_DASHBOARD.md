@@ -10,6 +10,16 @@ place `CONFIG_COLORS`/`STRATEGY_COLORS` are defined (also imported by
 `analysis/figures.py` and `analysis/plot_metrics.py` for the paper's own
 matplotlib figures) — no chart on this page redefines them locally.
 
+Every chart panel below (§4–§7, §8's significance table, §9's heatmap) also
+carries a **💬 Explain this chart** button (`webapp/chart_explainer.py`),
+distinct from the page-level 🤖 AI Summary (§10): it sends only that one
+chart's already-computed data (never raw per-request rows) to Claude for a
+1–3 sentence
+plain-language description, cached in `st.session_state` per exact
+(chart, data slice) so switching runs or sliders always produces a fresh
+explanation on next click rather than showing a stale one. Same
+`ANTHROPIC_API_KEY`-unset gating as the AI Summary button.
+
 ## 1. Header
 
 Title (`📊 Results Dashboard`), a **🔄 Refresh data** button (its return

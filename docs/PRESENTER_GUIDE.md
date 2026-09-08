@@ -108,7 +108,9 @@ mechanism from the AEAD one.
 
 ### 3. Results Dashboard (4 minutes — the empirical rigor moment)
 
-This page only shows what's actually in `results/raw/` — say so:
+This page shows exactly what's on disk for whichever run is selected at
+the top — a concurrency-sweep run (`results/raw/`) or a streaming-sweep
+run (`results/streaming/`), never hard-coded — say so:
 
 > "Everything on this page is computed live from real request logs, not
 > hard-coded — the same numbers `python -m analysis.aggregate` on the

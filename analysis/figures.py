@@ -251,13 +251,16 @@ def fig_tradeoff_heatmap(results_dir: str, output_dir: str) -> None:
 
 
 def fig_resource_overhead(results_dir: str, output_dir: str) -> None:
-    """CPU%/RSS are captured per-server-process by bench.orchestrator only
-    if invoked with resource sampling attached; when not available (the
-    default matrix run doesn't attach a sampler because the orchestrator
-    manages server subprocesses itself), this figure notes the gap rather
-    than fabricating data."""
-    print("fig7 (CPU/RSS heatmap) requires per-cell resource sampling; "
-          "see bench/runner.py --server-pid for standalone cells with sampling enabled. Skipping.")
+    """CPU%/RSS ARE captured per-cell by both bench.orchestrator's full-matrix
+    sweep and bench.streaming_runner (crypto.instrumentation.ResourceSampler,
+    written to results/sweep_summaries/*.json) -- the Results Dashboard's
+    Server Resource Usage panel already renders this live as a Plotly combo
+    chart for both run types. This static matplotlib heatmap is simply not
+    implemented yet; it would read the same results/sweep_summaries/*.json
+    files rather than needing its own sampling path."""
+    print("fig7 (CPU/RSS heatmap) is not implemented yet -- see the Results "
+          "Dashboard's Server Resource Usage panel for the equivalent interactive "
+          "chart, built from results/sweep_summaries/*.json. Skipping.")
 
 
 def main():

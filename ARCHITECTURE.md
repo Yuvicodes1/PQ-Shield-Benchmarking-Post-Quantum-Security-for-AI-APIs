@@ -125,17 +125,32 @@ protocol or the statistics.
 
 ![Streamlit dashboard structure](docs/diagrams/08_dashboard_structure.svg)
 
+*(This diagram still shows the pre-restructure four-page layout with one
+`results/raw/`-only Results Dashboard box — the bullets below are current;
+the SVG needs regenerating to match.)*
+
 - **Live Demo** — pick a configuration + digit, run one real transaction
   against a server the page starts on demand, with a live tamper toggle
   (ciphertext or signature) that shows detection happening in real time.
-- **Benchmark Runner** — a scoped `bench.orchestrator` sweep from the
-  browser (small concurrency/repetition values; use the CLI for full-scale
-  runs).
-- **Results Dashboard** — Plotly charts + tables built from whatever is
-  currently in `results/raw/`, plus a live security/performance trade-off
-  slider.
-- **Threat Scenarios** — HNDL/MITM results from disk, with buttons to run
-  either experiment live and persist the result.
+- **Benchmark Runner** — a scoped `bench.orchestrator` or
+  `bench.streaming_runner` sweep from the browser (small concurrency/
+  repetition values; use the CLI for full-scale runs).
+- **Results Dashboard** — one chronologically-sorted selector covering both
+  the concurrency sweep (`results/raw/`) and streaming sweep
+  (`results/streaming/`), interleaved, with shared panel structure across
+  both run types (RTT/TTFT vs. scale, overhead decomposition, wire bytes,
+  server CPU%/RSS, Mann-Whitney significance, a security/performance
+  trade-off matrix), a slider-driven trade-off weighting, and a per-chart
+  "Explain this chart" button (`webapp/chart_explainer.py`) alongside the
+  page-level AI summary. See `docs/RESULTS_DASHBOARD.md`.
+- **Threat Scenarios** — HNDL/MITM results from disk, plus their streaming
+  counterparts (sequence-integrity attack, HNDL exposure-vs-length), with
+  buttons to run any experiment live and persist the result. See
+  `docs/THREAT_SCENARIOS.md`.
+- **Cryptographic Validation** — ground-truth checks independent of any run
+  selector: NIST ACVP KAT vectors, the streaming signature-cost model, and
+  a security-score assumption check (`analysis/security_validation.py`)
+  against real HNDL/MITM results.
 
 Demo servers run on ports 8100–8103, distinct from the CLI's default 8000,
 so a dashboard session and a CLI benchmark can run side by side without
