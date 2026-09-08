@@ -2,8 +2,8 @@
   "config": "classical",
   "strategy": "hash_chain",
   "attack": "reorder",
-  "n_trials": 10,
-  "n_valid_trials": 10,
+  "n_trials": 15,
+  "n_valid_trials": 15,
   "detection_rate": 1.0,
   "mid_stream_detection_rate": 0.0,
   "fraction_delivered_before_detection_mean": 1.0

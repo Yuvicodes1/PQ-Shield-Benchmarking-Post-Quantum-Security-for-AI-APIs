@@ -32,6 +32,7 @@ import numpy as np
 import pandas as pd
 
 from analysis.aggregate import discard_warmup, load_raw
+from webapp.colors import CONFIG_COLORS
 
 CONFIG_ORDER = ["control", "classical", "hybrid", "full_pqc"]
 CONFIG_LABELS = {
@@ -39,12 +40,6 @@ CONFIG_LABELS = {
     "classical": "A: Classical\n(RSA-2048 + ECDSA)",
     "hybrid": "B: Hybrid\n(ML-KEM-768 + ECDSA)",
     "full_pqc": "C: Full PQC\n(ML-KEM-768 + ML-DSA-65)",
-}
-CONFIG_COLORS = {
-    "control": "#888888",
-    "classical": "#c0392b",
-    "hybrid": "#e67e22",
-    "full_pqc": "#2471a3",
 }
 
 

@@ -134,7 +134,7 @@ what changed.
 
 | File | Purpose |
 |---|---|
-| `bench/streaming_runner.py` | CLI sweep across configs × strategies × response-length × chunk-size. Starts/stops each config's server itself, exactly like `bench/orchestrator.py`. Writes `results/streaming/{config}-streaming.csv`. |
+| `bench/streaming_runner.py` | CLI sweep across configs × strategies × response-length × chunk-size. Starts/stops each config's server itself, exactly like `bench/orchestrator.py`. Writes `results/streaming/{config}-streaming-{run_id}.csv` (one run_id per sweep invocation, same scheme as `bench/orchestrator.py`'s `results/raw/`), so past sweeps accumulate instead of being overwritten by the next one. |
 | `analysis/streaming_analysis.py` | Aggregates those CSVs into a summary table, plus a specific side-by-side strategy comparison at any (config, response length, chunk size) you choose — this is what produced the table in §2 above. |
 
 ### Dependencies and docs
@@ -366,6 +366,36 @@ load as a follow-up experiment, run multiple `run_streaming_transaction`
 calls concurrently via `asyncio.gather` in a small driver script, but
 report it as a separate result with its own caveats, not blended into
 either existing sweep.
+
+**A note on baselines.** The main sweep has a genuine unprotected `control`
+leg, so its overhead numbers (Mann-Whitney significance, the trade-off
+matrix's composite score) are computed relative to `control` — the true
+zero-overhead reference. `bench/streaming_runner.py` never exercises a
+`control` config at all; it only sweeps `classical`/`hybrid`/`full_pqc`.
+So every streaming-sweep overhead/significance number in the Results
+Dashboard is computed relative to `classical` instead — the nearest real
+baseline, not an unprotected one. **Do not compare a streaming overhead
+percentage directly against a concurrency-sweep overhead percentage** —
+they are not measured against the same reference point, even though they
+may look like the same kind of number. The dashboard labels which baseline
+a given figure uses (heading/caption changes to "vs. Classical" rather
+than "vs. Control"); the same distinction applies if you cite these numbers
+in the paper. See `docs/DESIGN.md` §5's "A note on baselines" and
+`analysis.aggregate.resolve_baseline_config` for the resolution logic.
+
+**A note on the streaming security score.** The trade-off matrix's
+`security_score(config)` term is a plain categorical number for the main
+sweep. For a streaming run, signing strategy is a real security-relevant
+choice the main sweep has no equivalent of — `hash_chain` defers its
+sequence-integrity guarantee to the terminating signature (§2 above), which
+means a dropped or reordered chunk isn't caught until later than it would
+be under `per_chunk`. The Results Dashboard's streaming trade-off panel
+blends this **measured** exposure window (from the 🌊 Streaming Sequence
+Attack tab's `fraction_delivered_before_detection_mean`, see
+`threats/streaming_mitm_experiment.py`) into the categorical score via
+`analysis.tradeoff_matrix.streaming_security_score`, for whichever strategy
+is selected. See `docs/DESIGN.md` §5's "Streaming security score" note for
+the full formula and the default weighting's justification.
 
 ## 9. Validating the measurement instrument itself
 
@@ -667,11 +697,10 @@ its worse time-to-first-token and independent of the HNDL finding above.
 
 ## 11. Known limitations / honest gaps
 
-- **Not yet wired into the Streamlit dashboard.** The `webapp/` pages don't
-  have a streaming view yet. The CLI/Python path above is fully functional;
-  a `pages/5_Streaming_Demo.py` page showing chunks arriving live (similar
-  to the existing Live Demo page's tamper toggle) would be a natural
-  follow-up, reusing `api/secure_streaming_client.py` directly.
+- **No `control` leg, so streaming overhead/significance figures are
+  `classical`-relative, not `control`-relative** — see "A note on
+  baselines" above. Not fixable without adding an unprotected streaming
+  config to `bench/streaming_runner.py`, which hasn't been done.
 - **The streaming endpoint is not load-tested under concurrency** (see §8) —
   don't cite streaming numbers as representative of concurrent-load
   behavior; that's what the main `bench/orchestrator.py` sweep is for.
@@ -685,3 +714,11 @@ its worse time-to-first-token and independent of the HNDL finding above.
   chunks at once if your threat model tolerates a small latency buffer per
   batch; that variant is not implemented here and would be a reasonable
   fourth strategy to add if reviewers ask for it.
+
+Two gaps that used to be listed here are fixed: the Results Dashboard's
+Data source selector now covers streaming runs (`pages/3_📊_Results_Dashboard.py`,
+`docs/RESULTS_DASHBOARD.md`), and `bench/streaming_runner.py` now samples
+server-process CPU%/RSS per transaction the same way `bench/orchestrator.py`
+does per cell, writing into `results/sweep_summaries/` — runs collected
+before that wiring existed simply have no resource data, same as any
+concurrency-sweep run that predates `crypto.instrumentation.ResourceSampler`.

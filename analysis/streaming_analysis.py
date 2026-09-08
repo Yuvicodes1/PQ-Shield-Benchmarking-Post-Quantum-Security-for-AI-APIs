@@ -63,6 +63,13 @@ def strategy_comparison_at(df: pd.DataFrame, config: str, max_tokens: int, chunk
     baseline_ttft = sub[sub["strategy"] == "buffer_and_sign"]["ttft_ms_mean"]
     baseline_ttft = baseline_ttft.iloc[0] if len(baseline_ttft) else None
     sub = sub.copy()
+    # Always create these two columns -- even when this particular (config, max_tokens,
+    # chunk_size_tokens) slice has no buffer_and_sign/per_chunk row to compare against
+    # (e.g. a sweep that only ran a subset of strategies at this combination) -- so the
+    # column selection below never KeyErrors; NaN here reads as "no baseline available",
+    # which callers (e.g. the Results Dashboard) already render as "--" via na_rep.
+    sub["ttft_speedup_vs_buffer_and_sign"] = pd.NA
+    sub["signature_bytes_reduction_vs_per_chunk"] = pd.NA
     if baseline_ttft:
         sub["ttft_speedup_vs_buffer_and_sign"] = baseline_ttft / sub["ttft_ms_mean"]
     per_chunk_bytes = sub[sub["strategy"] == "per_chunk"]["total_signature_bytes_mean"]

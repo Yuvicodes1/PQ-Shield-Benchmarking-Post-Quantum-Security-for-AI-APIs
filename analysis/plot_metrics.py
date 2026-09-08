@@ -23,8 +23,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from webapp.colors import CONFIG_COLORS
+
 CONFIG_ORDER = ["control", "classical", "hybrid", "full_pqc"]
-CONFIG_COLORS = {"control": "#888888", "classical": "#c0392b", "hybrid": "#e67e22", "full_pqc": "#2471a3"}
 
 
 def main():

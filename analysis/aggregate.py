@@ -7,8 +7,9 @@ misleading for an SLA-relevant claim.
 Discards the first `--warmup-fraction` of requests in each raw CSV as
 JIT/connection-pool warm-up before computing statistics (also per the
 design doc), and reports a non-parametric Mann-Whitney U test comparing
-each protected configuration's RTT distribution against the control
-baseline at the same concurrency level.
+each protected configuration's RTT distribution against a baseline
+configuration at the same concurrency level -- `control` by default when
+present, `classical` otherwise (see `resolve_baseline_config`).
 
 Usage:
     python -m analysis.aggregate --raw-dir results/raw --output results/aggregate_stats.csv
@@ -91,26 +92,65 @@ def summarize(df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows).sort_values(["concurrency", "config"])
 
 
-def mann_whitney_vs_control(df: pd.DataFrame, metric: str = "rtt_ms") -> pd.DataFrame:
-    """Non-parametric test: is each protected config's RTT distribution
-    significantly different from control, at the same concurrency level?"""
+def resolve_baseline_config(available_configs, baseline_config: str | None = None) -> str:
+    """Picks which configuration is treated as the zero-overhead reference
+    for both the significance test below and analysis/tradeoff_matrix.py's
+    composite score. An explicit baseline_config is always honored as-is.
+    Otherwise: 'control' when it's present in the data -- every
+    already-validated concurrency-sweep number to date is computed this way
+    (docs/DESIGN.md section 6) -- falling back to 'classical' when it isn't,
+    which is every streaming run: bench/streaming_runner.py has no
+    unprotected control leg at all (docs/STREAMING.md), so 'classical' is
+    the nearest real baseline rather than an arbitrary substitute -- see the
+    'baseline_config' column this produces, which callers (e.g. the Results
+    Dashboard) surface explicitly rather than silently swapping numbers that
+    look the same but aren't baseline-equivalent.
+    """
+    if baseline_config is not None:
+        return baseline_config
+    return "control" if "control" in set(available_configs) else "classical"
+
+
+def mann_whitney_vs_control(
+    df: pd.DataFrame,
+    metric: str = "rtt_ms",
+    group_cols: list[str] | tuple[str, ...] = ("concurrency",),
+    baseline_config: str | None = None,
+) -> pd.DataFrame:
+    """Non-parametric test: is each other config's `metric` distribution
+    significantly different from the baseline config, within each group
+    (matching values of `group_cols`)? Defaults (group_cols=("concurrency",),
+    baseline_config=None -> resolves to "control") reproduce the original
+    concurrency-sweep-only behavior exactly. Streaming callers pass
+    group_cols=("strategy", "max_tokens", "chunk_size_tokens") -- there is no
+    "concurrency" column in that sweep's schema -- and get baseline_config
+    resolved to "classical" automatically, since the streaming sweep has no
+    "control" leg. The output columns are still named *_control/*_vs_control
+    regardless of which config was actually used, for backward
+    compatibility with existing readers (e.g. the dashboard's column-name
+    based `.style.format(...)`) -- the resolved config is always in the
+    "baseline_config" column, so callers can label the result correctly."""
     ok = df[df["error"].isna() | (df["error"] == "")]
+    group_cols = list(group_cols)
+    baseline_config = resolve_baseline_config(ok["config"].unique(), baseline_config)
     rows = []
-    for concurrency, group in ok.groupby("concurrency"):
-        control_vals = group[group["config"] == "control"][metric].dropna().values
+    for group_key, group in ok.groupby(group_cols):
+        group_key = group_key if isinstance(group_key, tuple) else (group_key,)
+        control_vals = group[group["config"] == baseline_config][metric].dropna().values
         if len(control_vals) < 2:
             continue
         for config in group["config"].unique():
-            if config == "control":
+            if config == baseline_config:
                 continue
             treatment_vals = group[group["config"] == config][metric].dropna().values
             if len(treatment_vals) < 2:
                 continue
             u_stat, p_value = stats.mannwhitneyu(treatment_vals, control_vals, alternative="two-sided")
             rows.append({
-                "concurrency": concurrency,
+                **dict(zip(group_cols, group_key)),
                 "config": config,
                 "metric": metric,
+                "baseline_config": baseline_config,
                 "n_control": len(control_vals),
                 "n_treatment": len(treatment_vals),
                 "median_control": float(np.median(control_vals)),
@@ -124,11 +164,11 @@ def mann_whitney_vs_control(df: pd.DataFrame, metric: str = "rtt_ms") -> pd.Data
             })
     if not rows:
         return pd.DataFrame(columns=[
-            "concurrency", "config", "metric", "n_control", "n_treatment",
+            *group_cols, "config", "metric", "baseline_config", "n_control", "n_treatment",
             "median_control", "median_treatment", "overhead_pct_vs_control",
             "u_statistic", "p_value", "significant_at_0.05",
         ])
-    return pd.DataFrame(rows).sort_values(["concurrency", "config"])
+    return pd.DataFrame(rows).sort_values([*group_cols, "config"])
 
 
 def main():
@@ -137,6 +177,9 @@ def main():
     parser.add_argument("--warmup-fraction", type=float, default=0.05)
     parser.add_argument("--output", default="results/aggregate_stats.csv")
     parser.add_argument("--significance-output", default="results/significance_vs_control.csv")
+    parser.add_argument("--baseline-config", default=None,
+                         help="Config to compare against; default auto-resolves to 'control' if present, "
+                              "else 'classical' (see resolve_baseline_config).")
     args = parser.parse_args()
 
     df = load_raw(args.raw_dir)
@@ -153,7 +196,7 @@ def main():
     summary.to_csv(args.output, index=False)
     print(f"Wrote summary statistics ({len(summary)} rows) to {args.output}")
 
-    sig = mann_whitney_vs_control(df_trimmed, metric="rtt_ms")
+    sig = mann_whitney_vs_control(df_trimmed, metric="rtt_ms", baseline_config=args.baseline_config)
     sig.to_csv(args.significance_output, index=False)
     print(f"Wrote Mann-Whitney U significance tests ({len(sig)} rows) to {args.significance_output}")
 

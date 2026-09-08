@@ -140,7 +140,7 @@ def _call_claude(system_prompt: str, context: dict, context_label: str) -> str:
         system=system_prompt,
         messages=[{
             "role": "user",
-            "content": f"Here is the current {context_label} data:\n\n{json.dumps(context, indent=2)}",
+            "content": f"Here is the current {context_label} data:\n\n{json.dumps(context, indent=2, default=str)}",
         }],
     )
 
@@ -277,3 +277,32 @@ SYSTEM_PROMPT_THREATS = (
 
 def generate_threat_summary(context: dict) -> str:
     return _call_claude(SYSTEM_PROMPT_THREATS, context, "threat-scenario")
+
+
+# ---------------------------------------------------------------------------
+# Per-chart "Explain this chart" button (webapp/chart_explainer.py)
+# ---------------------------------------------------------------------------
+
+SYSTEM_PROMPT_CHART = (
+    "You are a benchmarking analyst explaining ONE chart from a post-quantum cryptography (PQC) "
+    "benchmark dashboard to a technical but non-cryptography-expert reader. You are given "
+    "chart_title and chart_data (a small structured summary of exactly what's plotted -- never "
+    "the full underlying dataset).\n\n"
+    "Write 1-3 short sentences describing what the chart shows and the main takeaway, in plain "
+    "language -- nothing else, no extra sections.\n\n"
+    "Ground every claim strictly in chart_data -- never invent a number, a trend, or a cause that "
+    "isn't present in what was given. If chart_data is empty or too sparse to say anything "
+    "meaningful, say so plainly instead of filling space."
+)
+
+
+def generate_chart_explanation(chart_title: str, chart_data: dict, caveats: list[str] | None = None) -> str:
+    """chart_data is a small structured summary of exactly what's plotted --
+    e.g. {"x_axis": "concurrency", "y_axis": "RTT (ms)", "series": {...}} --
+    never the full underlying dataframe. `caveats` is accepted for call-site
+    compatibility (webapp/chart_explainer.py's callers still pass whatever
+    labels/notes are shown on screen near the chart) but is intentionally
+    NOT sent to the model or echoed in the explanation -- the explanation is
+    scoped to plainly describing what's plotted, nothing more."""
+    context = {"chart_title": chart_title, "chart_data": chart_data}
+    return _call_claude(SYSTEM_PROMPT_CHART, context, "chart")

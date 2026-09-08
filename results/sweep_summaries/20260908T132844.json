@@ -1,0 +1,17 @@
+[
+  {
+    "run_id": "20260908T132844",
+    "run_type": "streaming",
+    "config": "classical",
+    "strategy": "buffer_and_sign",
+    "max_tokens": 50,
+    "chunk_size_tokens": 5,
+    "repetition": 1,
+    "n_errors": 0,
+    "cpu_percent_mean": 0.0,
+    "cpu_percent_max": 0.0,
+    "rss_mb_mean": 233.0625,
+    "rss_mb_max": 233.0625,
+    "n_samples": 1
+  }
+]

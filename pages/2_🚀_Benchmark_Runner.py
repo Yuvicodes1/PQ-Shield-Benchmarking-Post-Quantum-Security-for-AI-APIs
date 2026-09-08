@@ -49,7 +49,7 @@ with tab_concurrency:
                 default=[5, 10],
             )
         with col2:
-            repetitions = st.number_input("Repetitions per cell", min_value=1, max_value=5, value=1)
+            repetitions = st.number_input("Repetitions per cell", min_value=1, max_value=10, value=1)
             requests_per_concurrency = st.number_input(
                 "Requests per concurrency (requests = concurrency x this)", min_value=1, max_value=20, value=3
             )
@@ -175,7 +175,7 @@ with tab_streaming:
                 default=[5],
             )
             stream_repetitions = st.number_input(
-                "Repetitions per combination", min_value=1, max_value=5, value=1
+                "Repetitions per combination", min_value=1, max_value=10, value=1
             )
 
         n_combos = len(stream_configs) * len(strategies) * len(max_tokens_values) * len(chunk_size_values) * int(stream_repetitions)

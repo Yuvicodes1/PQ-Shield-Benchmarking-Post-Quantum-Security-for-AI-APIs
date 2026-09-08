@@ -149,6 +149,8 @@ def run_full_sweep(
                     n_errors = sum(1 for r in rows if r["error"])
                     summary = {
                         "run_id": run_id,
+                        "run_type": "concurrency",  # distinguishes this from bench.streaming_runner's
+                                                     # entries once both write into results/sweep_summaries/
                         "config": config_key,
                         "concurrency": concurrency,
                         "repetition": repetition,

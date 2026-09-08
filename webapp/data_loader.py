@@ -15,7 +15,7 @@ import os
 import pandas as pd
 
 from analysis.aggregate import discard_warmup, mann_whitney_vs_control, summarize
-from analysis.tradeoff_matrix import SECURITY_SCORES
+from analysis.tradeoff_matrix import build_matrix_at
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RAW_DIR = os.path.join(REPO_ROOT, "results", "raw")
@@ -75,8 +75,11 @@ def raw_file_inventory() -> pd.DataFrame:
 
 def streaming_file_inventory() -> pd.DataFrame:
     """One row per results/streaming/*.csv file (bench.streaming_runner's
-    per-config output), for the Benchmark Runner page's streaming tab --
-    mirrors raw_file_inventory()'s role for the concurrency sweep."""
+    per-config, per-sweep output -- one file per config per run_id since
+    bench.streaming_runner.run_sweep started tagging output with a run_id;
+    older files predating that have no run_id column at all), for the
+    Benchmark Runner page's streaming tab -- mirrors raw_file_inventory()'s
+    role for the concurrency sweep."""
     paths = sorted(glob.glob(os.path.join(STREAMING_DIR, "*.csv")))
     rows = []
     for p in paths:
@@ -85,6 +88,7 @@ def streaming_file_inventory() -> pd.DataFrame:
             n_errors = (df["error"].notna() & (df["error"] != "")).sum() if "error" in df.columns else 0
             rows.append({
                 "file": os.path.basename(p),
+                "run_id": df["run_id"].iloc[0] if "run_id" in df.columns and len(df) else LEGACY_RUN_ID,
                 "config": df["config"].iloc[0] if len(df) else None,
                 "n_transactions": len(df),
                 "n_errors": int(n_errors),
@@ -92,20 +96,123 @@ def streaming_file_inventory() -> pd.DataFrame:
                 "mean_ttft_ms": round(df["ttft_ms"].mean(), 1) if "ttft_ms" in df.columns and len(df) else None,
             })
         except Exception:
-            rows.append({"file": os.path.basename(p), "config": None, "n_transactions": None,
+            rows.append({"file": os.path.basename(p), "run_id": None, "config": None, "n_transactions": None,
                          "n_errors": None, "strategies": None, "mean_ttft_ms": None})
     return pd.DataFrame(rows)
 
 
-def load_streaming_df() -> pd.DataFrame | None:
+def load_streaming_df(run_id: str | None = None) -> pd.DataFrame | None:
     """Concatenates every results/streaming/*.csv into one frame, for the
     Results Dashboard's streaming section. None if no streaming sweep has
-    been run yet."""
+    been run yet.
+
+    run_id=None (default) returns everything ever collected, across every
+    sweep -- matching this function's original behavior, and load_raw_df's
+    for the concurrency sweep. Pass a specific run_id, or the sentinel
+    "__latest__", to scope to just one streaming sweep -- see
+    get_available_streaming_runs(). Files written before
+    bench.streaming_runner started tagging output with a run_id have no
+    run_id column at all; those rows are bucketed under LEGACY_RUN_ID
+    rather than silently dropped, same as _fill_legacy_run_id does for the
+    concurrency sweep's raw data.
+    """
     paths = sorted(glob.glob(os.path.join(STREAMING_DIR, "*.csv")))
     if not paths:
         return None
     frames = [pd.read_csv(p) for p in paths]
-    return pd.concat(frames, ignore_index=True)
+    df = pd.concat(frames, ignore_index=True)
+    df = _fill_legacy_run_id(df)
+    if run_id == "__latest__":
+        run_id = latest_run_id(df)
+    if run_id is not None:
+        df = df[df["run_id"] == run_id]
+        if df.empty:
+            return None
+    return df
+
+
+def get_available_streaming_runs() -> tuple[list[str], str | None]:
+    """(all streaming run_ids most-recent-first, latest non-legacy run_id)
+    for the Results Dashboard streaming section's run selector -- mirrors
+    get_available_runs() for the concurrency sweep. Returns ([], None) if
+    no streaming sweep has been run yet."""
+    df = load_streaming_df()
+    if df is None:
+        return [], None
+    return list_runs(df), latest_run_id(df)
+
+
+def get_unified_runs() -> tuple[list[dict], tuple[str, str | None] | None]:
+    """One merged, chronologically-sorted list of every run the Results
+    Dashboard can show -- concurrency-sweep runs (results/raw/) and
+    streaming-sweep runs (results/streaming/) interleaved, not grouped by
+    type. Both experiment types share the same run_id generator
+    (bench.runner.new_run_id -> time.strftime("%Y%m%dT%H%M%S")), so a plain
+    lexicographic sort on run_id is already chronological across both.
+
+    Each entry is a dict: {"key": (type, run_id_or_None), "type": "concurrency"
+    | "streaming", "run_id": str | None, "label": str}. run_id=None marks one
+    of the two "all runs combined" pseudo-entries (one per type, since the
+    two schemas -- RTT vs. time-to-first-token -- can't be combined into one
+    meaningful aggregate). "key" is what a caller should pass as the widget's
+    option value; it's a (type, run_id) tuple rather than a bare run_id so the
+    two experiment types' independent "legacy" buckets (and, in the
+    astronomically unlikely case two sweeps started in the same second, their
+    real run_ids) never collide.
+
+    Returns (entries, default_key) -- default_key points at the single most
+    recent non-legacy run across both types, matching each individual
+    selector's previous "most recent" default; entries=[] / default_key=None
+    if neither results/raw/ nor results/streaming/ has any data yet.
+    """
+    conc_runs, _ = get_available_runs()
+    stream_runs, _ = get_available_streaming_runs()
+
+    def _type_label(t: str) -> str:
+        return "Concurrency Sweep" if t == "concurrency" else "Streaming Sweep"
+
+    def _timed_label(run_id: str, t: str) -> str:
+        if run_id == LEGACY_RUN_ID:
+            base = "Legacy data (no run_id)"
+        else:
+            try:
+                from datetime import datetime
+
+                base = datetime.strptime(run_id, "%Y%m%dT%H%M%S").strftime("%Y-%m-%d %H:%M")
+            except ValueError:
+                base = run_id
+        return f"{base} — {_type_label(t)}"
+
+    _all_label = {"concurrency": "All concurrency-sweep runs combined", "streaming": "All streaming runs combined"}
+
+    entries: list[dict] = []
+    # Both "all combined" pseudo-entries up front, mirroring the previous
+    # single selector's "All runs combined" always sorting first.
+    for t, runs in (("concurrency", conc_runs), ("streaming", stream_runs)):
+        if runs:
+            entries.append({
+                "key": (t, None), "type": t, "run_id": None,
+                "label": f"{_all_label[t]} ({len(runs)} runs)",
+            })
+
+    timed: list[dict] = []
+    for t, runs in (("concurrency", conc_runs), ("streaming", stream_runs)):
+        for run_id in runs:
+            timed.append({"key": (t, run_id), "type": t, "run_id": run_id, "label": _timed_label(run_id, t)})
+    # run_id is a sortable timestamp string on both sides (LEGACY_RUN_ID sorts
+    # first, same quirk each individual selector already had on its own).
+    timed.sort(key=lambda e: e["run_id"], reverse=True)
+    entries.extend(timed)
+
+    real_runs = [e for e in timed if e["run_id"] != LEGACY_RUN_ID]
+    if real_runs:
+        default_key = max(real_runs, key=lambda e: e["run_id"])["key"]
+    elif timed:
+        default_key = timed[0]["key"]
+    else:
+        default_key = None
+
+    return entries, default_key
 
 
 LEGACY_RUN_ID = "legacy"  # bucket for rows written before run_id existed
@@ -187,40 +294,53 @@ def get_trimmed_and_summary(warmup_fraction: float = 0.05, run_id: str | None = 
 
 
 def get_significance(trimmed_df: pd.DataFrame | None, metric: str = "rtt_ms") -> pd.DataFrame | None:
+    """Concurrency-sweep significance table -- unchanged call, unchanged
+    output: baseline_config auto-resolves to "control" (present in every
+    concurrency-sweep run), so every existing number here is untouched."""
     if trimmed_df is None or trimmed_df.empty:
         return None
     return mann_whitney_vs_control(trimmed_df, metric=metric)
 
 
-def build_custom_tradeoff(trimmed_df: pd.DataFrame, w_sec: float, w_perf: float) -> pd.DataFrame:
-    """Same composite-score formula as analysis/tradeoff_matrix.py's
-    build_matrix(), parameterized by a single user-chosen (w_sec, w_perf)
-    pair for the dashboard's interactive weighting sliders."""
-    ok = trimmed_df[trimmed_df["error"].isna() | (trimmed_df["error"] == "")]
-    median_rtt = ok.groupby(["config", "concurrency"])["rtt_ms"].median()
+def get_streaming_significance(streaming_df: pd.DataFrame | None, metric: str = "ttft_ms") -> pd.DataFrame | None:
+    """Streaming-run equivalent of get_significance() -- grouped by
+    (strategy, max_tokens, chunk_size_tokens) instead of concurrency (the
+    streaming sweep has no "concurrency" column), and baseline_config
+    auto-resolves to "classical" since there's no "control" leg to compare
+    against. Check the result's "baseline_config" column before labeling
+    it -- this is a real methodological difference from the concurrency
+    sweep's control-relative numbers, not a detail to hide."""
+    if streaming_df is None or streaming_df.empty:
+        return None
+    return mann_whitney_vs_control(
+        streaming_df, metric=metric, group_cols=("strategy", "max_tokens", "chunk_size_tokens")
+    )
 
-    rows = []
-    for concurrency in sorted(ok["concurrency"].unique()):
-        if ("control", concurrency) not in median_rtt.index:
-            continue
-        control_rtt = median_rtt[("control", concurrency)]
-        for config in ["classical", "hybrid", "full_pqc"]:
-            if (config, concurrency) not in median_rtt.index:
-                continue
-            config_rtt = median_rtt[(config, concurrency)]
-            overhead = (config_rtt - control_rtt) / control_rtt if control_rtt > 0 else 0.0
-            sec_score = SECURITY_SCORES[config]
-            score = w_sec * sec_score - w_perf * overhead
-            rows.append({
-                "config": config,
-                "concurrency": int(concurrency),
-                "security_score": sec_score,
-                "median_rtt_ms": config_rtt,
-                "control_median_rtt_ms": control_rtt,
-                "normalized_latency_overhead": overhead,
-                "composite_score": score,
-            })
-    return pd.DataFrame(rows)
+
+def build_custom_tradeoff(
+    trimmed_df: pd.DataFrame, w_sec: float, w_perf: float,
+    scale_col: str = "concurrency", metric_col: str = "rtt_ms",
+    security_scores: dict[str, float | None] | None = None,
+) -> pd.DataFrame:
+    """Thin call-through into analysis.tradeoff_matrix.build_matrix_at -- the
+    dashboard's interactive weighting slider needs a single arbitrary
+    (w_sec, w_perf) pair rather than build_matrix()'s three fixed presets,
+    but the score formula itself lives in exactly one place (tradeoff_matrix.py),
+    not reimplemented here. baseline_config auto-resolves inside
+    build_matrix_at (see its docstring) -- "control" for the concurrency
+    sweep's default (scale_col="concurrency", metric_col="rtt_ms") call,
+    "classical" for a streaming call (scale_col="max_tokens",
+    metric_col="ttft_ms", say). Check the result's "baseline_config" column
+    before labeling it.
+
+    security_scores=None (default) uses the plain SECURITY_SCORES mapping,
+    unchanged concurrency-sweep behavior. A streaming call passes a dict of
+    {config: analysis.tradeoff_matrix.streaming_security_score(config,
+    strategy, ...)} instead, pre-filtered to the configs with actual data --
+    see build_matrix_at's docstring."""
+    return build_matrix_at(
+        trimmed_df, w_sec, w_perf, scale_col=scale_col, metric_col=metric_col, security_scores=security_scores
+    )
 
 
 def load_hndl_summaries() -> list[dict]:
@@ -296,11 +416,15 @@ def load_streaming_hndl_independence() -> list[dict]:
 
 
 def load_sweep_summaries(run_id: str | None = None) -> pd.DataFrame:
-    """Per-cell sweep summaries written by bench.orchestrator.run_full_sweep --
-    throughput, error count, and server-process CPU%/RSS during that cell
-    (crypto.instrumentation.ResourceSampler). One file per run_id under
-    results/sweep_summaries/. Runs from before this existed have no file and
-    are simply absent here -- not an error, just no resource data for them.
+    """Per-cell sweep summaries written by bench.orchestrator.run_full_sweep
+    (per (config, concurrency, repetition) cell) and, since Fix 1,
+    bench.streaming_runner.run_sweep (per streaming transaction) -- both
+    include throughput/error info and server-process CPU%/RSS during that
+    cell (crypto.instrumentation.ResourceSampler). One file per run_id under
+    results/sweep_summaries/, since both sweeps share the same run_id
+    generator. Runs from before resource sampling existed for their sweep
+    type have no file and are simply absent here -- not an error, just no
+    resource data for them.
     """
     paths = sorted(glob.glob(os.path.join(SWEEP_SUMMARY_DIR, "*.json")))
     rows = []
@@ -315,3 +439,25 @@ def load_sweep_summaries(run_id: str | None = None) -> pd.DataFrame:
     if run_id is not None and "run_id" in df.columns:
         df = df[df["run_id"] == run_id]
     return df
+
+
+def load_resource_summaries(run_type: str, run_id: str | None = None) -> pd.DataFrame:
+    """load_sweep_summaries() scoped to one run_type ("concurrency" or
+    "streaming") and, optionally, one run_id -- what the Results Dashboard's
+    Resource Usage panel actually wants, for either mode, via one call.
+
+    Every summary file written before this per-cell "run_type" tagging
+    existed came only from bench.orchestrator's concurrency sweep --
+    bench.streaming_runner never wrote to this directory before Fix 1 -- so
+    a missing run_type is treated as "concurrency" rather than dropped or
+    misfiled. That's what keeps every already-validated concurrency-sweep
+    resource number unchanged by this function's existence."""
+    df = load_sweep_summaries(run_id=run_id)
+    if df.empty:
+        return df
+    df = df.copy()
+    if "run_type" not in df.columns:
+        df["run_type"] = "concurrency"
+    else:
+        df["run_type"] = df["run_type"].fillna("concurrency")
+    return df[df["run_type"] == run_type].reset_index(drop=True)

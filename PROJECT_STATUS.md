@@ -9,9 +9,6 @@ a detailed, chronological record of the streaming-feature integration
 scenario, and how each piece was verified) see
 [docs/STREAMING_INTEGRATION.md](docs/STREAMING_INTEGRATION.md) — this file
 summarizes the end state, that one documents how it got there.
-`PROJECT_STRUCTURE.md` predates all of these and describes an earlier
-layout (`config_a_classical.py`, `oqs_kem.py`, `work/oqs-prefix/`, only two
-protected configs) — treat this file and `ARCHITECTURE.md` as current, not it.
 
 ## What the project is
 
@@ -134,8 +131,9 @@ New, from this pass:
 7. Commit or clean up the in-flight dashboard work above (run tracking, AI
    summary, new MITM signature results) and update `README.md`/`ARCHITECTURE.md`
    to describe it once committed.
-8. Refresh or remove the stale `PROJECT_STRUCTURE.md`, which still describes
-   a pre-full-PQC, pre-`work/`-reorg layout.
+8. ~~Refresh or remove the stale `PROJECT_STRUCTURE.md`~~ — removed; it
+   described a pre-full-PQC, pre-`work/`-reorg layout superseded by
+   `ARCHITECTURE.md` and this file.
 
 From the streaming integration pass — see
 [docs/STREAMING_INTEGRATION.md](docs/STREAMING_INTEGRATION.md) §11 for
