@@ -1,5 +1,7 @@
 # PQ-Shield — Project Status
 
+> **Note (October 2026):** superseded in parts — see the README's Status section, `paper/CHANGES.md`, and `paper/response_to_reviewers.md` for the current state.
+
 A snapshot of what exists in this repository and what it does, as of
 **2026-09-01** on branch `local-sync`. For setup/usage see
 [README.md](README.md); for module-by-module structure and data flow see

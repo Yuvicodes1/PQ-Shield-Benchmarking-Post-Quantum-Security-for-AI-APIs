@@ -1,5 +1,7 @@
 # PQ-Shield — Live Demo Presenter Guide (Review 2)
 
+> **Note (October 2026):** the dashboard pages were renamed and reorganised (Home, Key findings, Live demo, Benchmark runner, Results explorer, Threat lab, Validation); the trade-off matrix was replaced by the decision explorer on Key findings. Numbers below that predate the October 2026 re-runs should be checked against `paper/key_numbers.md`.
+
 Target: 10–12 minutes of live demo + Q&A buffer. Everything runs on
 `localhost` — no internet dependency, so a flaky venue Wi-Fi cannot break
 the demo. The only risk is *time* and *your own machine's CPU*, both of

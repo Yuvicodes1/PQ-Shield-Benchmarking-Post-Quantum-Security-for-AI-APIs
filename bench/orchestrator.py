@@ -250,7 +250,8 @@ def _crypto_name(config_key: str) -> str:
 
 def main():
     parser = argparse.ArgumentParser(description="PQ-Shield full benchmark matrix orchestrator")
-    parser.add_argument("--configs", default="control,classical,classical-ecdhe,hybrid,hybrid-kex,full-pqc")
+    parser.add_argument("--configs", default="control,control-2rt,classical,classical-ecdhe,hybrid,hybrid-kex,"
+                                              "full-pqc,hybrid-kex-pq")
     parser.add_argument("--concurrency", default="10,100,1000")
     parser.add_argument("--repetitions", type=int, default=5)
     parser.add_argument("--requests-per-concurrency", type=int, default=10)
@@ -268,6 +269,9 @@ def main():
     parser.add_argument("--requests-per-handshake", type=int, default=1,
                         help="Session resumption: requests served per key exchange (1 = fresh exchange "
                              "per request, the default worst case)")
+    parser.add_argument("--auth-handshake", action="store_true",
+                        help="Servers sign each handshake transcript with an identity key and clients verify it "
+                             "under the pinned key (crypto/handshake_auth.py)")
     args = parser.parse_args()
 
     configs = [c.strip() for c in args.configs.split(",") if c.strip()]
@@ -285,6 +289,7 @@ def main():
         payload_profile=args.payload_profile,
         network_profile=args.network_profile,
         requests_per_handshake=args.requests_per_handshake,
+        auth_handshake=args.auth_handshake,
     )
 
     os.makedirs(os.path.dirname(args.summary_out), exist_ok=True)

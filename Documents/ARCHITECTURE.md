@@ -1,5 +1,7 @@
 # PQ-Shield Architecture
 
+> **Note (October 2026):** the system now has seven protected/control configurations, an optional authenticated handshake, and the dashboard lives in `views/`; see the README and `paper/diagrams/system_overview.svg` for the current architecture.
+
 This document describes how PQ-Shield is put together: the module layers, the
 crypto abstraction the three *protected* configurations share, the request
 lifecycle of a single protected transaction, the benchmark/threat/analysis

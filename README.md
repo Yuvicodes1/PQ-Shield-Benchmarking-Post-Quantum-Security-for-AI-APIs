@@ -1,359 +1,182 @@
-# PQ-Shield: Security-Performance Benchmarking of PQC Algorithms for AI API Protection
+# PQ-Shield: Post-Quantum Signature Schedules for Streaming LLM Inference
 
-PQ-Shield is an empirical measurement framework for the operational cost of
-migrating a real-time AI inference API to NIST post-quantum cryptography
-(PQC). It wraps the same FastAPI digit-classifier inference workload in
-three cryptographic configurations, subjects each to concurrency sweeps and
-two adversarial threat scenarios (harvest-now-decrypt-later, active
-man-in-the-middle tampering), and produces a quantitative, weighted
-security/performance trade-off matrix.
+PQ-Shield is a measurement study of what migrating a protected AI inference API
+to NIST post-quantum cryptography costs, in milliseconds and bytes, and what it
+buys against passive and active attackers. It wraps a real FastAPI inference
+service — a RandomForest classifier for request/response traffic and a
+Llama-3.2-3B model for token streaming — in seven protection configurations,
+and measures them under load, on emulated networks, with session reuse, and
+under attack.
 
-| Configuration | Key establishment | Response signature | Purpose |
-|---|---|---|---|
-| Control | none | none | Unprotected zero-overhead reference |
-| A — Classical | RSA-2048-OAEP | ECDSA P-256 | Current classical baseline |
-| B — Hybrid | ML-KEM-768 (FIPS 203) | ECDSA P-256 | Incremental PQC migration path |
-| C — Full PQC | ML-KEM-768 (FIPS 203) | ML-DSA-65 (FIPS 204) | Fully quantum-resistant |
+The main finding: for a streamed LLM response, the post-quantum cost lies in the
+**signature schedule**, not the key exchange. Signing every chunk with ML-DSA-65
+adds 135,669 B to a 200-token response; one hash-chain signature adds 3,309 B but
+leaves the response unverified until it ends. A hash chain checkpointed every
+*k* chunks spans that range, and *k* sets how much unverified text a user has
+seen when an attack is caught.
 
-The inference workload is a 100-tree scikit-learn RandomForest trained on
-the UCI Optical Recognition of Handwritten Digits dataset (`load_digits`,
-1,797 samples, 64 features, 10 classes, ~96% test accuracy). Model accuracy
-is not the point — the model exists to produce realistic small-request /
-small-response JSON payloads (≈345B request / ≈93B response) for the
-crypto wrappers to protect. See `docs/DESIGN.md` for the full protocol
-design, hypotheses (H1–H4), and divergences from the original Review 1
-proposal.
+PQ-Shield is an **application-layer emulation of protected inference
+transactions, not a TLS implementation**. The paper, its figures and tables,
+and the response to reviewers are in [`paper/`](paper/).
+
+| Code | Configuration | Key establishment | Signature | Role |
+|---|---|---|---|---|
+| — | Control | none | none | Unprotected reference (one request) |
+| — | Control-2RT | none | none | Same two HTTP requests as a protected transaction, no crypto: protected − Control-2RT = cryptographic overhead |
+| A | Classical-RSA | RSA-2048-OAEP, key generated per handshake | ECDSA P-256 | Legacy worst case |
+| A′ | Classical-ECDHE | X25519 | ECDSA P-256 | Realistic classical baseline |
+| B | Hybrid | ML-KEM-768 (FIPS 203) | ECDSA P-256 | Post-quantum key exchange |
+| B′ | Hybrid-KEX | X25519MLKEM768 | ECDSA P-256 | Deployed hybrid group; hedged against an ML-KEM break |
+| C | Full PQC | ML-KEM-768 | ML-DSA-65 (FIPS 204) | Post-quantum on both axes |
+| C′ | Hybrid-KEX-PQ | X25519MLKEM768 | ML-DSA-65 | Post-quantum on both axes and hedged |
+
+All protected configurations share AES-256-GCM with an HKDF-SHA256 session key;
+only the asymmetric primitives differ. An optional **authenticated handshake**
+(server signs the handshake transcript with an identity key the client pins)
+is available for every configuration.
 
 ## What's implemented
 
-- **`crypto/oqs_adapter.py`** — a from-scratch ctypes binding directly to
-  a locally built liboqs shared library (ML-KEM-768 + ML-DSA-65 only), with
-  a startup self-test. No `liboqs-python` dependency, no system-wide install.
-- **Three full crypto configurations** (`crypto/classical.py`,
-  `crypto/hybrid.py`, `crypto/full_pqc.py`) sharing a common interface
-  (`crypto/base.py`) and the same AES-256-GCM symmetric layer
-  (`crypto/aead.py`, HKDF-SHA256 keyed).
-- **13 passing protocol tests** (`tests/test_crypto_roundtrip.py`) covering
-  full round-trips and tamper detection (corrupted ciphertext, corrupted
-  signature, substituted message) for all three configurations.
-- **Four FastAPI servers**: `api/server.py` (control) and
-  `api/server_config_{a,b,c}.py` (protected), all sharing
-  `api/secure_app.py`'s handshake + predict endpoint logic and
-  `api/model_service.py`'s inference code, so the crypto wrapper is the
-  only thing that differs between server processes.
-- **CLI clients** (`api/client.py`, `client_hybrid.py`, `client_full_pqc.py`)
-  and a shared async transaction helper (`api/secure_client.py`).
-- **Benchmark orchestrator** (`bench/orchestrator.py` +
-  `bench/runner.py`) that launches each server fresh, sweeps concurrency ×
-  repetitions, and writes one CSV row per request.
-- **HNDL threat script** (`threats/hndl_capture.py`) measuring stored byte
-  volume per configuration, explicitly distinguishing "bytes an adversary
-  must store" from "bytes eventually decryptable under a future CRQC."
-- **MITM threat harness** (`threats/mitm_harness.py`, a small `aiohttp`
-  proxy) and driver (`threats/mitm_experiment.py`) that tamper with either
-  the response ciphertext or the signature field and measure detection
-  rate/latency, isolating AEAD-layer detection from signature-layer
-  detection.
-- **Analysis layer**: `analysis/aggregate.py` (mean/median/std/p95/p99 +
-  Mann-Whitney U significance vs. control), `analysis/tradeoff_matrix.py`
-  (the weighted composite-score decision matrix, reported at three
-  weightings), `analysis/figures.py` (the full paper figure set), and
-  `analysis/plot_metrics.py` (a quick smoke-test comparison chart).
-- **Payload profiles** (`model/profiles/*`) — the request/response shape
-  every server dispatches through, swappable per process via
-  `PQ_SHIELD_PAYLOAD_PROFILE`: `tabular_small` (the digit classifier above,
-  default), `image_cnn` (a ~4KB image payload against real NumPy
-  convolution compute), `embedding`, and `llm_completion`, for the
-  payload-shape sensitivity question in `docs/DESIGN.md`.
-- **Token streaming** (`crypto/streaming.py`, `POST
-  /secure/predict/stream`, `api/secure_streaming_client.py`,
-  `model/streaming_backends/*`) — SSE token-by-token responses with three
-  signing strategies (buffer-and-sign, per-chunk, hash-chain); see
-  `docs/STREAMING.md`.
-- **Primitive validation** (`validation/`) — `spec_conformance.py` checks
-  measured byte sizes against FIPS 203/204; `primitive_bench.py` benchmarks
-  raw operation cost (and, via `bench_cold_start_signing()`, the ~8ms
-  one-time ECDSA backend-initialization cost a warm loop can't see — see
-  `docs/STREAMING.md` §9); `nist_kat.py` + `kat_vectors.py` +
-  `vectors/*.json` byte-exact-match the liboqs bindings against **NIST's
-  own ACVP known-answer test vectors** (the vectors used for FIPS 140
-  certification) — 75/75 pass for ML-KEM-768 keyGen/encaps/decaps and
-  ML-DSA-65 signature verification, with the (documented, not silently
-  skipped) cases liboqs's public API can't reproduce — ML-DSA-65
-  keyGen/sigGen — stated plainly rather than faked.
-- **Streaming signature-cost model validation**
-  (`analysis/streaming_model_validation.py`) — since no external dataset
-  measures PQC signature overhead on streamed responses, this validates the
-  measurement *instrument* instead: predicts signature bytes and signing
-  time analytically from the KAT-verified primitive costs, and checks that
-  `bench/streaming_runner.py`'s live sweep matches exactly (bytes) or
-  within a stated, data-derived tolerance (timing). See `docs/STREAMING.md`
-  §9 for the full diagnostic history, including a confirmed root cause for
-  an initial 300x+ timing discrepancy.
-- **Streaming HNDL exposure scaling** (`threats/streaming_hndl_experiment.py`)
-  — extends the HNDL threat model to streaming: one handshake's session key
-  is reused across an entire stream, so a broken handshake exposes
-  everything that stream ever sent, not one small reply. Measures that
-  exposure scaling with response length (linear, 100% for classical; flat
-  0% for hybrid/full_pqc regardless of length) and empirically checks that
-  confidentiality exposure doesn't depend on signing strategy. See
-  `docs/STREAMING.md` §10.
-- **Dockerfile** for reproducible builds (liboqs build + pinned deps +
-  self-test + pytest, all run at image-build time).
+- **Crypto** (`crypto/`) — a from-scratch ctypes binding to a locally built
+  liboqs (ML-KEM-768, ML-DSA-65; `oqs_adapter.py`), the seven configurations
+  behind one interface (`base.py`, `registry.py`), AES-256-GCM + HKDF
+  (`aead.py`), optional handshake authentication (`handshake_auth.py`), and
+  timers that record wall-clock and thread-CPU time (`instrumentation.py`).
+- **Streaming** (`crypto/streaming.py`, `POST /secure/predict/stream`) —
+  buffer-and-sign, per-chunk, and hash-chain signing with optional checkpoints
+  every *k* chunks. Every signed message binds a role label, the session, and
+  the chunk position; every stream ends with a signed length record; the
+  client requires that record and enforces the checkpoint schedule it requested.
+- **Servers and clients** (`api/`) — one FastAPI process per configuration
+  (`server.py`, `server_config_*.py`, shared `secure_app.py`), async clients
+  with session resumption and identity pinning (`secure_client.py`,
+  `secure_streaming_client.py`).
+- **Benchmarks** (`bench/`) — concurrency sweeps (`orchestrator.py`,
+  `runner.py`), streaming sweeps (`streaming_runner.py`), byte-level network
+  emulation (`netem_proxy.py`), and `paper_runs.py`, which reproduces every
+  experiment in the paper and records run IDs in `results/paper_runs.json`.
+- **Threat experiments** (`threats/`) — harvest-now-decrypt-later capture
+  (single transaction and streaming), response tampering, stream sequence
+  attacks, a 500-trials-per-cell **attack campaign** with adaptive checkpoint
+  attacks and a false-rejection baseline (`streaming_attack_campaign.py`), and
+  **key substitution** against unauthenticated and pinned handshakes
+  (`key_substitution.py`).
+- **Validation** (`validation/`) — all **130 NIST ACVP vectors** reproduced,
+  including ML-DSA-65 key generation and signing byte for byte (`nist_kat.py`);
+  FIPS size conformance; primitive benchmarks; and a signing-cost diagnostic
+  (back-to-back vs. spaced vs. busy vs. efficiency cores; `contention_check.py`).
+- **Analysis** (`analysis/paper_figures.py`) — every figure and table in the
+  paper, with repetition-level statistics (two-stage bootstrap CIs, Cliff's δ,
+  Holm-corrected Mann–Whitney on repetition medians, ±5% equivalence tests),
+  failure analysis, and a weight-free dominance table.
+- **Dashboard** (`app.py`, `views/`, `webapp/`) — see below.
 
 ## Prerequisites
 
-- Python 3.11+ (developed and tested on 3.12).
-- CMake, Ninja, a C compiler, OpenSSL headers, and Git, to build liboqs
-  from source. On Ubuntu/Debian: `apt install build-essential cmake
-  ninja-build libssl-dev git`. On macOS: Xcode Command Line Tools plus
-  `brew install cmake ninja`.
+- Python 3.11+ (developed on 3.13).
+- CMake, Ninja, a C compiler, OpenSSL headers, and Git, to build liboqs from
+  source. Ubuntu/Debian: `apt install build-essential cmake ninja-build
+  libssl-dev git`. macOS: Xcode Command Line Tools plus `brew install cmake ninja`.
+- Optional, for real LLM streaming: `pip install -r requirements-streaming.txt`
+  and a GGUF model (the paper uses Llama-3.2-3B-Instruct Q4_K_M); see
+  `docs/STREAMING.md`.
 
 ## Setup
 
 ```bash
 git clone <this-repo>
 cd pq-shield
-
-python3 -m venv .venv
-source .venv/bin/activate
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
 bash scripts/install_oqs.sh
-# prints: export PQ_SHIELD_OQS_LIB=<repo>/oqs-prefix/lib/liboqs.so
-export PQ_SHIELD_OQS_LIB=<repo>/oqs-prefix/lib/liboqs.so   # add to your shell profile
+export PQ_SHIELD_OQS_LIB=<repo>/oqs-prefix/lib/liboqs.so   # printed by the script; add to your shell profile
 
 python -m model.train
 python -m pytest -q
-# 106 passed, 4 failed -- the 4 failures are pre-existing legacy tests
-# (test_classical_roundtrip.py, test_full_pqc.py, test_hybrid_roundtrip.py)
-# predating the current schema, unrelated to any change; everything else,
-# including the NIST KAT and streaming validation suites, passes clean.
+# 205 passed, 4 failed -- the 4 failures are legacy tests (test_classical_roundtrip.py,
+# test_full_pqc.py, test_hybrid_roundtrip.py) written against an older schema.
 ```
 
-`install_oqs.sh` clones liboqs and builds *only* ML-KEM-768 and ML-DSA-65
-(`OQS_MINIMAL_BUILD`), which compiles in under a minute on one core. To
-point at a different liboqs build (system-wide, or a full build with every
-algorithm), skip the script and set `PQ_SHIELD_OQS_LIB` to that library's
-absolute path directly.
+`install_oqs.sh` builds only ML-KEM-768 and ML-DSA-65 (`OQS_MINIMAL_BUILD`). To
+use another liboqs build, set `PQ_SHIELD_OQS_LIB` to its absolute path.
+A repo-root `.env` (gitignored) can hold `PQ_SHIELD_OQS_LIB`,
+`PQ_SHIELD_LLAMA_MODEL_PATH`, `PQ_SHIELD_STREAMING_BACKEND=llama_cpp`, and
+`ANTHROPIC_API_KEY` (dashboard AI summaries).
 
-## Run a single server and make a prediction
+## Reproduce the paper
 
 ```bash
-# Control (unprotected)
-uvicorn api.server:app --port 8000
-curl -X POST localhost:8000/predict -H "Content-Type: application/json" \
-  -d '{"input":[0,0,5,13,9,1,0,0,0,0,13,15,10,15,5,0,0,3,15,2,0,11,8,0,0,4,12,0,0,8,8,0,0,5,8,0,0,9,8,0,0,4,11,0,1,12,7,0,0,2,14,5,10,12,0,0,0,0,6,13,10,0,0,0]}'
+python -m bench.paper_runs                 # every experiment, in order (several hours)
+python -m bench.paper_runs --steps 16,17   # a subset (see the step list in bench/paper_runs.py)
+python -m analysis.paper_figures           # figures, tables, key_numbers.md -> paper/
+cd paper && tectonic -X compile pq_shield_journal.tex
 ```
 
+`paper_runs.py` runs each step on one host, archives earlier threat/validation
+results, records each sweep's run ID and the software environment
+(`paper/environment.json`), and keeps going if a step fails. Steps 1–13 are the
+original experiments; steps 14–21 are the second review round (signing-cost
+diagnostic, Hybrid-KEX-PQ concurrency, streaming and checkpoint sweeps with CPU
+time, attack campaign, key substitution, authenticated-handshake cost, HNDL for
+Hybrid-KEX-PQ). Keep the machine otherwise idle and on AC power while it runs.
+
+## Run a single server
+
 ```bash
-# Configuration A (classical)
-uvicorn api.server_config_a:app --port 8000
-python -m api.client --url http://127.0.0.1:8000
+uvicorn api.server:app --port 8000                       # Control (also serves Control-2RT's GET /handshake)
+uvicorn api.server_config_a:app --port 8000              # A  Classical-RSA
+uvicorn api.server_config_ecdhe:app --port 8000          # A′ Classical-ECDHE
+uvicorn api.server_config_b:app --port 8000              # B  Hybrid
+uvicorn api.server_config_hybridkex:app --port 8000      # B′ Hybrid-KEX
+uvicorn api.server_config_c:app --port 8000              # C  Full PQC
+uvicorn api.server_config_hybridkexpq:app --port 8000    # C′ Hybrid-KEX-PQ
+PQ_SHIELD_AUTH_HANDSHAKE=1 uvicorn api.server_config_c:app --port 8000   # with handshake authentication
 
-# Configuration B (hybrid)
-uvicorn api.server_config_b:app --port 8000
-python -m api.client_hybrid --url http://127.0.0.1:8000
-
-# Configuration C (full PQC)
-uvicorn api.server_config_c:app --port 8000
-python -m api.client_full_pqc --url http://127.0.0.1:8000
+python -m api.client --url http://127.0.0.1:8000           # CLI client for A (client_hybrid, client_full_pqc for B, C)
 ```
 
-Each protected client performs a full transaction (handshake → establish
-session key → AES-GCM encrypt request → POST → AES-GCM decrypt response →
-verify signature) and prints every timing field plus `valid_signature`.
-
-## Run the full benchmark matrix
+## Run individual experiments
 
 ```bash
-python -m bench.orchestrator \
-  --configs control,classical,hybrid,full-pqc \
-  --concurrency 10,100,1000 \
-  --repetitions 5 \
-  --requests-per-concurrency 5 \
-  --min-requests 50
-```
+# Concurrency sweep (each configuration's server is started fresh, swept, stopped)
+python -m bench.orchestrator --configs control-2rt,classical-ecdhe,hybrid,full-pqc \
+  --concurrency 10,100,1000 --repetitions 5
+#   --network-profile {localhost,metro,wan,mobile}   byte-level network emulation
+#   --requests-per-handshake 100                     session resumption
+#   --payload-profile {tabular_small,image_cnn,embedding,llm_completion}
+#   --auth-handshake                                 authenticated handshake
 
-The orchestrator starts each server fresh (own process, own port), waits
-for `/healthz`, runs every (concurrency × repetition) cell, writes
-`results/raw/{config}-c{concurrency}-r{repetition}.csv`, then stops that
-server before moving to the next configuration — no two configurations
-ever share a process or contend for the same core simultaneously.
-`--requests-per-concurrency` sets `requests = concurrency *
-requests_per_concurrency` per cell (`--min-requests` is a floor for
-low-concurrency cells); the design doc's convention is 10× concurrency —
-lower it if your machine is core-constrained (a single-core sandbox, for
-example, needs 30–45 minutes for the full 10×`concurrency`,
-3-concurrency-level, 5-repetition, 4-configuration matrix; scale
-accordingly).
+# Streaming sweep (real Llama with PQ_SHIELD_STREAMING_BACKEND=llama_cpp, else synthetic)
+python -m bench.streaming_runner --configs hybrid,full-pqc --strategies per_chunk,hash_chain \
+  --max-tokens 200 --chunk-size-tokens 5 --repetitions 5 --checkpoint-intervals 0,1,5,10
 
-For a single ad-hoc cell instead of the full matrix (server already
-running separately):
+# Threats
+python -m threats.streaming_attack_campaign --trials 500 --pool 10     # stream integrity, static + adaptive
+python -m threats.key_substitution --trials 300                        # full man-in-the-middle
+python -m threats.streaming_hndl_experiment --configs classical,full-pqc --max-tokens 50,200,500,2000
+bash scripts/run_threat_experiments.sh classical 8001                  # HNDL + tampering, one config
 
-```bash
-python -m bench.runner --configuration full-pqc --concurrency 100 \
-  --requests 500 --repetition 1 --server-pid <server_pid> \
-  --output results/raw/full-pqc-c100-r1.csv
-```
-
-`--server-pid` attaches CPU%/RSS sampling to that process for the duration
-of the run (`crypto/instrumentation.ResourceSampler`).
-
-## Run the threat experiments
-
-**HNDL (passive capture, 1000 requests):**
-
-```bash
-uvicorn api.server_config_c:app --port 8000 &
-python -m threats.hndl_capture --configuration full-pqc \
-  --url http://127.0.0.1:8000 --requests 1000 \
-  --output results/hndl/full-pqc-hndl.csv
-```
-
-**MITM (active tamper injection + detection):**
-
-```bash
-uvicorn api.server_config_c:app --port 8000 &
-python -m threats.mitm_harness --upstream http://127.0.0.1:8000 \
-  --listen-port 8080 --tamper-target ciphertext &
-python -m threats.mitm_experiment --configuration full-pqc \
-  --proxy-url http://127.0.0.1:8080 --requests 100 \
-  --tamper-target ciphertext \
-  --output results/mitm/full-pqc-mitm-ciphertext.csv
-```
-
-Or run both threat scripts for one configuration against an already-running
-server in one step:
-
-```bash
-uvicorn api.server_config_a:app --port 8001 &
-bash scripts/run_threat_experiments.sh classical 8001
-```
-
-`--tamper-target ciphertext` corrupts the AES-GCM response body (caught at
-the AEAD authentication layer, before signature verification is reached);
-`--tamper-target signature` corrupts only the signature field, isolating
-ECDSA vs. ML-DSA-65 tamper-detection latency specifically (this is the
-number RQ4/H4 is about).
-
-**Streaming HNDL exposure scaling** (against an already-running streaming
-server, or self-managed with `--configs`):
-
-```bash
-uvicorn api.server_config_c:app --port 8000 &
-python -m threats.streaming_hndl_experiment --configuration full-pqc \
-  --url http://127.0.0.1:8000 --max-tokens 50,200,500,2000 \
-  --output results/hndl/streaming/full_pqc-streaming-hndl.csv
-
-# or, starting/stopping each config's server itself:
-python -m threats.streaming_hndl_experiment \
-  --configs classical,hybrid,full-pqc --max-tokens 50,200,500,2000
-```
-
-## Validate against ground truth
-
-Two checks independent of the benchmark sweeps above, answering "is the
-measurement instrument itself correct," not "how fast is it":
-
-```bash
-# Byte-exact against NIST's own ACVP known-answer test vectors
-python -m validation.nist_kat
-python -m validation.nist_kat --output results/validation/nist_kat.json
-
-# Streaming signature-cost model vs. the live streaming sweep
+# Validation
+python -m validation.nist_kat --output results/validation/nist_kat.json   # 130/130 ACVP vectors
+python -m validation.contention_check                                     # signing cost by calling pattern
 python -m validation.primitive_bench --output results/validation/primitive_bench.json
-python -m analysis.streaming_model_validation
 ```
 
-`nist_kat.py` reports 25/25 ML-KEM-768 keyGen, 25/25 encapsulation, 10/10
-decapsulation (including implicit-rejection cases), and 15/15 ML-DSA-65
-signature verification — byte-exact matches, or correct accept/reject
-verdicts, against NIST's own reference vectors — and states plainly which
-checks (ML-DSA-65 keyGen/sigGen) liboqs's public API cannot reproduce,
-rather than skipping them silently.
-
-`streaming_model_validation.py` predicts each streaming transaction's
-signature bytes and signing time purely from arithmetic over the
-KAT-verified primitive costs, then checks that against
-`bench/streaming_runner.py`'s live measurements — signature bytes match
-exactly (fixed-length ML-DSA-65) or fall within an exact integer range
-(variable-length ECDSA DER encoding) on every row measured so far. See
-`docs/STREAMING.md` §9 for why this is the right substitute for an
-external ground truth, and for the full diagnosis of an initial 300x+
-timing discrepancy (root cause: a one-time ~8ms ECDSA backend
-initialization cost a warm benchmarking loop never pays but a live
-server's first sign call does).
-
-## Analyze results
-
-```bash
-python -m analysis.aggregate           # mean/median/std/p95/p99 + Mann-Whitney U vs. control
-python -m analysis.tradeoff_matrix     # weighted composite security/performance score
-python -m analysis.figures             # full paper figure set -> outputs/*.png
-python -m analysis.plot_metrics        # quick smoke-test comparison chart
-```
-
-`analysis/aggregate.py` discards the first 5% of requests per cell as
-warm-up (`--warmup-fraction` to change) and reports a non-parametric
-Mann-Whitney U test comparing each protected configuration's RTT
-distribution against control at each concurrency level, since crypto/network
-latency distributions are right-skewed and should not be assumed normal.
-
-`analysis/tradeoff_matrix.py` reports the composite score
-`w_sec * security_score(config) - w_perf * normalized_latency_overhead`
-at three weightings (security-priority, balanced, performance-priority)
-rather than one arbitrary weighting — see `docs/DESIGN.md` §5 for the
-explicit, defended `security_score` ordinal mapping.
-
-## Payload profiles (beyond the digit classifier)
-
-Every server dispatches its request/response shape through a pluggable
-`model/profiles/*` profile (`model/profiles/registry.py`), selected once per
-process via `PQ_SHIELD_PAYLOAD_PROFILE` (default: `tabular_small`, the
-64-feature digit classifier used throughout this README). `python -m
-bench.orchestrator --payload-profile {tabular_small,image_cnn,embedding,
-llm_completion}` sweeps a different workload shape end-to-end — larger
-request/response payloads change the crypto-overhead-to-payload-size ratio,
-which is the sensitivity question raised in `docs/DESIGN.md`.
-
-## Preparing a live demo (e.g. a review/panel presentation)
-
-```bash
-bash scripts/preflight_check.sh   # verifies self-test, model, tests, ports, data — fix any ❌
-bash scripts/run_webapp.sh        # launch the dashboard, warm it up yourself first
-```
-
-See `docs/PRESENTER_GUIDE.md` for a page-by-page demo script with timing,
-talking points anchored to this project's actual measured numbers, and
-answers to likely panel questions (including how to honestly present a
-counterintuitive or still-being-verified result rather than overclaiming it).
-
-## Streaming signatures (LLM-style token streams)
-
-The above benchmarks single-shot JSON responses. For token-by-token SSE
-streaming responses — the shape a real chat-completion API actually uses —
-`POST /secure/predict/stream` (`api/secure_app.py`) streams Server-Sent
-Events instead of one JSON body. See `docs/STREAMING.md`, which covers three
-signing strategies (buffer-and-sign, per-chunk, hash-chain), their
-time-to-first-token and signature-byte-overhead trade-offs, and how to run
-the real vs. synthetic generation backends (`model/streaming_backends/*`;
-`requirements-streaming.txt` for the optional real-model dependencies).
+Latency is end-to-end (`total_ms`: handshake + protected request). At high
+concurrency on a single host, client and server share the CPU; the paper draws
+equivalence conclusions at 10 connections only.
 
 ## Docker
 
 ```bash
 docker build -t pq-shield .
-docker run --rm -p 8000:8000 pq-shield
-# or, to run a full sweep with results persisted to the host:
-docker run --rm -v "$(pwd)/results:/app/results" pq-shield \
-  python -m bench.orchestrator --configs control,classical,hybrid,full-pqc \
-  --concurrency 10,100,1000 --repetitions 5
+docker run --rm -p 8501:8501 pq-shield streamlit run app.py --server.port 8501 --server.address 0.0.0.0
+docker run --rm -v "$(pwd)/results:/app/results" pq-shield python -m bench.orchestrator --concurrency 10 --repetitions 2
 ```
 
-The image builds liboqs from source, installs pinned dependencies, trains
-the model, and runs the crypto self-test plus the full pytest suite at
-*build* time — a broken build never ships.
+The image builds liboqs from source, installs pinned dependencies, trains the
+model, and runs the crypto self-test at build time.
 
 ## Interactive dashboard (Streamlit)
 
@@ -399,6 +222,9 @@ Seven pages in three groups (`app.py` routes to `views/`; theme in
 - **Validation** — all 130 NIST ACVP vectors, signature counts vs. the
   analytic model, and threat-model assumptions vs. the experiments.
 
+Before a live presentation, run `bash scripts/preflight_check.sh` (self-test,
+model, tests, ports, data) and see `docs/PRESENTER_GUIDE.md`.
+
 All pages import directly from `crypto/`, `api/`, `bench/`,
 `threats/`, and `analysis/` — there is no separate "demo" implementation of
 the protocol or the statistics; the dashboard is a thin interactive layer
@@ -408,155 +234,51 @@ over the same code the CLI and the paper's results are built from.
 
 ```
 pq-shield/
-├── crypto/
-│   ├── oqs_adapter.py       # ctypes bindings to liboqs (ML-KEM-768, ML-DSA-65)
-│   ├── aead.py                # AES-256-GCM + HKDF session-key derivation
-│   ├── base.py                 # shared ServerCryptoConfig / ClientCryptoConfig interface
-│   ├── classical.py            # Config A
-│   ├── hybrid.py                # Config B
-│   ├── full_pqc.py              # Config C
-│   ├── registry.py               # name -> crypto class lookup
-│   ├── instrumentation.py         # Timer, ResourceSampler (CPU%/RSS)
-│   └── streaming.py                # SSE signing strategies (buffer/per-chunk/hash-chain)
-├── model/
-│   ├── train.py                 # trains + serializes the RandomForest
-│   ├── artifacts/                # model.pkl, model_metadata.json (gitignored)
-│   ├── profiles/                 # tabular_small, image_cnn, embedding, llm_completion
-│   └── streaming_backends/        # synthetic + real (llama.cpp/transformers) token backends
-├── api/
-│   ├── model_service.py         # dispatches to the active payload profile
-│   ├── schemas.py                 # pydantic request/response models
-│   ├── server.py                   # control (unprotected)
-│   ├── secure_app.py                # shared handshake+predict(+stream) endpoint logic
-│   ├── server_config_{a,b,c}.py      # thin per-config wrappers
-│   ├── secure_client.py                # shared async client transaction logic
-│   ├── secure_streaming_client.py       # client-side SSE stream consumption
-│   ├── async_bridge.py                   # sync generator -> async iterator bridge
-│   ├── _client_cli.py                     # shared CLI plumbing
-│   └── client{,_hybrid,_full_pqc}.py       # per-config CLI entrypoints
-├── bench/
-│   ├── runner.py                # single-cell async load generator
-│   ├── orchestrator.py           # full matrix: manages server lifecycle + sweep
-│   └── streaming_runner.py        # streaming-mode load generator
-├── threats/
-│   ├── hndl_capture.py          # Threat Scenario 1
-│   ├── mitm_harness.py           # Threat Scenario 2 -- tampering proxy
-│   ├── mitm_experiment.py         # Threat Scenario 2 -- driver + detection stats
-│   ├── streaming_mitm_experiment.py # streaming sequence-integrity (drop/reorder) attack
-│   └── streaming_hndl_experiment.py  # streaming HNDL exposure-vs-response-length
-├── validation/                   # ground truth: FIPS conformance, NIST's own KAT vectors
-│   ├── primitive_bench.py          # op cost + cold-start (first-sign-in-a-process) cost
-│   ├── reference_data.py            # published FIPS 203/204 constants
-│   ├── spec_conformance.py           # measured byte sizes vs. FIPS 203/204
-│   ├── nist_kat.py                    # vs. NIST ACVP known-answer test vectors
-│   ├── kat_vectors.py                  # loads/parses the trimmed vector files
-│   └── vectors/                         # trimmed NIST ACVP JSON + fetch.sh (full upstream)
-├── analysis/
-│   ├── aggregate.py              # summary stats + Mann-Whitney U (configurable baseline_config)
-│   ├── tradeoff_matrix.py         # weighted composite decision matrix (concurrency + streaming)
-│   ├── security_validation.py      # cross-checks the score's categorical axes vs. real HNDL/MITM data
-│   ├── figures.py                  # full paper figure set
-│   ├── plot_metrics.py              # quick comparison chart
-│   ├── streaming_analysis.py         # time-to-first-token / signing-overhead analysis
-│   └── streaming_model_validation.py  # analytical signature-cost model vs. the live sweep
-├── webapp/
-│   ├── bootstrap.py               # repo-root sys.path + .env loading (import first, always)
-│   ├── server_manager.py           # demo server lifecycle (ports 8100-8103)
-│   ├── demo_transaction.py          # tamper-capable live transaction logic
-│   ├── data_loader.py                # cached results loading for the dashboard
-│   ├── colors.py                      # single source for config/strategy chart colors
-│   ├── chart_explainer.py              # per-chart "Explain this chart" button
-│   └── ai_summary.py                    # on-demand Claude-generated dashboard/threat/chart summaries
-├── views/                        # Streamlit pages: home, key_findings, live_demo, benchmark_runner,
-│                                    results_explorer, threat_lab, validation
-├── app.py                        # Streamlit entrypoint: grouped navigation over views/
-├── tests/                        # 106 passed + 4 pre-existing legacy failures (see Setup)
-│   ├── test_crypto_roundtrip.py    # core protocol round-trips + tamper detection
-│   ├── test_streaming_signing.py    # crypto/streaming.py's three signing strategies
-│   ├── test_payload_profiles.py      # model/profiles/* shape/size checks
-│   ├── test_validation.py             # spec_conformance.py + primitive_bench.py checks
-│   ├── test_nist_kat.py                # validation/nist_kat.py vs. NIST's ACVP vectors
-│   ├── test_streaming_model_validation.py # analysis/streaming_model_validation.py
-│   └── test_streaming_hndl.py           # threats/streaming_hndl_experiment.py
-├── scripts/
-│   ├── install_oqs.sh            # builds liboqs (minimal, ML-KEM-768 + ML-DSA-65)
-│   ├── run_threat_experiments.sh  # HNDL + MITM convenience wrapper
-│   └── preflight_check.sh          # pre-demo sanity check (self-test, model, tests, ports)
-├── docs/
-│   ├── DESIGN.md                 # protocol design, hypotheses, divergences from proposal
-│   ├── STREAMING.md               # signing strategies, backend setup, ground-truth validation
-│   ├── STREAMING_HOW_IT_WORKS.md   # mechanism-level walkthrough: how streaming works end-to-end
-│   ├── STREAMING_INTEGRATION.md     # dated log of the streaming feature's build/integration
-│   ├── RESULTS_DASHBOARD.md          # ground-truth, section-by-section dashboard reference
-│   ├── THREAT_SCENARIOS.md            # ground-truth, tab-by-tab threat-scenarios page reference
-│   ├── PRESENTER_GUIDE.md              # page-by-page live-demo script
-│   └── diagrams/                         # architecture SVGs referenced from ARCHITECTURE.md
-├── results/                      # raw per-request CSVs are gitignored; summary
-│                                    JSONs (hndl/mitm/streaming-hndl/sweep_summaries) and
-│                                    validation/*.json are committed for the dashboard
-├── outputs/                       # generated figures (gitignored)
+├── crypto/            oqs_adapter (liboqs ctypes), aead, base, registry, instrumentation,
+│                      classical / classical_ecdhe / hybrid / hybrid_kex / full_pqc / hybrid_kex_pq,
+│                      streaming (signing strategies + checkpoints), handshake_auth
+├── api/               server.py (control), server_config_* (one per configuration), secure_app.py,
+│                      secure_client.py, secure_streaming_client.py, CLI clients
+├── bench/             orchestrator, runner, streaming_runner, netem_proxy, paper_runs
+├── threats/           hndl_capture, mitm_harness + mitm_experiment, streaming_mitm_experiment,
+│                      streaming_hndl_experiment, streaming_attack_campaign, key_substitution
+├── validation/        nist_kat + kat_vectors + vectors/ (trimmed NIST ACVP JSON, fetch.sh),
+│                      spec_conformance, primitive_bench, contention_check
+├── analysis/          paper_figures (the paper's figures/tables), aggregate, streaming_analysis,
+│                      streaming_model_validation, security_validation, legacy figures/tradeoff_matrix
+├── model/             train.py, profiles/ (payload shapes), streaming_backends/ (llama.cpp, synthetic)
+├── views/             Streamlit pages (home, key_findings, live_demo, benchmark_runner,
+│                      results_explorer, threat_lab, validation)
+├── webapp/            ui (styling), findings (cached paper data), data_loader, demo_transaction,
+│                      server_manager, colors, ai_summary, chart_explainer
+├── app.py             Streamlit entry point
+├── .streamlit/        config.toml (light and dark themes)
+├── paper/             pq_shield_journal.tex/.pdf, figures/, tables/, diagrams/, key_numbers.md,
+│                      environment.json, response_to_reviewers.md, CHANGES.md, reference_audit.md
+├── results/           summaries and manifests (raw per-request CSVs are gitignored)
+├── tests/             205 passing + 4 legacy failures
+├── docs/              DESIGN, STREAMING, THREAT_SCENARIOS, RESULTS_DASHBOARD, PRESENTER_GUIDE, diagrams
+├── Documents/         ARCHITECTURE, PROJECT_STATUS, design document, research references
+├── scripts/           install_oqs.sh, run_webapp.sh, run_threat_experiments.sh, preflight_check.sh
 └── Dockerfile
 ```
 
-## Current status / next steps
+## Status
 
-Implemented and passing: crypto layer, protocol tests, all four servers,
-CLI clients, benchmark orchestrator, HNDL and MITM threat scripts (plus
-their streaming counterparts — sequence-integrity and HNDL-exposure-scaling
-— `threats/streaming_*.py`), the full analysis/figures pipeline, the
-pluggable payload-profile system (`model/profiles/*`), SSE token streaming
-with three signing strategies (`crypto/streaming.py`, `docs/STREAMING.md`),
-and two independent layers of ground-truth validation (`validation/`,
-`analysis/streaming_model_validation.py`): PQ-Shield's liboqs bindings are
-byte-exact against NIST's own ACVP known-answer test vectors, and the
-streaming benchmark's signature-byte overhead matches an analytical model
-derived from those same primitive costs exactly, on every row measured —
-see `docs/STREAMING.md` §§9–10 for the full methodology and a from-scratch
-diagnosis of an initial signing-*time* discrepancy down to a confirmed,
-specific cause (not hand-waved away). A full A/B/C/control × {10,100,1000}
-concurrency × 5-repetition sweep and the HNDL/MITM experiments have been
-run once end-to-end on the development host; see `results/` for the actual
-output and `docs/DESIGN.md` §7 for host-specific caveats (this repo was
-developed on a single-core sandbox, so absolute latency numbers there are
-not representative of production hardware — re-run the sweep on your
-target hardware before citing absolute numbers, though relative overhead
-ratios between configurations are expected to reproduce).
-
-Remaining for the full Review 2 / paper-ready deliverable:
-
-1. Re-run the full matrix on multi-core, non-sandboxed hardware for
-   production-representative absolute latency numbers.
-2. `model/profiles/image_cnn.py` covers the larger-payload sensitivity
-   question with a real (untrained, deterministically-seeded) NumPy conv
-   net rather than the CIFAR-10-trained CNN the Review 1 proposal
-   envisioned — swap in a trained CIFAR-10 model there if classification
-   accuracy itself needs to be defensible, not just the payload shape/cost.
-3. ~~Expand `analysis/figures.py`'s CPU/RSS heatmap~~ — resource sampling
-   (`crypto.instrumentation.ResourceSampler`) is now threaded through both
-   the full-matrix `bench/orchestrator.py` sweep and `bench/streaming_runner.py`
-   (per transaction), written to `results/sweep_summaries/*.json`, and
-   rendered as a real combo chart in the Results Dashboard's Server Resource
-   Usage panel for both run types. `analysis/figures.py`'s own static
-   matplotlib heatmap (item 7 in its docstring) is the one piece of this
-   still not wired up, if the paper needs a non-interactive figure for it.
-4. Push the `--reuse-handshake` "warm connection" variant through the full
-   sweep as a secondary result, per `docs/DESIGN.md` §3.
-5. Close the remaining streaming signing-*time* validation gap
-   (`hash_chain` and `classical`/`hybrid` `per_chunk`) with a
-   higher-repetition sweep — see `docs/STREAMING.md` §9's per-row
-   breakdown of what's confirmed noise vs. still-open, and don't cite
-   those specific numbers as validated until then (signature-*byte*
-   overhead and `buffer_and_sign` timing are already fully validated).
-6. Publish to IEEE Access / an ACM CCS workshop per the Review 1 proposal's
-   target venue, and tag a release for the open-source artifact.
+The paper has been through three rounds of external review (see
+`paper/response_to_reviewers.md` and `paper/CHANGES.md`) and is being prepared
+for IEEE Access. Open items, stated as limitations in the paper: a separate
+load-generator host, server-class and multi-host replication, a TLS-native
+implementation, packet-level network emulation, larger models and real request
+traces, other tokenizers for the HNDL rate, session resumption across streams,
+and side-channel analysis.
 
 ## Security scope
 
-These cryptographic wrappers are an application-layer benchmarking harness,
-not a replacement for TLS. In a real deployment, run the API behind
-authenticated TLS and use authenticated server-key distribution or
-certificate pinning. The handshake endpoint in this prototype intentionally
-exposes fresh ephemeral public key material on every call, unauthenticated,
-so the benchmark can measure a fresh exchange per transaction by default —
-this is appropriate for a benchmarking harness and inappropriate for a
-production authentication scheme as-is.
+These wrappers are an application-layer benchmarking harness, not a
+replacement for TLS. The default handshake is **unauthenticated** — the paper
+shows that key substitution then succeeds against every configuration,
+post-quantum or not — so that a fresh exchange per transaction can be
+measured. The authenticated variant (`PQ_SHIELD_AUTH_HANDSHAKE=1`, a transcript
+signature under a pinned identity key) stops key substitution but does not
+model a PKI. In a real deployment, run the API behind authenticated TLS.

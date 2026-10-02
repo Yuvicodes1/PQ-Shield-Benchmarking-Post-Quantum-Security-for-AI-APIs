@@ -1,5 +1,7 @@
 # Streaming Signatures — What This Adds and Why
 
+> **Note (October 2026):** the streaming protocol is now v2 (role/session/position binding, a signed end-of-stream record, checkpoint enforcement), and the signing-*time* discrepancy discussed in §9 is explained by processor power state between chunks (per-signature CPU cost after an idle gap is about 7–17× the back-to-back cost); see `validation/contention_check.py` and Section VI-C of the paper. Signature *bytes* match the analytic model exactly, as before.
+
 This document covers a new capability added to PQ-Shield: benchmarking
 cryptographic signature overhead for **streaming** AI API responses (the
 token-by-token SSE pattern every real LLM chat API uses), as opposed to the

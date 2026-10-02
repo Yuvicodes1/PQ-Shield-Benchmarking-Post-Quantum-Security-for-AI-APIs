@@ -1,5 +1,7 @@
 # PQ-Shield: Design & Implementation Reference
 
+> **Note (October 2026):** this is the original design document. The study now has seven configurations plus a matched no-crypto control (see the README), the weighted composite score of §5 was retired in favour of a weight-free dominance analysis, and the default handshake has an optional authenticated variant. The current methodology is in `paper/pq_shield_journal.tex`.
+
 This document is the implementation-facing companion to the Review 1
 proposal (`docs/PQ_Shield_Review1.pdf`, not tracked in this repo). It
 describes what was actually built, where it diverges from the original
