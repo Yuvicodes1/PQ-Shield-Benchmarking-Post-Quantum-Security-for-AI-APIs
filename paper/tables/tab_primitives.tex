@@ -1,0 +1,31 @@
+\begin{table}[t]
+\centering
+\caption{Primitive-level micro-benchmark (single process, warm loop). $n$ = timed iterations.}
+\label{tab:primitives}
+\setlength{\tabcolsep}{3pt}
+\footnotesize
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+Algorithm & Op. & $n$ & Median ($\mu$s) & p99 ($\mu$s) & ops/s \\
+\midrule
+ML-KEM-768 & KeyGen & 2000 & 10.2 & 12.5 & 98,357 \\
+ML-KEM-768 & Encaps & 2000 & 11.5 & 14.7 & 86,640 \\
+ML-KEM-768 & Decaps & 2000 & 13.1 & 15.0 & 76,190 \\
+\addlinespace
+X25519 & KeyGen & 2000 & 80.7 & 93.5 & 12,390 \\
+X25519 & Exchange & 2000 & 137.2 & 150.1 & 7,288 \\
+\addlinespace
+RSA-2048 & KeyGen & 200 & 62,698.0 & 257,378.1 & 16 \\
+RSA-2048 OAEP & Encrypt & 2000 & 24.3 & 27.3 & 41,237 \\
+RSA-2048 OAEP & Decrypt & 2000 & 811.3 & 1,730.7 & 1,233 \\
+\addlinespace
+ML-DSA-65 & KeyGen & 2000 & 38.0 & 42.3 & 26,316 \\
+ML-DSA-65 & Sign & 2000 & 67.9 & 246.1 & 14,733 \\
+ML-DSA-65 & Verify & 2000 & 35.5 & 40.8 & 28,202 \\
+\addlinespace
+ECDSA P-256 & KeyGen & 2000 & 15.5 & 18.5 & 64,687 \\
+ECDSA P-256 & Sign & 2000 & 21.0 & 23.7 & 47,619 \\
+ECDSA P-256 & Verify & 2000 & 46.3 & 54.2 & 21,602 \\
+\bottomrule
+\end{tabular}
+\end{table}

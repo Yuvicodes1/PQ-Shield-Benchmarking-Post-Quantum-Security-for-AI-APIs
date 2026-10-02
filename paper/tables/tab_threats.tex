@@ -1,0 +1,25 @@
+\begin{table}[t]
+\centering
+\caption{Tampering with single responses: one flipped bit per response, in the AEAD ciphertext or in the signature. Detection time is the rejecting check alone (median).}
+\label{tab:threats}
+\setlength{\tabcolsep}{4pt}
+\footnotesize
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+Config. & Target & $n$ & Detected & Detection (ms) \\
+\midrule
+Classical-RSA & ciphertext & 100 & 100\% & 0.007 \\
+Classical-RSA & signature & 100 & 100\% & 0.063 \\
+Classical-ECDHE & ciphertext & 100 & 100\% & 0.008 \\
+Classical-ECDHE & signature & 100 & 100\% & 0.083 \\
+Hybrid & ciphertext & 100 & 100\% & 0.008 \\
+Hybrid & signature & 100 & 100\% & 0.083 \\
+Hybrid-KEX & ciphertext & 100 & 100\% & 0.008 \\
+Hybrid-KEX & signature & 100 & 100\% & 0.082 \\
+Full PQC & ciphertext & 100 & 100\% & 0.008 \\
+Full PQC & signature & 100 & 100\% & 0.059 \\
+Hybrid-KEX-PQ & ciphertext & 100 & 100\% & 0.009 \\
+Hybrid-KEX-PQ & signature & 100 & 100\% & 0.058 \\
+\bottomrule
+\end{tabular}
+\end{table}

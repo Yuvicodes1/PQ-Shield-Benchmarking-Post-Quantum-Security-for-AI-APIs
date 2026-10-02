@@ -18,6 +18,7 @@ from crypto.streaming import (
     verify_hash_chain_chunk,
     verify_hash_chain_final,
     verify_per_chunk,
+    verify_per_chunk_final,
 )
 
 CHUNKS = [b"The quick ", b"brown fox ", b"jumps over ", b"the lazy dog."]
@@ -42,7 +43,7 @@ def test_buffer_and_sign_roundtrip(config_name):
         assert strategy.add_chunk(chunk, i) is None  # withholds until finalize
 
     final = strategy.finalize(len(CHUNKS))
-    result = verify_buffer_and_sign_final(final, session_key, bundle.sig_public_key, client)
+    result = verify_buffer_and_sign_final(final, session_key, bundle.sig_public_key, client, bundle.handshake_id)
 
     assert result["signature_valid"] is True
     assert result["aead_ok"] is True
@@ -61,7 +62,7 @@ def test_buffer_and_sign_tampered_ciphertext_rejected(config_name):
     tampered[0] ^= 0xFF
     final["ciphertext"] = bytes(tampered)
 
-    result = verify_buffer_and_sign_final(final, session_key, bundle.sig_public_key, client)
+    result = verify_buffer_and_sign_final(final, session_key, bundle.sig_public_key, client, bundle.handshake_id)
     # Signature covers (nonce||ciphertext), so tampering the ciphertext must
     # also break the signature check -- the envelope no longer matches.
     assert result["signature_valid"] is False
@@ -73,12 +74,15 @@ def test_per_chunk_roundtrip_all_chunks_valid(config_name):
     strategy = get_server_strategy("per_chunk", server, bundle.handshake_id, session_key)
 
     wire_chunks = [strategy.add_chunk(c, i) for i, c in enumerate(CHUNKS)]
-    assert strategy.finalize(len(CHUNKS)) is None  # nothing withheld
+    end = strategy.finalize(len(CHUNKS))  # signed end-of-stream record, no withheld content
+    assert end["kind"] == "final_per_chunk" and end["n_chunks"] == len(CHUNKS)
+    assert verify_per_chunk_final(end, len(CHUNKS), bundle.sig_public_key, client,
+                                  bundle.handshake_id)["stream_fully_verified"] is True
 
     reconstructed = b""
     for i, chunk in enumerate(wire_chunks):
         result = verify_per_chunk(chunk, expected_index=i, session_key=session_key,
-                                   sig_public_key=bundle.sig_public_key, client_crypto=client)
+                                   sig_public_key=bundle.sig_public_key, client_crypto=client, handshake_id=bundle.handshake_id)
         assert result["signature_valid"] is True
         assert result["aead_ok"] is True
         assert result["in_order"] is True
@@ -102,7 +106,7 @@ def test_per_chunk_tampering_one_chunk_does_not_affect_others(config_name):
 
     results = [
         verify_per_chunk(c, expected_index=i, session_key=session_key,
-                          sig_public_key=bundle.sig_public_key, client_crypto=client)
+                          sig_public_key=bundle.sig_public_key, client_crypto=client, handshake_id=bundle.handshake_id)
         for i, c in enumerate(wire_chunks)
     ]
 
@@ -131,7 +135,7 @@ def test_per_chunk_detects_reordering(config_name):
 
     results = [
         verify_per_chunk(c, expected_index=i, session_key=session_key,
-                          sig_public_key=bundle.sig_public_key, client_crypto=client)
+                          sig_public_key=bundle.sig_public_key, client_crypto=client, handshake_id=bundle.handshake_id)
         for i, c in enumerate(reordered)
     ]
 
@@ -152,7 +156,7 @@ def test_hash_chain_roundtrip(config_name):
     wire_chunks = [strategy.add_chunk(c, i) for i, c in enumerate(CHUNKS)]
     final = strategy.finalize(len(CHUNKS))
 
-    chain_state = HashChainClientState()
+    chain_state = HashChainClientState(bundle.handshake_id)
     reconstructed = b""
     for chunk in wire_chunks:
         result = verify_hash_chain_chunk(chunk, chain_state, session_key)
@@ -178,7 +182,7 @@ def test_hash_chain_detects_tampered_middle_chunk(config_name):
     tampered[0] ^= 0xFF
     wire_chunks[1]["ciphertext"] = bytes(tampered)
 
-    chain_state = HashChainClientState()
+    chain_state = HashChainClientState(bundle.handshake_id)
     chunk_results = [verify_hash_chain_chunk(c, chain_state, session_key) for c in wire_chunks]
 
     # AEAD catches the tampered chunk immediately, at the moment it arrives...
@@ -202,7 +206,7 @@ def test_hash_chain_detects_dropped_chunk(config_name):
     wire_chunks = [strategy.add_chunk(c, i) for i, c in enumerate(CHUNKS)]
     final = strategy.finalize(len(CHUNKS))
 
-    chain_state = HashChainClientState()
+    chain_state = HashChainClientState(bundle.handshake_id)
     surviving_chunks = [wire_chunks[0], wire_chunks[2], wire_chunks[3]]  # chunk 1 dropped
     for c in surviving_chunks:
         verify_hash_chain_chunk(c, chain_state, session_key)
@@ -257,3 +261,64 @@ def test_signature_byte_cost_ordering_matches_design_expectation():
     assert chain_total_sig_bytes == buf_total_sig_bytes  # both: exactly one signature
     assert per_chunk_total_sig_bytes == len(CHUNKS) * buf_total_sig_bytes
     assert per_chunk_total_sig_bytes > buf_total_sig_bytes
+
+
+# --- v2: truncation, duplication, and cross-session replay ----------------------------------
+
+@pytest.mark.parametrize("config_name", CONFIG_NAMES)
+def test_per_chunk_end_record_detects_truncation(config_name):
+    """Dropping the tail leaves every remaining chunk valid and in order; only
+    the signed end record (count mismatch, or its absence) reveals it."""
+    server, client, bundle, session_key = _handshake(config_name)
+    strategy = get_server_strategy("per_chunk", server, bundle.handshake_id, session_key)
+    wire = [strategy.add_chunk(c, i) for i, c in enumerate(CHUNKS)]
+    end = strategy.finalize(len(CHUNKS))
+    kept = wire[:2]
+    assert all(verify_per_chunk(c, i, session_key, bundle.sig_public_key, client, bundle.handshake_id)
+               ["signature_valid"] for i, c in enumerate(kept))
+    r = verify_per_chunk_final(end, len(kept), bundle.sig_public_key, client, bundle.handshake_id)
+    assert r["signature_valid"] is True and r["count_matches"] is False
+    assert r["stream_fully_verified"] is False
+
+
+@pytest.mark.parametrize("config_name", CONFIG_NAMES)
+def test_hash_chain_final_binds_length(config_name):
+    """A truncated chain cannot be completed with the original final record."""
+    server, client, bundle, session_key = _handshake(config_name)
+    strategy = get_server_strategy("hash_chain", server, bundle.handshake_id, session_key)
+    wire = [strategy.add_chunk(c, i) for i, c in enumerate(CHUNKS)]
+    final = strategy.finalize(len(CHUNKS))
+    state = HashChainClientState(bundle.handshake_id)
+    for c in wire[:2]:
+        verify_hash_chain_chunk(c, state, session_key)
+    assert verify_hash_chain_final(final, state, bundle.sig_public_key, client)["stream_fully_verified"] is False
+
+
+@pytest.mark.parametrize("config_name", CONFIG_NAMES)
+def test_per_chunk_detects_duplicate(config_name):
+    server, client, bundle, session_key = _handshake(config_name)
+    strategy = get_server_strategy("per_chunk", server, bundle.handshake_id, session_key)
+    wire = [strategy.add_chunk(c, i) for i, c in enumerate(CHUNKS)]
+    dup = wire[:2] + [wire[1]] + wire[2:]
+    results = [verify_per_chunk(c, i, session_key, bundle.sig_public_key, client, bundle.handshake_id)
+               for i, c in enumerate(dup)]
+    assert results[2]["in_order"] is False
+
+
+@pytest.mark.parametrize("config_name", ["classical_ecdhe", "hybrid", "full_pqc"])
+def test_signatures_bound_to_session_even_with_same_signing_key(config_name):
+    """Cross-session replay must fail even if the server reused one long-term
+    signing key: a record signed under session A does not verify as session B."""
+    server, client, bundle, session_key = _handshake(config_name)
+    strategy = get_server_strategy("per_chunk", server, bundle.handshake_id, session_key)
+    chunk = strategy.add_chunk(CHUNKS[0], 0)
+    same_key = bundle.sig_public_key
+    assert verify_per_chunk(chunk, 0, session_key, same_key, client, bundle.handshake_id)["signature_valid"]
+    assert not verify_per_chunk(chunk, 0, session_key, same_key, client, "another-session")["signature_valid"]
+    chain = get_server_strategy("hash_chain", server, bundle.handshake_id, session_key)
+    wire = [chain.add_chunk(c, i) for i, c in enumerate(CHUNKS)]
+    final = chain.finalize(len(CHUNKS))
+    other = HashChainClientState("another-session")
+    for c in wire:
+        verify_hash_chain_chunk(c, other, session_key)
+    assert verify_hash_chain_final(final, other, same_key, client)["stream_fully_verified"] is False

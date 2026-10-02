@@ -17,8 +17,17 @@ security_score is an explicit, defended ordinal mapping (NOT hand-waved):
                           integrity/authenticity axes
 
 normalized_latency_overhead(config, concurrency) =
-    (median_rtt_ms[config, concurrency] - median_rtt_ms[baseline, concurrency])
-    / median_rtt_ms[baseline, concurrency]
+    (median_total_ms[config, concurrency] - median_total_ms[baseline, concurrency])
+    / median_total_ms[baseline, concurrency]
+
+total_ms is end-to-end (handshake + protected request) -- the only latency
+directly comparable to control's single request. (rtt_ms, used here before,
+covers only the protected request leg and so omitted the handshake cost
+entirely, which is where the configurations differ most.)
+
+A config whose every request at a given concurrency failed (e.g. Classical
+at 1,000 connections) gets a row with available=False and composite_score
+NaN rather than silently disappearing from the matrix.
 
 `baseline` is `control` whenever it's present in the data -- every
 already-validated concurrency-sweep number to date is computed this way --
@@ -54,9 +63,13 @@ from analysis.aggregate import discard_warmup, load_raw, resolve_baseline_config
 
 SECURITY_SCORES = {
     "control": None,   # excluded from the matrix -- it is the zero-overhead reference, not a real option
+    "control_2rt": None,  # matched-protocol reference, also not a real option
     "classical": 0.0,
+    "classical_ecdhe": 0.0,  # X25519 falls to Shor exactly as RSA does: no quantum resistance on either axis
     "hybrid": 0.8,
+    "hybrid_kex": 0.8,  # same axes as hybrid: PQ-safe key exchange, classical signature
     "full_pqc": 1.0,
+    "hybrid_kex_pq": 1.0,  # PQ on both axes and hedged; the paper no longer uses this score (dominance table)
 }
 
 # Default split for streaming_security_score() below: how much of the
@@ -149,7 +162,7 @@ def build_matrix_at(
     w_perf: float,
     baseline_config: str | None = None,
     scale_col: str = "concurrency",
-    metric_col: str = "rtt_ms",
+    metric_col: str = "total_ms",
     security_scores: dict[str, float | None] | None = None,
 ) -> pd.DataFrame:
     """The one place composite_score is actually computed, for a single
@@ -168,18 +181,14 @@ def build_matrix_at(
     The resolved value is always in the output's "baseline_config" column.
 
     scale_col/metric_col default to the concurrency sweep's "concurrency"/
-    "rtt_ms" -- passing scale_col="max_tokens", metric_col="ttft_ms" (say)
+    "total_ms" -- passing scale_col="max_tokens", metric_col="ttft_ms" (say)
     computes the same formula for a streaming run, keyed by response length
     instead of concurrency. Output column names for the scale/metric/
     baseline values track whichever columns were requested (e.g.
     "median_ttft_ms"/"baseline_median_ttft_ms" for that streaming call) so
     two different scales/metrics are never silently conflated in one frame;
-    for the default (scale_col="concurrency", metric_col="rtt_ms") call --
-    every concurrency-sweep caller today -- these are "median_rtt_ms" and
-    "baseline_median_rtt_ms", identical values to before this function
-    gained these parameters (only the second column's name changed, from
-    "control_median_rtt_ms", to stop implying it's always literally
-    `control`; nothing reads that column by name elsewhere in the codebase).
+    for the default call these are "median_total_ms" and
+    "baseline_median_total_ms".
 
     security_scores=None (default) uses the module-level SECURITY_SCORES
     dict, exactly as before this parameter existed. A caller building a
@@ -187,12 +196,16 @@ def build_matrix_at(
     {config: streaming_security_score(config, strategy, ...)} instead --
     see that function -- so the composite-score *formula* below never
     changes, only which per-config number "security_score" resolves to."""
-    ok = df[df["error"].isna() | (df["error"] == "")]
+    is_err = df["error"].notna() & (df["error"] != "")
+    ok = df[~is_err]
     available_configs = set(ok["config"].unique())
     baseline_config = resolve_baseline_config(available_configs, baseline_config)
     median_metric = ok.groupby(["config", scale_col])[metric_col].median()
+    error_rate = is_err.groupby([df["config"], df[scale_col]]).mean()
     scores = security_scores if security_scores is not None else SECURITY_SCORES
-    scored_configs = [c for c, s in scores.items() if s is not None and c in available_configs]
+    # Attempted, not just successful: a config that failed every request at
+    # some scale must still get a (NaN-scored, available=False) row there.
+    scored_configs = [c for c, s in scores.items() if s is not None and c in set(df["config"].unique())]
 
     median_col = f"median_{metric_col}"
     baseline_col = f"baseline_median_{metric_col}"
@@ -204,9 +217,18 @@ def build_matrix_at(
         except KeyError:
             continue
         for config in scored_configs:
+            if (config, scale_val) not in error_rate.index:
+                continue  # never attempted at this scale
             try:
                 config_val = median_metric[(config, scale_val)]
             except KeyError:
+                rows.append({
+                    "config": config, scale_col: int(scale_val), "baseline_config": baseline_config,
+                    "w_sec": w_sec, "w_perf": w_perf, "security_score": scores[config],
+                    median_col: None, baseline_col: baseline_val,
+                    "normalized_latency_overhead": None, "composite_score": None,
+                    "error_rate": float(error_rate[(config, scale_val)]), "available": False,
+                })
                 continue
             overhead_pct = (config_val - baseline_val) / baseline_val if baseline_val > 0 else None
             sec_score = scores[config]
@@ -222,6 +244,8 @@ def build_matrix_at(
                 baseline_col: baseline_val,
                 "normalized_latency_overhead": overhead_pct,
                 "composite_score": score,
+                "error_rate": float(error_rate[(config, scale_val)]),
+                "available": True,
             })
     return pd.DataFrame(rows)
 
@@ -248,9 +272,11 @@ def main():
     parser.add_argument("--baseline-config", default=None,
                          help="Config to normalize overhead against; default auto-resolves to 'control' "
                               "if present, else 'classical' (see resolve_baseline_config).")
+    parser.add_argument("--run-id", action="append", default=None,
+                         help="Only use rows from this sweep run_id (repeatable).")
     args = parser.parse_args()
 
-    df = load_raw(args.raw_dir)
+    df = load_raw(args.raw_dir, run_ids=args.run_id)
     df = discard_warmup(df, args.warmup_fraction)
 
     matrix = build_matrix(df, baseline_config=args.baseline_config)
@@ -263,7 +289,10 @@ def main():
         print(f"\n=== {weighting_name} (w_sec={WEIGHTINGS[weighting_name]['w_sec']}, "
               f"w_perf={WEIGHTINGS[weighting_name]['w_perf']}) ===")
         for concurrency in sorted(sub["concurrency"].unique()):
-            cs = sub[sub["concurrency"] == concurrency].sort_values("composite_score", ascending=False)
+            cs = sub[(sub["concurrency"] == concurrency) & sub["available"]].sort_values(
+                "composite_score", ascending=False)
+            if cs.empty:
+                continue
             best = cs.iloc[0]
             print(f"  concurrency={concurrency}: best = {best['config']} "
                   f"(score={best['composite_score']:.3f}, overhead={best['normalized_latency_overhead']:.1%})")

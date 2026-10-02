@@ -1,4 +1,4 @@
-"""Transaction logic for the Streamlit "Live Demo" and "Threat Scenarios"
+"""Transaction logic for the Streamlit "Live Streamer" and "Threat Scenarios"
 pages. Reuses the exact same crypto and client code as the CLI clients
 (api/secure_client.py) and the CLI tests, plus threats/mitm_harness.py's
 tamper function, so a demo request runs through identical code paths to
@@ -26,6 +26,7 @@ from crypto.streaming import (
     verify_hash_chain_chunk,
     verify_hash_chain_final,
     verify_per_chunk,
+    verify_per_chunk_final,
 )
 from threats.mitm_harness import _tamper_response_body
 
@@ -167,6 +168,18 @@ def _flip_middle_byte(raw: bytes) -> bytes:
     return bytes(mutated)
 
 
+STREAM_ATTACKS = {
+    None: "No attack",
+    "tamper_ciphertext": "Flip a bit in one chunk's ciphertext",
+    "tamper_signature": "Flip a bit in a signature",
+    "drop": "Drop one chunk",
+    "reorder": "Swap one chunk with the next",
+    "duplicate": "Deliver one chunk twice",
+    "truncate": "Cut the stream after one chunk",
+    "strip_checkpoints": "Strip every checkpoint signature",
+}
+
+
 async def run_streaming_transaction_live(
     base_url: str,
     config_name: str,
@@ -175,206 +188,208 @@ async def run_streaming_transaction_live(
     chunk_size_tokens: int = 5,
     max_tokens: int = 200,
     checkpoint_interval: int | None = None,
-    tamper_chunk_index: int | None = None,
-    tamper_target: str = "ciphertext",
+    attack: str | None = None,
+    attack_index: int = 2,
+    enforce_schedule: bool = True,
 ) -> AsyncIterator[dict]:
-    """Async generator counterpart to api/secure_streaming_client.py's
-    run_streaming_transaction, for the Live Demo page's streaming panel.
+    """Live counterpart to api/secure_streaming_client.run_streaming_transaction
+    for the Live demo page: yields one event per SSE record as it arrives, so
+    the page can render each chunk the moment it is decrypted and show whether
+    a verified signature covers it yet.
 
-    Instead of returning one flat metrics dict after the whole stream has
-    been consumed, this yields one event dict *as each SSE chunk arrives*,
-    so the caller (a Streamlit page) can update the UI token-by-token in
-    real time rather than only once the transaction is over. It also
-    supports the same live tamper-injection pattern as
-    run_secure_transaction above -- locally corrupting one target chunk's
-    ciphertext or signature bytes before verification, to demonstrate
-    detection happening live instead of only in the final summary.
+    `attack` simulates an on-path adversary at chunk `attack_index` (see
+    STREAM_ATTACKS): flipping bits, or rearranging validly protected records
+    without forging any -- drop, reorder, duplicate, truncate, or stripping
+    the checkpoint signatures. Verification uses the same functions as the
+    benchmark client, including checkpoint verification and, when
+    `enforce_schedule`, the requested checkpoint schedule.
 
-    `tamper_chunk_index`: the 0-based chunk index to corrupt (None = no
-    tampering). buffer_and_sign has no intermediate chunks, so any non-None
-    value there tampers the single final envelope instead.
-    `tamper_target`: "ciphertext" (AEAD layer) or "signature" (signature
-    layer) -- ignored for hash_chain's per-chunk events, which carry no
-    per-chunk signature to tamper (only "ciphertext" applies there until
-    the terminating signed chain hash, which honors both).
-
-    Event shapes:
-      {"type": "chunk", "index": int|None, "text": str|None, "tampered": bool,
-       "signature_valid": bool|None, "aead_ok": bool|None,
-       "in_order": bool|None, "chain_ok_so_far": bool|None}
-      {"type": "final", "stream_fully_verified": bool, "tampered": bool}
+    Events:
+      {"type": "chunk", "index", "text", "status": "verified"|"pending"|"rejected",
+       "reason": str|None, "attacked": bool, "signature_valid", "aead_ok"}
+      {"type": "covered", "upto": int}      -- every chunk so far is now covered by a verified signature
+      {"type": "final", "stream_fully_verified": bool, "reason": str|None, "text": str|None}
       {"type": "summary", "metrics": dict}
       {"type": "error", "message": str}
     """
     client_crypto = get_client_crypto(config_name)
     metrics: dict = {
-        "config": config_name, "strategy": strategy, "error": None,
-        "ttft_ms": None, "total_ms": None, "n_chunks": 0,
-        "total_signature_bytes": 0, "total_signing_ms": 0.0, "total_verify_ms": 0.0,
-        "all_signatures_valid": True, "all_aead_ok": True, "all_in_order": True,
-        "stream_fully_verified": None, "reconstructed_bytes": 0,
+        "config": config_name, "strategy": strategy, "checkpoint_interval": checkpoint_interval,
+        "attack": attack, "error": None, "ttft_ms": None, "total_ms": None, "n_chunks": 0, "n_signatures": 0,
+        "total_signature_bytes": 0, "total_signing_ms": 0.0, "total_signing_cpu_ms": 0.0,
+        "total_verify_ms": 0.0, "stream_fully_verified": None, "max_unverified_chunks": 0,
+        "rejected_at_chunk": None,
     }
 
-    def _maybe_tamper(index: int | None, field_bytes: bytes, field: str) -> tuple[bytes, bool]:
-        if tamper_chunk_index is None or field != tamper_target:
-            return field_bytes, False
-        if index is None or index == tamper_chunk_index:
-            return _flip_middle_byte(field_bytes), True
-        return field_bytes, False
+    def _flip(field: str, data: dict) -> dict:
+        return {**data, field: _b64e(_flip_middle_byte(_b64d(data[field])))}
 
     try:
         async with httpx.AsyncClient(timeout=120.0) as client:
             handshake_json, handshake_ms = await do_handshake(client, base_url)
             metrics["handshake_ms"] = handshake_ms
-
-            kex_public_key = _b64d(handshake_json["kex_public_key"])
             sig_public_key = _b64d(handshake_json["sig_public_key"])
             handshake_id = handshake_json["handshake_id"]
-
-            est = client_crypto.establish(kex_public_key)
-            request_body = {
-                "prompt": prompt, "strategy": strategy,
-                "chunk_size_tokens": chunk_size_tokens, "max_tokens": max_tokens,
-            }
-            if checkpoint_interval is not None:
+            est = client_crypto.establish(_b64d(handshake_json["kex_public_key"]))
+            request_body = {"prompt": prompt, "strategy": strategy,
+                            "chunk_size_tokens": chunk_size_tokens, "max_tokens": max_tokens}
+            if checkpoint_interval:
                 request_body["checkpoint_interval"] = checkpoint_interval
-
-            request_plaintext = json.dumps(request_body).encode()
-            req_aead = aead_encrypt(est.session_key, request_plaintext)
-            payload = {
-                "handshake_id": handshake_id,
-                "kex_blob": _b64e(est.kex_blob),
-                "nonce": _b64e(req_aead.nonce),
-                "ciphertext": _b64e(req_aead.ciphertext),
-            }
+            req_aead = aead_encrypt(est.session_key, json.dumps(request_body).encode())
+            payload = {"handshake_id": handshake_id, "kex_blob": _b64e(est.kex_blob),
+                       "nonce": _b64e(req_aead.nonce), "ciphertext": _b64e(req_aead.ciphertext)}
 
             t_start = time.perf_counter()
-            chain_state = HashChainClientState() if strategy == "hash_chain" else None
-            expected_index = 0
-            reconstructed = bytearray()
+            chain_state = (HashChainClientState(handshake_id,
+                                                checkpoint_interval=checkpoint_interval if enforce_schedule else None)
+                           if strategy == "hash_chain" else None)
+            state = {"expected": 0, "pending": 0, "failed": None, "terminal": False, "held": None,
+                     "signed_seen": 0}
+
+            def account(data: dict) -> None:
+                metrics["total_signature_bytes"] += data.get("signature_bytes", 0) or 0
+                metrics["total_signing_ms"] += data.get("sign_ms", 0.0) or 0.0
+                metrics["total_signing_cpu_ms"] += data.get("sign_cpu_ms", 0.0) or 0.0
+                if data.get("signature"):
+                    metrics["n_signatures"] += 1
+
+            def fail(reason: str, index) -> None:
+                if state["failed"] is None:
+                    state["failed"] = reason
+                    metrics["rejected_at_chunk"] = index
+
+            def process(data: dict, attacked: bool) -> list[dict]:
+                """Verify one record; return the events it produces."""
+                kind = data.get("kind")
+                out: list[dict] = []
+                if kind == "chunk":
+                    account(data)
+                    metrics["n_chunks"] += 1
+                    nonce, ct = _b64d(data["nonce"]), _b64d(data["ciphertext"])
+                    if strategy == "per_chunk":
+                        r = verify_per_chunk({"index": data["index"], "nonce": nonce, "ciphertext": ct,
+                                              "signature": _b64d(data["signature"])}, state["expected"],
+                                             est.session_key, sig_public_key, client_crypto, handshake_id)
+                        state["expected"] += 1
+                        metrics["total_verify_ms"] += r["verify_ms"]
+                        ok = r["signature_valid"] and bool(r["aead_ok"]) and r["in_order"]
+                        reason = None if ok else ("signature invalid" if not r["signature_valid"] else
+                                                  "AEAD tag failed" if r["aead_ok"] is False else
+                                                  "out of order")
+                        if not ok:
+                            fail(reason, data["index"])
+                        text = r["plaintext"].decode(errors="replace") if r["plaintext"] else None
+                        out.append({"type": "chunk", "index": data["index"], "text": text, "attacked": attacked,
+                                    "status": "verified" if ok and state["failed"] is None else "rejected",
+                                    "reason": reason, "signature_valid": r["signature_valid"], "aead_ok": r["aead_ok"]})
+                    else:  # hash_chain
+                        sig = _b64d(data["signature"]) if data.get("signature") else None
+                        r = verify_hash_chain_chunk({"index": data["index"], "nonce": nonce, "ciphertext": ct,
+                                                     "chain_hash": _b64d(data["chain_hash"]), "signature": sig},
+                                                    chain_state, est.session_key, sig_public_key, client_crypto)
+                        metrics["total_verify_ms"] += r["verify_ms"]
+                        reason = None
+                        if not r["aead_ok"]:
+                            reason = "AEAD tag failed"
+                        elif r["checkpoint_missing"]:
+                            reason = "expected checkpoint missing"
+                        elif r["checkpoint"] and not r["checkpoint_valid"]:
+                            reason = "checkpoint signature does not match the chain"
+                        if reason:
+                            fail(reason, data["index"])
+                        text = r["plaintext"].decode(errors="replace") if r["plaintext"] else None
+                        state["pending"] += 1
+                        metrics["max_unverified_chunks"] = max(metrics["max_unverified_chunks"], state["pending"])
+                        out.append({"type": "chunk", "index": data["index"], "text": text, "attacked": attacked,
+                                    "status": "rejected" if state["failed"] else "pending", "reason": reason,
+                                    "signature_valid": r["checkpoint_valid"], "aead_ok": r["aead_ok"]})
+                        if r["checkpoint"] and r["checkpoint_valid"] and state["failed"] is None:
+                            state["pending"] = 0
+                            out.append({"type": "covered", "upto": data["index"]})
+                elif kind in ("final_buffered", "final_per_chunk", "final_chain"):
+                    account(data)
+                    state["terminal"] = True
+                    text = None
+                    if kind == "final_buffered":
+                        r = verify_buffer_and_sign_final(
+                            {"nonce": _b64d(data["nonce"]), "ciphertext": _b64d(data["ciphertext"]),
+                             "signature": _b64d(data["signature"])},
+                            est.session_key, sig_public_key, client_crypto, handshake_id)
+                        ok = r["signature_valid"] and bool(r["aead_ok"])
+                        text = r["plaintext"].decode(errors="replace") if r["plaintext"] else None
+                        reason = None if ok else ("AEAD tag failed" if r["aead_ok"] is False else "signature invalid")
+                    elif kind == "final_per_chunk":
+                        r = verify_per_chunk_final({"n_chunks": data["n_chunks"], "signature": _b64d(data["signature"])},
+                                                   state["expected"], sig_public_key, client_crypto, handshake_id)
+                        ok = r["stream_fully_verified"]
+                        reason = None if ok else ("end record signature invalid" if not r["signature_valid"]
+                                                  else "chunk count does not match the signed end record")
+                    else:
+                        r = verify_hash_chain_final({"final_chain_hash": _b64d(data["final_chain_hash"]),
+                                                     "n_chunks": data["n_chunks"], "signature": _b64d(data["signature"])},
+                                                    chain_state, sig_public_key, client_crypto)
+                        ok = r["stream_fully_verified"]
+                        reason = None if ok else ("terminal signature invalid" if not r["signature_valid"]
+                                                  else "chain or length does not match the signed terminal record")
+                    metrics["total_verify_ms"] += r["verify_ms"]
+                    if not ok:
+                        fail(reason, "end")
+                    verified = state["failed"] is None
+                    metrics["stream_fully_verified"] = verified
+                    if verified:
+                        out.append({"type": "covered", "upto": metrics["n_chunks"] - 1})
+                    out.append({"type": "final", "stream_fully_verified": verified, "reason": state["failed"],
+                                "text": text})
+                return out
 
             async with client.stream("POST", f"{base_url}/secure/predict/stream", json=payload) as resp:
                 if resp.status_code != 200:
                     body = await resp.aread()
                     yield {"type": "error", "message": f"HTTP {resp.status_code}: {body[:200]}"}
                     return
-
                 async for line in resp.aiter_lines():
                     if not line.startswith("data:"):
                         continue
                     data = json.loads(line[len("data:"):].strip())
-
+                    if "kind" not in data:
+                        continue  # the trailing "done" record is not signed data
                     if metrics["ttft_ms"] is None:
                         metrics["ttft_ms"] = (time.perf_counter() - t_start) * 1000
-
-                    kind = data.get("kind")
-
-                    if kind == "chunk" and strategy == "per_chunk":
-                        ciphertext, ct_tampered = _maybe_tamper(
-                            data["index"], _b64d(data["ciphertext"]), "ciphertext"
-                        )
-                        signature, sig_tampered = _maybe_tamper(
-                            data["index"], _b64d(data["signature"]), "signature"
-                        )
-                        chunk = {
-                            "index": data["index"], "nonce": _b64d(data["nonce"]),
-                            "ciphertext": ciphertext, "signature": signature,
-                        }
-                        result = verify_per_chunk(chunk, expected_index, est.session_key,
-                                                   sig_public_key, client_crypto)
-                        metrics["all_signatures_valid"] &= result["signature_valid"]
-                        metrics["all_aead_ok"] &= bool(result["aead_ok"])
-                        metrics["all_in_order"] &= result["in_order"]
-                        metrics["total_signature_bytes"] += data.get("signature_bytes", 0)
-                        metrics["total_verify_ms"] += result["verify_ms"]
-                        metrics["total_signing_ms"] += data.get("sign_ms", 0.0)
-                        metrics["n_chunks"] += 1
-                        expected_index += 1
-                        text = None
-                        if result["plaintext"]:
-                            reconstructed.extend(result["plaintext"])
-                            text = result["plaintext"].decode(errors="replace")
-                        yield {
-                            "type": "chunk", "index": data["index"], "text": text,
-                            "tampered": ct_tampered or sig_tampered,
-                            "signature_valid": result["signature_valid"],
-                            "aead_ok": result["aead_ok"], "in_order": result["in_order"],
-                            "chain_ok_so_far": None,
-                        }
-
-                    elif kind == "chunk" and strategy == "hash_chain":
-                        ciphertext, ct_tampered = _maybe_tamper(
-                            data["index"], _b64d(data["ciphertext"]), "ciphertext"
-                        )
-                        chunk = {
-                            "index": data["index"], "nonce": _b64d(data["nonce"]),
-                            "ciphertext": ciphertext, "chain_hash": _b64d(data["chain_hash"]),
-                        }
-                        result = verify_hash_chain_chunk(chunk, chain_state, est.session_key)
-                        metrics["all_aead_ok"] &= bool(result["aead_ok"])
-                        metrics["total_signature_bytes"] += data.get("signature_bytes", 0)
-                        metrics["total_signing_ms"] += data.get("sign_ms", 0.0)
-                        metrics["n_chunks"] += 1
-                        text = None
-                        if result["plaintext"]:
-                            reconstructed.extend(result["plaintext"])
-                            text = result["plaintext"].decode(errors="replace")
-                        yield {
-                            "type": "chunk", "index": data["index"], "text": text,
-                            "tampered": ct_tampered,
-                            "signature_valid": None, "aead_ok": result["aead_ok"],
-                            "in_order": None, "chain_ok_so_far": result["chain_ok_so_far"],
-                        }
-
-                    elif kind == "final_buffered":
-                        ciphertext, ct_tampered = _maybe_tamper(None, _b64d(data["ciphertext"]), "ciphertext")
-                        signature, sig_tampered = _maybe_tamper(None, _b64d(data["signature"]), "signature")
-                        final_chunk = {
-                            "nonce": _b64d(data["nonce"]), "ciphertext": ciphertext, "signature": signature,
-                        }
-                        result = verify_buffer_and_sign_final(final_chunk, est.session_key,
-                                                                sig_public_key, client_crypto)
-                        metrics["all_signatures_valid"] &= result["signature_valid"]
-                        metrics["all_aead_ok"] &= bool(result["aead_ok"])
-                        metrics["total_signature_bytes"] += data.get("signature_bytes", 0)
-                        metrics["total_verify_ms"] += result["verify_ms"]
-                        metrics["total_signing_ms"] += data.get("sign_ms", 0.0)
-                        if result["plaintext"]:
-                            reconstructed.extend(result["plaintext"])
-                        metrics["stream_fully_verified"] = (
-                            result["signature_valid"] and bool(result["aead_ok"])
-                        )
-                        yield {
-                            "type": "final",
-                            "stream_fully_verified": metrics["stream_fully_verified"],
-                            "tampered": ct_tampered or sig_tampered,
-                            "text": result["plaintext"].decode(errors="replace") if result["plaintext"] else None,
-                        }
-
-                    elif kind == "final_chain":
-                        signature, sig_tampered = _maybe_tamper(None, _b64d(data["signature"]), "signature")
-                        final_chunk = {
-                            "final_chain_hash": _b64d(data["final_chain_hash"]), "signature": signature,
-                        }
-                        result = verify_hash_chain_final(final_chunk, chain_state, sig_public_key, client_crypto)
-                        metrics["stream_fully_verified"] = result["stream_fully_verified"]
-                        metrics["total_signature_bytes"] += data.get("signature_bytes", 0)
-                        metrics["total_verify_ms"] += result["verify_ms"]
-                        metrics["total_signing_ms"] += data.get("sign_ms", 0.0)
-                        yield {
-                            "type": "final",
-                            "stream_fully_verified": result["stream_fully_verified"],
-                            "tampered": sig_tampered,
-                            "text": None,
-                        }
+                    is_target = data.get("kind") == "chunk" and data.get("index") == attack_index
+                    is_final = data.get("kind", "").startswith("final")
+                    batch: list[tuple[dict, bool]] = [(data, False)]
+                    if attack == "tamper_ciphertext" and (is_target or (strategy == "buffer_and_sign" and is_final)):
+                        batch = [(_flip("ciphertext", data), True)]
+                    elif attack == "tamper_signature" and data.get("signature") and (
+                            is_target or (strategy != "per_chunk" and is_final)):
+                        batch = [(_flip("signature", data), True)]
+                    elif attack == "drop" and is_target:
+                        batch = []
+                    elif attack == "duplicate" and is_target:
+                        batch = [(data, False), (dict(data), True)]
+                    elif attack == "reorder" and is_target:
+                        state["held"] = data
+                        batch = []
+                    elif attack == "reorder" and state["held"] is not None and data.get("kind") == "chunk":
+                        batch = [(data, True), (state["held"], True)]
+                        state["held"] = None
+                    elif (attack == "strip_checkpoints" and strategy == "hash_chain" and data.get("kind") == "chunk"
+                          and data.get("signature")):
+                        batch = [({**data, "signature": None, "signature_bytes": 0}, True)]
+                    if attack == "truncate" and strategy == "buffer_and_sign" and is_final:
+                        break  # cut before the single signed envelope arrives
+                    for rec, attacked in batch:
+                        for ev in process(rec, attacked):
+                            yield ev
+                    if attack == "truncate" and is_target:
+                        break  # the connection is cut: no further chunks, no terminal record
 
             metrics["total_ms"] = (time.perf_counter() - t_start) * 1000
-            metrics["reconstructed_bytes"] = len(reconstructed)
-            if metrics["stream_fully_verified"] is None:
-                metrics["stream_fully_verified"] = (
-                    metrics["all_signatures_valid"] and metrics["all_aead_ok"] and metrics["all_in_order"]
-                )
-
+            if not state["terminal"]:
+                metrics["stream_fully_verified"] = False
+                if state["failed"] is None:
+                    state["failed"] = "stream ended without its signed terminal record (truncated)"
+                yield {"type": "final", "stream_fully_verified": False, "reason": state["failed"], "text": None}
         yield {"type": "summary", "metrics": metrics}
 
     except Exception as exc:

@@ -129,7 +129,7 @@ protocol or the statistics.
 `results/raw/`-only Results Dashboard box — the bullets below are current;
 the SVG needs regenerating to match.)*
 
-- **Live Demo** — pick a configuration + digit, run one real transaction
+- **Live Streamer** — pick a configuration + digit, run one real transaction
   against a server the page starts on demand, with a live tamper toggle
   (ciphertext or signature) that shows detection happening in real time.
 - **Benchmark Runner** — a scoped `bench.orchestrator` or

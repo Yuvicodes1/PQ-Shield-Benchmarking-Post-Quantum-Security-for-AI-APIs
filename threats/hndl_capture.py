@@ -46,7 +46,10 @@ from model.profiles.registry import get_profile
 # stored" is not the same question as "bytes eventually decryptable".
 KEX_DECRYPTABLE_UNDER_CRQC = {
     "classical": True,   # RSA-2048-OAEP broken by Shor's algorithm
+    "classical_ecdhe": True,  # X25519 -- discrete log, also broken by Shor's algorithm
     "hybrid": False,     # ML-KEM-768 -- lattice-based, not broken by Shor's algorithm
+    "hybrid_kex_pq": False,  # same X25519MLKEM768 key exchange as hybrid_kex
+    "hybrid_kex": False,  # X25519MLKEM768 -- secure unless BOTH halves are broken; ML-KEM half resists Shor
     "full_pqc": False,   # ML-KEM-768 -- same as above
 }
 

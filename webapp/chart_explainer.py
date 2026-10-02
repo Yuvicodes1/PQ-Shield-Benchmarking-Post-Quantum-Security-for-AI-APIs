@@ -98,7 +98,7 @@ def render_explain_button(
     clicked = st.button(label, key=f"{state_key}:button", type="secondary")
 
     if clicked:
-        with st.spinner("Asking Claude..."):
+        with st.spinner("Asking AI..."):
             try:
                 st.session_state[state_key] = ai_summary.generate_chart_explanation(
                     chart_title, chart_data, caveats=caveats

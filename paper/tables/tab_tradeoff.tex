@@ -1,0 +1,19 @@
+\begin{table*}[t]
+\centering
+\caption{Weighted composite score $w_{sec}\cdot S - w_{perf}\cdot O$ (higher is better), where $S$ is the security score (Classical 0, Hybrid 0.8, Full PQC 1.0) and $O$ the end-to-end latency overhead versus Control. Bold: best at that weighting and concurrency; fail: every request failed; n/a: not measured.}
+\label{tab:tradeoff}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrrrrrrrrr@{}}
+\toprule
+ & \multicolumn{3}{c}{Security ($w_{sec}{=}0.8$)} & \multicolumn{3}{c}{Balanced ($w_{sec}{=}0.5$)} & \multicolumn{3}{c}{Performance ($w_{sec}{=}0.2$)} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}
+Config. & 10 & 100 & 1,000 & 10 & 100 & 1,000 & 10 & 100 & 1,000 \\
+\midrule
+Classical-RSA & $-0.17$ & $-0.31$ & $-0.45$ & $-0.43$ & $-0.76$ & $-1.13$ & $-0.69$ & $-1.22$ & $-1.81$ \\
+Classical-ECDHE & $-0.01$ & $-0.10$ & $-0.22$ & $-0.02$ & $-0.24$ & $-0.56$ & $-0.04$ & $-0.38$ & $-0.90$ \\
+Hybrid & $+0.63$ & $+0.62$ & $+0.42$ & $+0.38$ & $\mathbf{+0.35}$ & $-0.14$ & $+0.12$ & $\mathbf{+0.07}$ & $-0.71$ \\
+Hybrid-KEX & $+0.62$ & $+0.55$ & $+0.40$ & $+0.36$ & $+0.18$ & $-0.19$ & $+0.10$ & $-0.20$ & $-0.78$ \\
+Full PQC & $\mathbf{+0.79}$ & $\mathbf{+0.72}$ & $\mathbf{+0.58}$ & $\mathbf{+0.48}$ & $+0.29$ & $\mathbf{-0.06}$ & $\mathbf{+0.17}$ & $-0.13$ & $\mathbf{-0.69}$ \\
+\bottomrule
+\end{tabular}
+\end{table*}

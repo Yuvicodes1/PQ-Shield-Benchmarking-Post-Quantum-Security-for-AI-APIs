@@ -1,0 +1,23 @@
+\begin{table*}[t]
+\centering
+\caption{Failed requests and their effect on the comparisons. All failures were connection resets (httpx \texttt{ReadError}): no timeouts and no HTTP errors. ``At handshake'': the first request of the transaction failed. Sensitivity: every failed request re-counted at the 30\,s client timeout (slower than any successful request) and the statistics recomputed. $\Delta$: difference in medians versus Classical-ECDHE, \% of its median, with 95\% CI. These levels are dominated by single-host contention, so the table tests only whether excluding failures changes the comparisons; it draws no equivalence verdicts.}
+\label{tab:failures}
+\setlength{\tabcolsep}{3pt}
+\footnotesize
+\begin{tabular}{@{}rlrrrrrll@{}}
+\toprule
+ & & & \multicolumn{2}{c}{Failed at} & \multicolumn{2}{c}{Median (s)} & \multicolumn{2}{c}{$\Delta$ vs.\ Classical-ECDHE (\%)} \\
+\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}
+Conc. & Configuration & Failed & handshake & request & succ.\ only & fail.\ at 30\,s & successful only & failures at 30\,s \\
+\midrule
+1,000 & Control & 0.0\% & -- & 0 & 9.43 & 9.43 & -- & -- \\
+ & Control-2RT & 0.2\% & 95 & 0 & 21.31 & 21.34 & -- & -- \\
+ & Classical-RSA & 1.5\% & 345 & 362 & 30.73 & 30.61 & +53.6 [+50.7, +55.9] & +52.1 [+49.6, +54.6] \\
+ & Classical-ECDHE & 1.5\% & 306 & 389 & 20.00 & 20.12 & ref. & ref. \\
+ & Hybrid & 1.5\% & 292 & 412 & 19.66 & 19.85 & -1.7 [-4.1, +0.9] & -1.3 [-3.5, +0.7] \\
+ & Hybrid-KEX & 1.2\% & 276 & 317 & 20.52 & 20.63 & +2.6 [-1.7, +9.8] & +2.5 [-1.8, +8.9] \\
+ & Full PQC & 1.6\% & 330 & 430 & 19.92 & 19.93 & -0.4 [-2.1, +1.2] & -0.9 [-1.9, +1.0] \\
+ & Hybrid-KEX-PQ & 1.3\% & 274 & 334 & 18.93 & 19.07 & -5.4 [-8.7, +0.3] & -5.2 [-8.8, +0.5] \\
+\bottomrule
+\end{tabular}
+\end{table*}

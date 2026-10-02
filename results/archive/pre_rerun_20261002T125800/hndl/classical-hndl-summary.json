@@ -1,0 +1,11 @@
+{
+  "config": "classical",
+  "n_requests": 200,
+  "n_ok": 200,
+  "total_bytes_stored": 86663,
+  "bytes_per_request_mean": 433.315,
+  "kex_bytes_per_request": 256,
+  "signature_bytes_per_request": 71,
+  "kex_decryptable_under_future_crqc": true,
+  "projected_bytes_per_1000_requests": 433315.0
+}

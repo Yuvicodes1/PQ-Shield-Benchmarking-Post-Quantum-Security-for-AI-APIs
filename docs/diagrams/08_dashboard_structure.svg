@@ -5,7 +5,7 @@
   <text x="500.0" y="56.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#831843">app.py</text>
   <text x="500.0" y="77.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="12" fill="#be185d">entrypoint / Home</text>
   <rect x="40" y="130" width="210" height="56" rx="9" fill="#fdf2f8" stroke="#ec4899" stroke-width="1.5"/>
-  <text x="145.0" y="149.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#831843">Live Demo</text>
+  <text x="145.0" y="149.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#831843">Live Streamer</text>
   <text x="145.0" y="170.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="12" fill="#be185d">pages/1_...</text>
   <rect x="270" y="130" width="210" height="56" rx="9" fill="#fdf2f8" stroke="#ec4899" stroke-width="1.5"/>
   <text x="375.0" y="149.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#831843">Benchmark Runner</text>

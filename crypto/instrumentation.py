@@ -20,21 +20,30 @@ import psutil
 
 
 class Timer:
-    """Context manager measuring wall-clock elapsed time in milliseconds.
+    """Context manager measuring elapsed time in milliseconds.
+
+    Records both wall-clock time (`elapsed_ms`) and the calling thread's CPU
+    time (`cpu_ms`). They differ when the thread is descheduled or waiting
+    for the GIL -- e.g. a signature computed on the event-loop thread while
+    the Llama token loop holds the GIL in a worker thread. Wall time is what
+    the client experiences; CPU time is the cost of the operation itself.
 
     Usage:
         with Timer() as t:
             do_something()
-        t.elapsed_ms
+        t.elapsed_ms, t.cpu_ms
     """
 
     def __enter__(self) -> "Timer":
+        self._c0 = time.thread_time()
         self._t0 = time.perf_counter()
         self.elapsed_ms = 0.0
+        self.cpu_ms = 0.0
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         self.elapsed_ms = (time.perf_counter() - self._t0) * 1000.0
+        self.cpu_ms = (time.thread_time() - self._c0) * 1000.0
 
 
 @dataclass

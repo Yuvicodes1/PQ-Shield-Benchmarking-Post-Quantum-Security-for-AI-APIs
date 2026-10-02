@@ -62,6 +62,7 @@ number the warm-loop benchmark cannot, by construction, ever measure.
 from __future__ import annotations
 
 import argparse
+import platform
 import json
 import os
 import statistics
@@ -71,6 +72,7 @@ import time
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ec, padding, rsa
+from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey
 
 from crypto.oqs_adapter import MLDSA65, MLKEM768
 from validation.reference_data import EXPECTED_QUALITATIVE_ORDERINGS, PUBLISHED_THROUGHPUT
@@ -140,12 +142,17 @@ def bench_classical(iterations: int, keygen_iterations: int | None = None) -> di
     rather than skipped -- just with a sample size that keeps the benchmark
     tractable.
     """
-    keygen_iterations = keygen_iterations or max(5, iterations // 100)
+    # Floor of 50: with RSA keygen's heavy-tailed prime-search cost, 5 samples
+    # (the old floor) gave a ratio vs. ML-KEM that moved by ~2x between runs.
+    keygen_iterations = keygen_iterations or max(50, iterations // 10)
 
     rsa_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     rsa_pub = rsa_key.public_key()
     secret = os.urandom(32)
     rsa_ct = rsa_pub.encrypt(secret, _OAEP)
+
+    x_key = X25519PrivateKey.generate()
+    x_peer = X25519PrivateKey.generate().public_key()
 
     ec_key = ec.generate_private_key(ec.SECP256R1())
     ec_pub = ec_key.public_key()
@@ -169,6 +176,10 @@ def bench_classical(iterations: int, keygen_iterations: int | None = None) -> di
             lambda: ec_key.sign(MESSAGE, ec.ECDSA(hashes.SHA256())), iterations, warmup=10,
         ),
         "ecdsa_p256_verify": _time_op(_ec_verify, iterations, warmup=10),
+        # X25519: the key exchange production TLS 1.3 actually uses (and the
+        # classical half of X25519MLKEM768) -- Configuration A' (classical_ecdhe).
+        "x25519_keygen": _time_op(X25519PrivateKey.generate, iterations, warmup=10),
+        "x25519_exchange": _time_op(lambda: x_key.exchange(x_peer), iterations, warmup=10),
     }
 
 
@@ -278,6 +289,13 @@ def check_orderings(kem: dict, sig: dict, classical: dict) -> list[dict]:
                 classical["rsa2048_keygen"]["mean_us"] / kem["keygen"]["mean_us"]
                 if kem["keygen"]["mean_us"] else None
             ),
+            # Median-based ratio is the one to cite: RSA keygen is heavy-tailed,
+            # so the mean ratio is dominated by a few slow prime searches.
+            "speedup_factor_median": (
+                classical["rsa2048_keygen"]["median_us"] / kem["keygen"]["median_us"]
+                if kem["keygen"]["median_us"] else None
+            ),
+            "rsa2048_keygen_iterations": classical["rsa2048_keygen"]["iterations"],
         },
         "rationale": EXPECTED_QUALITATIVE_ORDERINGS[2]["rationale"],
         "source": EXPECTED_QUALITATIVE_ORDERINGS[2]["source"],
@@ -326,12 +344,14 @@ def calibration_vs_published(kem: dict) -> list[dict]:
     return rows
 
 
-def run_all(iterations: int, cold_start_processes: int = 8) -> dict:
+def run_all(iterations: int, cold_start_processes: int = 8, rsa_keygen_iterations: int | None = None) -> dict:
     kem = bench_ml_kem_768(iterations)
     sig = bench_ml_dsa_65(iterations)
-    classical = bench_classical(iterations)
+    classical = bench_classical(iterations, keygen_iterations=rsa_keygen_iterations)
     result = {
         "iterations": iterations,
+        "host": {"system": platform.system(), "machine": platform.machine(),
+                 "cpu_count": os.cpu_count(), "python": platform.python_version()},
         "ml_kem_768": kem,
         "ml_dsa_65": sig,
         "classical": classical,
@@ -350,11 +370,13 @@ def main():
                          help="Fresh-process first-sign-call samples per algorithm (0 to skip; "
                               "each sample spawns a real subprocess, so this is slower than the "
                               "warm-loop benchmark above -- see module docstring)")
+    parser.add_argument("--rsa-keygen-iterations", type=int, default=None,
+                         help="RSA-2048 keygen samples (default: max(50, iterations // 10))")
     parser.add_argument("--output", default=None)
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
 
-    results = run_all(args.iterations, args.cold_start_processes)
+    results = run_all(args.iterations, args.cold_start_processes, args.rsa_keygen_iterations)
 
     if args.output:
         os.makedirs(os.path.dirname(args.output) or ".", exist_ok=True)

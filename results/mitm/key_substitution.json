@@ -1,0 +1,962 @@
+[
+  {
+    "config": "classical",
+    "variant": "benign",
+    "mode": "unauthenticated",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 300,
+    "accepted_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {}
+  },
+  {
+    "config": "classical",
+    "variant": "substitute",
+    "mode": "unauthenticated",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 300,
+    "accepted_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "attacker_read_request": 300,
+    "forged_response_accepted": 300,
+    "forged_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "rejected_at": {}
+  },
+  {
+    "config": "classical",
+    "variant": "substitute_resign",
+    "mode": "unauthenticated",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 300,
+    "accepted_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "attacker_read_request": 300,
+    "forged_response_accepted": 300,
+    "forged_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "rejected_at": {}
+  },
+  {
+    "config": "classical",
+    "variant": "relay_tamper",
+    "mode": "unauthenticated",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 0,
+    "accepted_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {
+      "aead": 300
+    }
+  },
+  {
+    "config": "classical",
+    "variant": "benign",
+    "mode": "pinned",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 300,
+    "accepted_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {}
+  },
+  {
+    "config": "classical",
+    "variant": "substitute",
+    "mode": "pinned",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 0,
+    "accepted_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {
+      "handshake": 300
+    }
+  },
+  {
+    "config": "classical",
+    "variant": "substitute_resign",
+    "mode": "pinned",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 0,
+    "accepted_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {
+      "handshake": 300
+    }
+  },
+  {
+    "config": "classical",
+    "variant": "relay_tamper",
+    "mode": "pinned",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 0,
+    "accepted_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {
+      "aead": 300
+    }
+  },
+  {
+    "config": "classical_ecdhe",
+    "variant": "benign",
+    "mode": "unauthenticated",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 300,
+    "accepted_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {}
+  },
+  {
+    "config": "classical_ecdhe",
+    "variant": "substitute",
+    "mode": "unauthenticated",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 300,
+    "accepted_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "attacker_read_request": 300,
+    "forged_response_accepted": 300,
+    "forged_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "rejected_at": {}
+  },
+  {
+    "config": "classical_ecdhe",
+    "variant": "substitute_resign",
+    "mode": "unauthenticated",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 300,
+    "accepted_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "attacker_read_request": 300,
+    "forged_response_accepted": 300,
+    "forged_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "rejected_at": {}
+  },
+  {
+    "config": "classical_ecdhe",
+    "variant": "relay_tamper",
+    "mode": "unauthenticated",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 0,
+    "accepted_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {
+      "aead": 300
+    }
+  },
+  {
+    "config": "classical_ecdhe",
+    "variant": "benign",
+    "mode": "pinned",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 300,
+    "accepted_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {}
+  },
+  {
+    "config": "classical_ecdhe",
+    "variant": "substitute",
+    "mode": "pinned",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 0,
+    "accepted_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {
+      "handshake": 300
+    }
+  },
+  {
+    "config": "classical_ecdhe",
+    "variant": "substitute_resign",
+    "mode": "pinned",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 0,
+    "accepted_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {
+      "handshake": 300
+    }
+  },
+  {
+    "config": "classical_ecdhe",
+    "variant": "relay_tamper",
+    "mode": "pinned",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 0,
+    "accepted_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {
+      "aead": 300
+    }
+  },
+  {
+    "config": "hybrid",
+    "variant": "benign",
+    "mode": "unauthenticated",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 300,
+    "accepted_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {}
+  },
+  {
+    "config": "hybrid",
+    "variant": "substitute",
+    "mode": "unauthenticated",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 300,
+    "accepted_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "attacker_read_request": 300,
+    "forged_response_accepted": 300,
+    "forged_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "rejected_at": {}
+  },
+  {
+    "config": "hybrid",
+    "variant": "substitute_resign",
+    "mode": "unauthenticated",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 300,
+    "accepted_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "attacker_read_request": 300,
+    "forged_response_accepted": 300,
+    "forged_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "rejected_at": {}
+  },
+  {
+    "config": "hybrid",
+    "variant": "relay_tamper",
+    "mode": "unauthenticated",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 0,
+    "accepted_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {
+      "aead": 300
+    }
+  },
+  {
+    "config": "hybrid",
+    "variant": "benign",
+    "mode": "pinned",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 300,
+    "accepted_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {}
+  },
+  {
+    "config": "hybrid",
+    "variant": "substitute",
+    "mode": "pinned",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 0,
+    "accepted_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {
+      "handshake": 300
+    }
+  },
+  {
+    "config": "hybrid",
+    "variant": "substitute_resign",
+    "mode": "pinned",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 0,
+    "accepted_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {
+      "handshake": 300
+    }
+  },
+  {
+    "config": "hybrid",
+    "variant": "relay_tamper",
+    "mode": "pinned",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 0,
+    "accepted_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {
+      "aead": 300
+    }
+  },
+  {
+    "config": "hybrid_kex",
+    "variant": "benign",
+    "mode": "unauthenticated",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 300,
+    "accepted_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {}
+  },
+  {
+    "config": "hybrid_kex",
+    "variant": "substitute",
+    "mode": "unauthenticated",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 300,
+    "accepted_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "attacker_read_request": 300,
+    "forged_response_accepted": 300,
+    "forged_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "rejected_at": {}
+  },
+  {
+    "config": "hybrid_kex",
+    "variant": "substitute_resign",
+    "mode": "unauthenticated",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 300,
+    "accepted_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "attacker_read_request": 300,
+    "forged_response_accepted": 300,
+    "forged_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "rejected_at": {}
+  },
+  {
+    "config": "hybrid_kex",
+    "variant": "relay_tamper",
+    "mode": "unauthenticated",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 0,
+    "accepted_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {
+      "aead": 300
+    }
+  },
+  {
+    "config": "hybrid_kex",
+    "variant": "benign",
+    "mode": "pinned",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 300,
+    "accepted_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {}
+  },
+  {
+    "config": "hybrid_kex",
+    "variant": "substitute",
+    "mode": "pinned",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 0,
+    "accepted_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {
+      "handshake": 300
+    }
+  },
+  {
+    "config": "hybrid_kex",
+    "variant": "substitute_resign",
+    "mode": "pinned",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 0,
+    "accepted_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {
+      "handshake": 300
+    }
+  },
+  {
+    "config": "hybrid_kex",
+    "variant": "relay_tamper",
+    "mode": "pinned",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 0,
+    "accepted_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {
+      "aead": 300
+    }
+  },
+  {
+    "config": "full_pqc",
+    "variant": "benign",
+    "mode": "unauthenticated",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 300,
+    "accepted_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {}
+  },
+  {
+    "config": "full_pqc",
+    "variant": "substitute",
+    "mode": "unauthenticated",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 300,
+    "accepted_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "attacker_read_request": 300,
+    "forged_response_accepted": 300,
+    "forged_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "rejected_at": {}
+  },
+  {
+    "config": "full_pqc",
+    "variant": "substitute_resign",
+    "mode": "unauthenticated",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 300,
+    "accepted_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "attacker_read_request": 300,
+    "forged_response_accepted": 300,
+    "forged_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "rejected_at": {}
+  },
+  {
+    "config": "full_pqc",
+    "variant": "relay_tamper",
+    "mode": "unauthenticated",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 0,
+    "accepted_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {
+      "aead": 300
+    }
+  },
+  {
+    "config": "full_pqc",
+    "variant": "benign",
+    "mode": "pinned",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 300,
+    "accepted_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {}
+  },
+  {
+    "config": "full_pqc",
+    "variant": "substitute",
+    "mode": "pinned",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 0,
+    "accepted_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {
+      "handshake": 300
+    }
+  },
+  {
+    "config": "full_pqc",
+    "variant": "substitute_resign",
+    "mode": "pinned",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 0,
+    "accepted_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {
+      "handshake": 300
+    }
+  },
+  {
+    "config": "full_pqc",
+    "variant": "relay_tamper",
+    "mode": "pinned",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 0,
+    "accepted_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {
+      "aead": 300
+    }
+  },
+  {
+    "config": "hybrid_kex_pq",
+    "variant": "benign",
+    "mode": "unauthenticated",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 300,
+    "accepted_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {}
+  },
+  {
+    "config": "hybrid_kex_pq",
+    "variant": "substitute",
+    "mode": "unauthenticated",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 300,
+    "accepted_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "attacker_read_request": 300,
+    "forged_response_accepted": 300,
+    "forged_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "rejected_at": {}
+  },
+  {
+    "config": "hybrid_kex_pq",
+    "variant": "substitute_resign",
+    "mode": "unauthenticated",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 300,
+    "accepted_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "attacker_read_request": 300,
+    "forged_response_accepted": 300,
+    "forged_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "rejected_at": {}
+  },
+  {
+    "config": "hybrid_kex_pq",
+    "variant": "relay_tamper",
+    "mode": "unauthenticated",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 0,
+    "accepted_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {
+      "aead": 300
+    }
+  },
+  {
+    "config": "hybrid_kex_pq",
+    "variant": "benign",
+    "mode": "pinned",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 300,
+    "accepted_ci95": [
+      0.9877790253057065,
+      1.0
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {}
+  },
+  {
+    "config": "hybrid_kex_pq",
+    "variant": "substitute",
+    "mode": "pinned",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 0,
+    "accepted_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {
+      "handshake": 300
+    }
+  },
+  {
+    "config": "hybrid_kex_pq",
+    "variant": "substitute_resign",
+    "mode": "pinned",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 0,
+    "accepted_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {
+      "handshake": 300
+    }
+  },
+  {
+    "config": "hybrid_kex_pq",
+    "variant": "relay_tamper",
+    "mode": "pinned",
+    "n_trials": 300,
+    "n_valid": 300,
+    "accepted": 0,
+    "accepted_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "attacker_read_request": 0,
+    "forged_response_accepted": 0,
+    "forged_ci95": [
+      0.0,
+      0.01222097469429355
+    ],
+    "rejected_at": {
+      "aead": 300
+    }
+  }
+]

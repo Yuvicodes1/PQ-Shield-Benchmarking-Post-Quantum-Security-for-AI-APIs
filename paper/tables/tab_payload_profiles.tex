@@ -1,0 +1,16 @@
+\begin{table*}[t]
+\centering
+\caption{Payload-shape sensitivity at 10 connections (5 repetitions per cell). Request/response sizes are plaintext medians; each cell gives median end-to-end latency (ms) and the added latency versus Control, with Mann--Whitney $U$ significance (* $p<0.05$).}
+\label{tab:payload}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrrrrrrrr@{}}
+\toprule
+Profile & Req. (B) & Resp. (B) & Control & Classical-RSA & Classical-ECDHE & Hybrid & Hybrid-KEX & Full PQC \\
+\midrule
+tabular\_small & 348 & 90 & 89.2 & 160.7 (+71.6*) & 95.9 (+6.7*) & 94.3 (+5.1*) & 96.1 (+7.0*) & 93.1 (+4.0*) \\
+image\_cnn & 4,138 & 245 & 4.2 & 114.4 (+110.2*) & 13.1 (+8.9*) & 10.2 (+6.0*) & 12.9 (+8.7*) & 10.2 (+6.0*) \\
+embedding & 202 & 8,017 & 5.7 & 110.0 (+104.2*) & 13.5 (+7.7*) & 9.9 (+4.2*) & 13.0 (+7.3*) & 10.5 (+4.8*) \\
+llm\_completion & 157 & 4,048 & 3.9 & 112.8 (+108.9*) & 13.3 (+9.4*) & 10.3 (+6.4*) & 13.0 (+9.1*) & 10.5 (+6.6*) \\
+\bottomrule
+\end{tabular}
+\end{table*}

@@ -120,7 +120,8 @@ producing `sig_bytes` bytes per signature (exact for ML-DSA-65; a
 [min, max] range for ECDSA-P256):
 
     buffer_and_sign              -> 1 signature
-    per_chunk                    -> n_chunks signatures
+    per_chunk                    -> n_chunks signatures (+1 signed end record
+                                    in protocol v2)
     hash_chain, no checkpoint    -> 1 signature
     hash_chain, checkpoint every -> floor(n_chunks / k) + 1 signatures
       k chunks
@@ -247,11 +248,13 @@ def cold_start_ms_and_tolerance(sig_algorithm: str, primitive_bench: dict) -> tu
     return mean_ms, tolerance_ratio
 
 
-def expected_signature_count(strategy: str, n_chunks: int, checkpoint_interval: int | None) -> int:
+def expected_signature_count(strategy: str, n_chunks: int, checkpoint_interval: int | None,
+                             protocol_version: str | None = None) -> int:
     if strategy == "buffer_and_sign":
         return 1
     if strategy == "per_chunk":
-        return max(0, int(n_chunks))
+        # v2 adds a signed end-of-stream record; rows without a version predate it.
+        return max(0, int(n_chunks)) + (1 if protocol_version == "v2" else 0)
     if strategy == "hash_chain":
         if not checkpoint_interval or checkpoint_interval <= 0:
             return 1
@@ -284,7 +287,9 @@ def validate_row(row: dict, primitive_bench: dict) -> dict:
     measured_bytes = int(row["total_signature_bytes"])
     measured_signing_ms = float(row["total_signing_ms"])
 
-    expected_sigs = expected_signature_count(strategy, n_chunks, checkpoint_interval)
+    pv = row.get("protocol_version")
+    expected_sigs = expected_signature_count(strategy, n_chunks, checkpoint_interval,
+                                             pv if isinstance(pv, str) else None)
     bytes_min, bytes_max = expected_signature_bytes(sig_algorithm, expected_sigs)
     bytes_exact_scheme = sig_algorithm == "ML-DSA-65"
     bytes_ok = bytes_min <= measured_bytes <= bytes_max

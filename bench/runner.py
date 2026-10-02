@@ -32,20 +32,24 @@ import time
 
 import httpx
 
-from api.secure_client import secure_predict_transaction
+from api.secure_client import ClientSession, secure_predict_transaction
 from crypto.instrumentation import ResourceSampler
 from model.profiles.registry import get_profile
 
 CONFIG_TO_MODULE_NAME = {
     "control": "control",
+    "control-2rt": "control_2rt",
     "classical": "classical",
+    "classical-ecdhe": "classical_ecdhe",
     "hybrid": "hybrid",
+    "hybrid-kex": "hybrid_kex",
+    "hybrid-kex-pq": "hybrid_kex_pq",
     "full-pqc": "full_pqc",
 }
 
 CSV_FIELDS = [
-    "run_id", "config", "payload_profile", "concurrency", "repetition", "request_index",
-    "rtt_ms", "handshake_ms", "total_ms",
+    "run_id", "config", "payload_profile", "network_profile", "requests_per_handshake", "resumed", "auth_handshake", "concurrency", "repetition", "request_index",
+    "rtt_ms", "handshake_ms", "total_ms", "handshake_auth_verify_ms",
     "client_establish_ms", "verify_ms", "valid_signature",
     "kex_blob_bytes", "signature_bytes",
     "request_plaintext_bytes", "response_plaintext_bytes", "response_ciphertext_bytes",
@@ -74,17 +78,29 @@ def _sample_request() -> dict:
     return get_profile().sample_request()
 
 
-async def _control_transaction(client: httpx.AsyncClient, base_url: str) -> dict:
-    row = {"config": "control", "error": None}
+async def _control_transaction(client: httpx.AsyncClient, base_url: str, two_round_trips: bool = False) -> dict:
+    """Unprotected transaction. With two_round_trips (config "control_2rt"),
+    first makes a no-crypto GET /handshake, mirroring the two HTTP requests of
+    every protected transaction -- the matched control that separates
+    protocol overhead from cryptographic overhead."""
+    row = {"config": "control_2rt" if two_round_trips else "control", "error": None}
     body = _sample_request()
     request_bytes = len(json.dumps(body).encode())
-    t0 = time.perf_counter()
     try:
+        handshake_ms = 0.0
+        if two_round_trips:
+            t_h = time.perf_counter()
+            hs = await client.get(f"{base_url}/handshake")
+            handshake_ms = (time.perf_counter() - t_h) * 1000
+            if hs.status_code != 200:
+                row["error"] = f"HTTP {hs.status_code} (handshake)"
+                return row
+        t0 = time.perf_counter()
         resp = await client.post(f"{base_url}/predict", json=body)
         rtt_ms = (time.perf_counter() - t0) * 1000
         row["rtt_ms"] = rtt_ms
-        row["total_ms"] = rtt_ms
-        row["handshake_ms"] = 0.0
+        row["total_ms"] = handshake_ms + rtt_ms
+        row["handshake_ms"] = handshake_ms
         row["request_plaintext_bytes"] = request_bytes
         if resp.status_code == 200:
             row["response_plaintext_bytes"] = len(resp.content)
@@ -103,12 +119,17 @@ def _flatten(row: dict, config_name: str, concurrency: int, repetition: int, idx
         "run_id": run_id,
         "config": config_name,
         "payload_profile": get_profile().name,
+        "network_profile": "localhost",  # bench.orchestrator overrides when a netem proxy is in the path
+        "requests_per_handshake": row.get("requests_per_handshake", 1),
+        "resumed": row.get("resumed", False),
+        "auth_handshake": row.get("auth_handshake", False),
         "concurrency": concurrency,
         "repetition": repetition,
         "request_index": idx,
         "rtt_ms": row.get("rtt_ms"),
         "handshake_ms": row.get("handshake_ms"),
         "total_ms": row.get("total_ms"),
+        "handshake_auth_verify_ms": row.get("handshake_auth_verify_ms"),
         "client_establish_ms": row.get("client_establish_ms"),
         "verify_ms": row.get("verify_ms"),
         "valid_signature": row.get("valid_signature"),
@@ -136,6 +157,8 @@ async def run_sweep_cell(
     repetition: int,
     reuse_handshake: bool = False,
     run_id: str | None = None,
+    requests_per_handshake: int = 1,
+    auth_handshake: bool = False,
 ) -> list[dict]:
     """Runs one (config, concurrency, repetition) cell and returns flattened rows.
 
@@ -152,12 +175,21 @@ async def run_sweep_cell(
     limits = httpx.Limits(max_connections=concurrency + 10, max_keepalive_connections=concurrency)
     async with httpx.AsyncClient(timeout=30.0, limits=limits) as client:
         cached_handshake = None
-        if reuse_handshake and config_name != "control":
+        pinned_identity = None
+        if auth_handshake and config_name not in ("control", "control_2rt"):
+            from api.secure_client import fetch_identity
+
+            pinned_identity = await fetch_identity(client, base_url)
+        if reuse_handshake and config_name not in ("control", "control_2rt"):
             from api.secure_client import do_handshake
 
             cached_handshake, _ = await do_handshake(client, base_url)
 
         async def worker():
+            # Session resumption (requests_per_handshake > 1): each worker -- one
+            # client connection's worth of traffic -- runs one key exchange and
+            # reuses it for the next requests_per_handshake requests.
+            session = None
             while True:
                 async with counter_lock:
                     if counter["n"] >= n_requests:
@@ -165,13 +197,21 @@ async def run_sweep_cell(
                     idx = counter["n"]
                     counter["n"] += 1
                 async with semaphore:
-                    if config_name == "control":
-                        row = await _control_transaction(client, base_url)
+                    if config_name in ("control", "control_2rt"):
+                        row = await _control_transaction(client, base_url, two_round_trips=config_name == "control_2rt")
                     else:
+                        if requests_per_handshake > 1 and (session is None or session.requests_left <= 0):
+                            session = ClientSession(requests_left=requests_per_handshake)
                         row = await secure_predict_transaction(
                             client, base_url, config_name, _sample_request(),
                             debug_metrics=True, cached_handshake=cached_handshake,
+                            session=session if requests_per_handshake > 1 else None,
+                            pinned_identity=pinned_identity,
                         )
+                        if row.get("error"):
+                            session = None  # start a fresh session after any failure
+                    row["requests_per_handshake"] = requests_per_handshake
+                    row["auth_handshake"] = pinned_identity is not None
                     results.append(_flatten(row, config_name, concurrency, repetition, idx, run_id))
 
         workers = [asyncio.create_task(worker()) for _ in range(concurrency)]

@@ -1,6 +1,8 @@
 # Threat Scenarios — current layout
 
-Describes what `pages/4_🛡️_Threat_Scenarios.py` actually shows today: four
+> **Note (October 2026):** the dashboard was reorganised into `views/` with grouped navigation; the weighted trade-off matrix was replaced by the no-weights decision explorer on the *Key findings* page, and new views cover the attack campaign, key substitution and signing cost. See the README's "Interactive dashboard" section for the current layout; the section-by-section detail below describes the earlier version.
+
+Describes what `views/threat_lab.py` actually shows today: four
 tabs, each independent of the others and of the Results Dashboard's run
 selector, plus one page-level AI summary at the bottom. Every tab follows
 the same shape — a plain-language explanation of the threat, a chart/table

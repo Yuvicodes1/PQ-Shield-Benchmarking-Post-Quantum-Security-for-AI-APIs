@@ -32,12 +32,23 @@ METRIC_COLUMNS = [
 ]
 
 
-def load_raw(raw_dir: str) -> pd.DataFrame:
+def load_raw(raw_dir: str, run_ids: list[str] | None = None) -> pd.DataFrame:
+    """Loads every raw CSV under `raw_dir`. Pass `run_ids` to keep only rows
+    from those sweeps -- results/raw/ accumulates every sweep ever run, and
+    pooling unrelated sweeps (different hosts, request counts, or a broken
+    smoke test) into one statistic is exactly what has to be avoided for a
+    citable number."""
     paths = sorted(glob.glob(os.path.join(raw_dir, "*.csv")))
     if not paths:
         raise SystemExit(f"No CSV files found under {raw_dir}. Run bench.orchestrator first.")
     frames = [pd.read_csv(p) for p in paths]
     df = pd.concat(frames, ignore_index=True)
+    if run_ids:
+        if "run_id" not in df.columns:
+            raise SystemExit("No run_id column in raw data; cannot filter by --run-id.")
+        df = df[df["run_id"].astype(str).isin(run_ids)].reset_index(drop=True)
+        if df.empty:
+            raise SystemExit(f"No rows under {raw_dir} match run_id(s) {run_ids}.")
     return df
 
 
@@ -51,12 +62,13 @@ def discard_warmup(df: pd.DataFrame, warmup_fraction: float) -> pd.DataFrame:
     applied function returns a frame with the same non-key columns as the
     input -- a boolean mask sidesteps that entirely and is easier to audit.
     """
-    df = df.sort_values(["config", "concurrency", "repetition", "request_index"]).reset_index(drop=True)
+    # A cell is one (run, config, concurrency, repetition) -- including run_id
+    # keeps two sweeps' same-numbered repetitions from being trimmed as one.
+    cell_cols = (["run_id"] if "run_id" in df.columns else []) + ["config", "concurrency", "repetition"]
+    df = df.sort_values([*cell_cols, "request_index"]).reset_index(drop=True)
     keep_mask = pd.Series(True, index=df.index)
 
-    for (_config, _concurrency, _repetition), group in df.groupby(
-        ["config", "concurrency", "repetition"], sort=False
-    ):
+    for _cell, group in df.groupby(cell_cols, sort=False, dropna=False):
         n = len(group)
         if n < 20:
             continue  # too few rows to safely discard any as warm-up
@@ -68,14 +80,24 @@ def discard_warmup(df: pd.DataFrame, warmup_fraction: float) -> pd.DataFrame:
 
 
 def summarize(df: pd.DataFrame) -> pd.DataFrame:
-    ok = df[df["error"].isna() | (df["error"] == "")]
+    """Latency statistics are computed over successful requests only, but
+    every (config, concurrency) cell that was attempted gets a row with its
+    error rate -- a cell where every request failed (e.g. Classical at
+    1,000 connections) must show up as 100% errors, not vanish from the
+    table because it had no successful rows to summarize."""
+    is_err = df["error"].notna() & (df["error"] != "")
     rows = []
-    for (config, concurrency), group in ok.groupby(["config", "concurrency"]):
+    for (config, concurrency), attempted in df.groupby(["config", "concurrency"]):
+        group = attempted[~is_err.loc[attempted.index]]
+        n_errors = int(is_err.loc[attempted.index].sum())
         row = {
             "config": config,
             "concurrency": concurrency,
             "n_requests": len(group),
-            "n_repetitions": group["repetition"].nunique(),
+            "n_repetitions": attempted["repetition"].nunique(),
+            "n_attempted": len(attempted),
+            "n_errors": n_errors,
+            "error_rate": n_errors / len(attempted) if len(attempted) else None,
         }
         for col in METRIC_COLUMNS:
             if col not in group.columns:
@@ -180,10 +202,13 @@ def main():
     parser.add_argument("--baseline-config", default=None,
                          help="Config to compare against; default auto-resolves to 'control' if present, "
                               "else 'classical' (see resolve_baseline_config).")
+    parser.add_argument("--run-id", action="append", default=None,
+                         help="Only aggregate rows from this sweep run_id (repeatable).")
     args = parser.parse_args()
 
-    df = load_raw(args.raw_dir)
-    print(f"Loaded {len(df)} raw rows from {args.raw_dir}")
+    df = load_raw(args.raw_dir, run_ids=args.run_id)
+    print(f"Loaded {len(df)} raw rows from {args.raw_dir}"
+          + (f" (run_id in {args.run_id})" if args.run_id else ""))
 
     df_trimmed = discard_warmup(df, args.warmup_fraction)
     print(f"{len(df_trimmed)} rows after discarding {args.warmup_fraction:.0%} warm-up per cell")
@@ -196,7 +221,15 @@ def main():
     summary.to_csv(args.output, index=False)
     print(f"Wrote summary statistics ({len(summary)} rows) to {args.output}")
 
-    sig = mann_whitney_vs_control(df_trimmed, metric="rtt_ms", baseline_config=args.baseline_config)
+    # total_ms (handshake + protected request) is the primary metric: it is
+    # the end-to-end cost a client actually pays and the only one directly
+    # comparable to control's single request. rtt_ms covers only the second
+    # leg of a protected transaction (it excludes the handshake round trip),
+    # so it is reported for decomposition, not as "overhead vs. control".
+    sig = pd.concat([
+        mann_whitney_vs_control(df_trimmed, metric=m, baseline_config=args.baseline_config)
+        for m in ("total_ms", "rtt_ms")
+    ], ignore_index=True)
     sig.to_csv(args.significance_output, index=False)
     print(f"Wrote Mann-Whitney U significance tests ({len(sig)} rows) to {args.significance_output}")
 

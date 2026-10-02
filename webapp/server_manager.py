@@ -1,5 +1,5 @@
-"""Manages the four demo servers (control, classical, hybrid, full_pqc) that
-the Streamlit "Live Demo" and "Threat Scenarios" pages talk to over real
+"""Manages the demo servers (one per configuration) that
+the Streamlit "Live Streamer" and "Threat Scenarios" pages talk to over real
 HTTP -- reused directly from bench/orchestrator.py's subprocess helpers so
 the demo goes through exactly the same server code path as the paper's
 benchmark, just on dedicated ports (8100-8103) so it never collides with a
@@ -21,17 +21,23 @@ import streamlit as st
 
 from bench.orchestrator import REPO_ROOT, SERVER_MODULES, _start_server, _wait_healthy
 
-DEMO_PORTS = {"control": 8100, "classical": 8101, "hybrid": 8102, "full_pqc": 8103}
+DEMO_PORTS = {"control": 8100, "classical": 8101, "hybrid": 8102, "full_pqc": 8103, "classical_ecdhe": 8104,
+              "hybrid_kex": 8105, "hybrid_kex_pq": 8106}
 
 # webapp/demo code uses crypto-module names ("full_pqc"); bench.orchestrator
 # uses hyphenated config keys ("full-pqc") for its SERVER_MODULES lookup.
-CONFIG_KEY = {"control": "control", "classical": "classical", "hybrid": "hybrid", "full_pqc": "full-pqc"}
+CONFIG_KEY = {"control": "control", "classical": "classical", "classical_ecdhe": "classical-ecdhe",
+              "hybrid": "hybrid", "hybrid_kex": "hybrid-kex", "full_pqc": "full-pqc",
+              "hybrid_kex_pq": "hybrid-kex-pq"}
 
 DISPLAY_NAME = {
     "control": "Control (unprotected)",
-    "classical": "A — Classical (RSA-2048 + ECDSA)",
+    "classical": "A — Classical-RSA (RSA-2048 + ECDSA, legacy)",
+    "classical_ecdhe": "A' — Classical-ECDHE (X25519 + ECDSA)",
+    "hybrid_kex": "B' — Hybrid-KEX (X25519MLKEM768 + ECDSA)",
     "hybrid": "B — Hybrid (ML-KEM-768 + ECDSA)",
     "full_pqc": "C — Full PQC (ML-KEM-768 + ML-DSA-65)",
+    "hybrid_kex_pq": "C′ — Hybrid-KEX-PQ (X25519MLKEM768 + ML-DSA-65)",
 }
 
 
@@ -63,7 +69,10 @@ def ensure_server(crypto_name: str) -> str:
     os.makedirs(log_dir, exist_ok=True)
     log_path = os.path.join(log_dir, f"webapp-{crypto_name}.log")
 
-    proc = _start_server(config_key, port, log_path)
+    # Demo servers always publish an identity key and sign handshake transcripts
+    # (crypto/handshake_auth.py); a client that ignores the signature behaves
+    # exactly like the unauthenticated default, so one server serves both demos.
+    proc = _start_server(config_key, port, log_path, extra_env={"PQ_SHIELD_AUTH_HANDSHAKE": "1"})
     _wait_healthy(base_url, timeout_s=25.0)
     st.session_state.demo_server_pids[crypto_name] = proc.pid
     return base_url

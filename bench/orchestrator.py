@@ -5,7 +5,7 @@ to the next configuration -- so no two configurations ever share a process
 or contend for the same CPU core at the same time.
 
 Usage:
-    python -m bench.orchestrator --configs control,classical,hybrid,full-pqc \
+    python -m bench.orchestrator --configs control,classical,classical-ecdhe,hybrid,hybrid-kex,full-pqc \
         --concurrency 10,100,1000 --repetitions 5 --requests-per-concurrency 10
 
 `--requests-per-concurrency` sets requests = concurrency * this value for
@@ -19,6 +19,7 @@ import argparse
 import asyncio
 import json
 import os
+import platform
 import signal
 import subprocess
 import sys
@@ -26,13 +27,18 @@ import time
 
 import httpx
 
+from bench.netem_proxy import NETWORK_PROFILES
 from bench.runner import new_run_id, run_sweep_cell, write_csv
 from crypto.instrumentation import ResourceSampler
 
 SERVER_MODULES = {
     "control": "api.server:app",
+    "control-2rt": "api.server:app",  # same server; the client makes the extra no-crypto round trip
     "classical": "api.server_config_a:app",
+    "classical-ecdhe": "api.server_config_ecdhe:app",
     "hybrid": "api.server_config_b:app",
+    "hybrid-kex": "api.server_config_hybridkex:app",
+    "hybrid-kex-pq": "api.server_config_hybridkexpq:app",
     "full-pqc": "api.server_config_c:app",
 }
 
@@ -40,6 +46,16 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PYTHON_BIN = os.path.join(REPO_ROOT, ".venv", "bin", "python")
 if not os.path.isfile(PYTHON_BIN):
     PYTHON_BIN = sys.executable
+
+# Recorded into every sweep-summary cell: results from different hosts (the
+# single-core sandbox vs. the M3 laptop) are not comparable in absolute terms,
+# so each cell has to say which machine produced it.
+HOST_INFO = {
+    "host_system": platform.system(),
+    "host_machine": platform.machine(),
+    "host_cpu_count": os.cpu_count(),
+    "host_python": platform.python_version(),
+}
 
 
 def _start_server(config_key: str, port: int, log_path: str, extra_env: dict | None = None) -> subprocess.Popen:
@@ -99,17 +115,27 @@ def run_full_sweep(
     log_dir: str,
     summary_dir: str | None = None,
     payload_profile: str = "tabular_small",
+    network_profile: str = "localhost",
+    requests_per_handshake: int = 1,
+    auth_handshake: bool = False,
 ) -> list[dict]:
     os.makedirs(raw_dir, exist_ok=True)
     os.makedirs(log_dir, exist_ok=True)
     summary_dir = summary_dir or os.path.join(REPO_ROOT, "results", "sweep_summaries")
     os.makedirs(summary_dir, exist_ok=True)
-    base_url = f"http://127.0.0.1:{port}"
+    server_url = f"http://127.0.0.1:{port}"
+    netem = NETWORK_PROFILES[network_profile]
+    # With a network profile, the load generator talks to the emulating proxy
+    # (bench.netem_proxy) and the proxy to the server; health checks still go
+    # straight to the server.
+    base_url = f"http://127.0.0.1:{port + 1000}" if netem else server_url
     all_cell_summaries = []
     run_id = new_run_id()
-    print(f"run_id={run_id}", flush=True)
+    print(f"run_id={run_id} network_profile={network_profile}", flush=True)
 
     extra_env = {"PQ_SHIELD_PAYLOAD_PROFILE": payload_profile}
+    if auth_handshake:
+        extra_env["PQ_SHIELD_AUTH_HANDSHAKE"] = "1"
     # Also set it in *this* process's environment: run_sweep_cell's client-side
     # request generation (model.profiles.registry.get_profile()) runs in-process
     # here, not in the server subprocess, so both must agree on the profile.
@@ -120,14 +146,33 @@ def run_full_sweep(
         print(f"\n=== Starting server: {config_key} ({SERVER_MODULES[config_key]}), "
               f"payload_profile={payload_profile} ===", flush=True)
         proc = _start_server(config_key, port, log_path, extra_env=extra_env)
+        proxy = None
         try:
-            _wait_healthy(base_url)
+            _wait_healthy(server_url)
             print(f"Server healthy (pid={proc.pid}).", flush=True)
+            if netem:
+                proxy = subprocess.Popen(
+                    [PYTHON_BIN, "-m", "bench.netem_proxy", "--listen-port", str(port + 1000),
+                     "--upstream-port", str(port), "--rtt-ms", str(netem["rtt_ms"]),
+                     "--bandwidth-mbps", str(netem["bandwidth_mbps"])],
+                    cwd=REPO_ROOT, start_new_session=True,
+                )
+                time.sleep(1.0)
+                _wait_healthy(base_url)
 
             for concurrency in concurrency_levels:
                 n_requests = max(min_requests, concurrency * requests_per_concurrency)
                 for repetition in range(1, repetitions + 1):
-                    fname = f"{config_key}-c{concurrency}-r{repetition}.csv"
+                    # run_id (and payload profile) in the filename -- mirrors
+                    # bench.streaming_runner. Without them, every later sweep
+                    # (including a quick dashboard smoke test) silently overwrote
+                    # the same {config}-c{N}-r{rep}.csv, leaving results/raw/ a
+                    # mix of unrelated runs that analysis.aggregate then pooled.
+                    net_tag = "" if network_profile == "localhost" else f"-net_{network_profile}"
+                    rph_tag = "" if requests_per_handshake == 1 else f"-rph{requests_per_handshake}"
+                    rph_tag += "-auth" if auth_handshake else ""
+                    fname = (f"{config_key}-{payload_profile}{net_tag}{rph_tag}"
+                             f"-c{concurrency}-r{repetition}-{run_id}.csv")
                     out_path = os.path.join(raw_dir, fname)
                     print(
                         f"  -> {config_key} | concurrency={concurrency} | rep={repetition} "
@@ -140,11 +185,14 @@ def run_full_sweep(
                     rows = asyncio.run(
                         run_sweep_cell(
                             base_url, _crypto_name(config_key), concurrency, n_requests, repetition,
-                            run_id=run_id,
+                            run_id=run_id, requests_per_handshake=requests_per_handshake,
+                            auth_handshake=auth_handshake,
                         )
                     )
                     wall_s = time.perf_counter() - t0
                     resource_summary = sampler.summary()  # server-process CPU%/RSS during this cell
+                    for r in rows:
+                        r["network_profile"] = network_profile
                     write_csv(rows, out_path)
                     n_errors = sum(1 for r in rows if r["error"])
                     summary = {
@@ -152,9 +200,15 @@ def run_full_sweep(
                         "run_type": "concurrency",  # distinguishes this from bench.streaming_runner's
                                                      # entries once both write into results/sweep_summaries/
                         "config": config_key,
+                        "payload_profile": payload_profile,
+                        "network_profile": network_profile,
+                        "requests_per_handshake": requests_per_handshake,
+                        "auth_handshake": auth_handshake,
+                        **({f"net_{k}": v for k, v in netem.items()} if netem else {}),
                         "concurrency": concurrency,
                         "repetition": repetition,
                         "requests": n_requests,
+                        **HOST_INFO,
                         "wall_seconds": wall_s,
                         "throughput_rps": len(rows) / wall_s if wall_s > 0 else None,
                         "n_errors": n_errors,
@@ -170,6 +224,8 @@ def run_full_sweep(
                         flush=True,
                     )
         finally:
+            if proxy is not None:
+                _stop_server(proxy)
             print(f"Stopping server: {config_key}", flush=True)
             _stop_server(proc)
             time.sleep(1.0)
@@ -184,14 +240,17 @@ def run_full_sweep(
 
 
 def _crypto_name(config_key: str) -> str:
-    return {"control": "control", "classical": "classical", "hybrid": "hybrid", "full-pqc": "full_pqc"}[
+    return {"control": "control", "control-2rt": "control_2rt", "classical": "classical",
+            "classical-ecdhe": "classical_ecdhe",
+            "hybrid": "hybrid", "hybrid-kex": "hybrid_kex", "full-pqc": "full_pqc",
+            "hybrid-kex-pq": "hybrid_kex_pq"}[
         config_key
     ]
 
 
 def main():
     parser = argparse.ArgumentParser(description="PQ-Shield full benchmark matrix orchestrator")
-    parser.add_argument("--configs", default="control,classical,hybrid,full-pqc")
+    parser.add_argument("--configs", default="control,classical,classical-ecdhe,hybrid,hybrid-kex,full-pqc")
     parser.add_argument("--concurrency", default="10,100,1000")
     parser.add_argument("--repetitions", type=int, default=5)
     parser.add_argument("--requests-per-concurrency", type=int, default=10)
@@ -204,6 +263,11 @@ def main():
         "--payload-profile", default="tabular_small",
         choices=["tabular_small", "image_cnn", "embedding", "llm_completion"],
     )
+    parser.add_argument("--network-profile", default="localhost", choices=list(NETWORK_PROFILES),
+                        help="Emulated network path between client and server (bench.netem_proxy)")
+    parser.add_argument("--requests-per-handshake", type=int, default=1,
+                        help="Session resumption: requests served per key exchange (1 = fresh exchange "
+                             "per request, the default worst case)")
     args = parser.parse_args()
 
     configs = [c.strip() for c in args.configs.split(",") if c.strip()]
@@ -219,6 +283,8 @@ def main():
         raw_dir=args.raw_dir,
         log_dir=args.log_dir,
         payload_profile=args.payload_profile,
+        network_profile=args.network_profile,
+        requests_per_handshake=args.requests_per_handshake,
     )
 
     os.makedirs(os.path.dirname(args.summary_out), exist_ok=True)

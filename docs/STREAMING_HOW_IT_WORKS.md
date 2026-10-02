@@ -310,7 +310,7 @@ Four Streamlit pages under `pages/` consume this machinery, all documented
 in detail (what was built, how verified) in `docs/STREAMING_INTEGRATION.md`
 §4–§6 and §8:
 
-- **Live Demo** (`1_🔴_Live_Demo.py`) — a "🌊 Streaming Response (SSE)" tab:
+- **Live Streamer** (`1_🔴_Live_Streamer.py`) — a "🌊 Streaming Response (SSE)" tab:
   pick config/strategy/prompt/chunk size, watch tokens and per-chunk
   verification badges arrive live, with a tamper toggle to watch detection
   happen in real time. Backed by `webapp/demo_transaction.run_streaming_transaction_live()`.

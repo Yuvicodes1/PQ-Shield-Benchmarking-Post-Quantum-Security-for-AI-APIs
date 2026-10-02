@@ -34,10 +34,12 @@ import pandas as pd
 from analysis.aggregate import discard_warmup, load_raw
 from webapp.colors import CONFIG_COLORS
 
-CONFIG_ORDER = ["control", "classical", "hybrid", "full_pqc"]
+CONFIG_ORDER = ["control", "classical", "classical_ecdhe", "hybrid", "hybrid_kex", "full_pqc"]
 CONFIG_LABELS = {
     "control": "Control (unprotected)",
-    "classical": "A: Classical\n(RSA-2048 + ECDSA)",
+    "classical": "A: Classical-RSA\n(RSA-2048 + ECDSA)",
+    "classical_ecdhe": "A': Classical-ECDHE\n(X25519 + ECDSA)",
+    "hybrid_kex": "B': Hybrid-KEX\n(X25519MLKEM768 + ECDSA)",
     "hybrid": "B: Hybrid\n(ML-KEM-768 + ECDSA)",
     "full_pqc": "C: Full PQC\n(ML-KEM-768 + ML-DSA-65)",
 }
@@ -233,7 +235,7 @@ def fig_tradeoff_heatmap(results_dir: str, output_dir: str) -> None:
     for ax, weighting in zip(axes, weightings):
         sub = df[df["weighting"] == weighting]
         pivot = sub.pivot(index="config", columns="concurrency", values="composite_score")
-        pivot = pivot.reindex([c for c in ["classical", "hybrid", "full_pqc"] if c in pivot.index])
+        pivot = pivot.reindex([c for c in ["classical", "classical_ecdhe", "hybrid", "hybrid_kex", "full_pqc"] if c in pivot.index])
         im = ax.imshow(pivot.values, cmap="RdYlGn", aspect="auto")
         ax.set_xticks(range(len(pivot.columns)))
         ax.set_xticklabels(pivot.columns)

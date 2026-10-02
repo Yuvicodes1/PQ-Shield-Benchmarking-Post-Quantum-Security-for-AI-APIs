@@ -69,7 +69,7 @@ class FullPQCServerCrypto(ServerCryptoConfig):
         state = self._sessions[handshake_id]
         with Timer() as t:
             signature = MLDSA65.sign(message, state.sig_secret_key)
-        return signature, {"sign_ms": t.elapsed_ms, "signature_bytes": len(signature)}
+        return signature, {"sign_ms": t.elapsed_ms, "sign_cpu_ms": t.cpu_ms, "signature_bytes": len(signature)}
 
     def forget(self, handshake_id: str) -> None:
         self._sessions.pop(handshake_id, None)
@@ -91,4 +91,4 @@ class FullPQCClientCrypto(ClientCryptoConfig):
     def verify(self, message: bytes, signature: bytes, sig_public_key: bytes) -> tuple[bool, dict]:
         with Timer() as t:
             ok = MLDSA65.verify(message, signature, sig_public_key)
-        return ok, {"verify_ms": t.elapsed_ms}
+        return ok, {"verify_ms": t.elapsed_ms, "verify_cpu_ms": t.cpu_ms}

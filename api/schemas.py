@@ -17,13 +17,22 @@ class HandshakeResponse(BaseModel):
     kex_algorithm: str
     sig_algorithm: str
     meta: dict
+    # Present only when the server runs with PQ_SHIELD_AUTH_HANDSHAKE=1: the
+    # identity key's signature over the transcript (crypto/handshake_auth.py).
+    transcript_signature: str | None = None
 
 
 class SecurePredictRequest(BaseModel):
     handshake_id: str
-    kex_blob: str  # base64 -- RSA-OAEP ciphertext or ML-KEM ciphertext, carries the AES session key
+    # base64 kex blob (RSA-OAEP ct / X25519 share / ML-KEM ct) that establishes the session key.
+    # Empty on a resumed request: the server reuses the session key it cached under handshake_id.
+    kex_blob: str = ""
     nonce: str  # base64 -- AES-GCM nonce for the request payload
     ciphertext: str  # base64 -- AES-GCM ciphertext of the request JSON body
+    # Ask the server to keep this handshake's session key (and signing key) for further
+    # requests -- session resumption, as a TLS deployment reusing a connection would.
+    # The last request of a session sends False and the server forgets everything.
+    keep_session: bool = False
 
 
 class SecurePredictResponse(BaseModel):

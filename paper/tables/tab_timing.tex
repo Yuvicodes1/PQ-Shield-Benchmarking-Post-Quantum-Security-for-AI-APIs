@@ -1,0 +1,22 @@
+\begin{table}[t]
+\centering
+\caption{Per-call signing and verification cost ($\mu$s, median; wall-clock / thread-CPU) by calling pattern, and per signature inside real Llama streams (CPU time; range of per-cell medians over all streaming and checkpoint cells). CPU time rises with wall time, so the extra cost after an idle gap is executed work (the core has clocked down), not waiting.}
+\label{tab:timing}
+\setlength{\tabcolsep}{2.5pt}
+\footnotesize
+\begin{tabular}{@{}L{2.9cm}rrrr@{}}
+\toprule
+ & \multicolumn{2}{c}{Sign} & \multicolumn{2}{c}{Verify} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Pattern & ECDSA & ML-DSA & ECDSA & ML-DSA \\
+\midrule
+Back-to-back, idle & 20/20 & 73/73 & 49/49 & 36/36 \\
+Back-to-back, during generation & 34/34 & 107/108 & 82/82 & 52/52 \\
+Back-to-back, efficiency cores & 132/133 & 386/372 & 334/335 & 221/222 \\
+One per 125\,ms, idle & 343/348 & 519/516 & 392/394 & 244/245 \\
+One per 125\,ms, core kept busy & 56/57 & 96/97 & 58/58 & 38/38 \\
+One per 125\,ms, during generation & 264/268 & 444/448 & 379/381 & 234/201 \\
+In streams (CPU, range of cells) & 39--360 & 92--640 & 66--414 & 48--294 \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,39 @@
+\begin{table*}[t]
+\centering
+\caption{End-to-end latency (handshake + protected request) by configuration and concurrency, over successful requests after 5\% warm-up trimming. ``Rep.\ range'': spread of the five per-repetition medians. $\Delta$: difference in medians (ms) with a 95\% two-stage bootstrap CI (repetitions, then requests), versus Control and versus Control-2RT, the matched no-crypto protocol (making $\Delta_{2RT}$ the cryptographic overhead alone). $\delta$: Cliff's delta versus Control. $p$: two-sided Mann--Whitney $U$ on per-repetition medians (5 vs.\ 5; smallest attainable 0.008), Holm-corrected within each concurrency level.}
+\label{tab:concurrency}
+\setlength{\tabcolsep}{2pt}
+\footnotesize
+\begin{tabular}{@{}rlrrrrrrrr@{}}
+\toprule
+Conc. & Configuration & Median (ms) & Rep.\ range (ms) & p95 (ms) & Fail & $\Delta$ vs.\ Control & $\Delta_{2RT}$ (crypto) & $\delta$ & $p_{\mathrm{Holm}}$ \\
+\midrule
+10 & Control & 90.7 & 89.1--92.3 & 117.0 & 0.0\% & ref. & -- & -- & -- \\
+ & Control-2RT & 92.4 & 90.7--94.6 & 118.8 & 0.0\% & +1.7 [-0.9, +4.0] & ref. & +0.10 & 0.222 \\
+ & Classical-RSA & 169.2 & 158.2--185.7 & 299.3 & 0.0\% & +78.5 [+69.3, +91.3] & +76.8 [+67.3, +89.5] & +0.93 & 0.056 \\
+ & Classical-ECDHE & 95.2 & 93.7--96.8 & 121.6 & 0.0\% & +4.4 [+2.2, +6.6] & +2.7 [+0.6, +5.2] & +0.19 & 0.056 \\
+ & Hybrid & 94.7 & 93.3--96.2 & 117.5 & 0.0\% & +4.0 [+1.9, +6.7] & +2.3 [+0.3, +5.0] & +0.17 & 0.056 \\
+ & Hybrid-KEX & 97.8 & 96.7--99.8 & 123.4 & 0.0\% & +7.1 [+4.5, +9.6] & +5.4 [+3.2, +7.8] & +0.27 & 0.056 \\
+ & Full PQC & 93.7 & 93.0--94.2 & 120.6 & 0.0\% & +3.0 [+1.0, +5.2] & +1.3 [-0.4, +3.7] & +0.14 & 0.056 \\
+ & Hybrid-KEX-PQ & 96.6 & 94.1--98.4 & 122.9 & 0.0\% & +5.9 [+3.2, +8.7] & +4.2 [+1.9, +7.1] & +0.25 & 0.056 \\
+\addlinespace
+100 & Control & 942.9 & 922.8--976.1 & 1,084.1 & 0.0\% & ref. & -- & -- & -- \\
+ & Control-2RT & 990.7 & 982.4--1,003.4 & 2,854.9 & 0.0\% & +47.8 [+29.5, +67.2] & ref. & +0.24 & 0.056 \\
+ & Classical-RSA & 2,381.4 & 2,066.9--2,592.8 & 5,935.1 & 0.1\% & +1.44 [+1.25, +1.59]\,s & +1.39 [+1.20, +1.53]\,s & +0.86 & 0.056 \\
+ & Classical-ECDHE & 1,396.2 & 1,014.0--1,701.4 & 4,081.1 & 0.1\% & +453.3 [+121.4, +704.6] & +405.5 [+68.4, +654.8] & +0.50 & 0.056 \\
+ & Hybrid & 1,043.7 & 983.5--1,590.4 & 3,719.4 & 0.0\% & +100.8 [+40.4, +416.4] & +53.0 [-4.9, +373.2] & +0.39 & 0.056 \\
+ & Hybrid-KEX & 1,361.7 & 1,115.1--1,638.5 & 4,179.9 & 0.2\% & +418.9 [+196.7, +665.8] & +371.0 [+148.7, +608.6] & +0.47 & 0.056 \\
+ & Full PQC & 1,331.9 & 987.8--1,604.3 & 4,139.3 & 0.1\% & +389.0 [+86.9, +646.4] & +341.2 [+38.8, +594.2] & +0.44 & 0.056 \\
+ & Hybrid-KEX-PQ & 1,576.4 & 1,561.8--1,626.0 & 4,209.7 & 0.2\% & +633.5 [+592.1, +685.1] & +585.7 [+545.6, +634.7] & +0.53 & 0.056 \\
+\addlinespace
+1,000 & Control & 9,428.0 & 9,402.4--9,586.0 & 12.27\,s & 0.0\% & ref. & -- & -- & -- \\
+ & Control-2RT & 21.31\,s & 18.92\,s--23.89\,s & 59.93\,s & 0.2\% & +11.88 [+10.46, +13.74]\,s & ref. & +0.77 & 0.056 \\
+ & Classical-RSA & 30.73\,s & 29.94\,s--31.23\,s & 46.42\,s & 1.5\% & +21.30 [+20.86, +21.63]\,s & +9.42 [+7.58, +10.87]\,s & +0.98 & 0.056 \\
+ & Classical-ECDHE & 20.00\,s & 19.57\,s--20.37\,s & 36.62\,s & 1.5\% & +10.57 [+10.24, +10.80]\,s & -1.31 [-3.26, +0.18]\,s & +0.92 & 0.056 \\
+ & Hybrid & 19.66\,s & 19.09\,s--20.10\,s & 34.23\,s & 1.5\% & +10.24 [+9.85, +10.55]\,s & -1.65 [-3.55, -0.12]\,s & +0.93 & 0.056 \\
+ & Hybrid-KEX & 20.52\,s & 19.41\,s--22.53\,s & 35.41\,s & 1.2\% & +11.09 [+10.28, +12.44]\,s & -0.79 [-2.88, +1.18]\,s & +0.95 & 0.056 \\
+ & Full PQC & 19.92\,s & 19.68\,s--20.23\,s & 33.88\,s & 1.6\% & +10.49 [+10.24, +10.57]\,s & -1.39 [-3.21, -0.01]\,s & +0.93 & 0.056 \\
+ & Hybrid-KEX-PQ & 18.93\,s & 18.24\,s--20.33\,s & 35.31\,s & 1.3\% & +9.50 [+8.94, +10.50]\,s & -2.38 [-4.41, -0.58]\,s & +0.89 & 0.056 \\
+\bottomrule
+\end{tabular}
+\end{table*}

@@ -82,7 +82,7 @@ class HybridServerCrypto(ServerCryptoConfig):
         state = self._sessions[handshake_id]
         with Timer() as t:
             signature = state.ec_private.sign(message, ec.ECDSA(hashes.SHA256()))
-        return signature, {"sign_ms": t.elapsed_ms, "signature_bytes": len(signature)}
+        return signature, {"sign_ms": t.elapsed_ms, "sign_cpu_ms": t.cpu_ms, "signature_bytes": len(signature)}
 
     def forget(self, handshake_id: str) -> None:
         self._sessions.pop(handshake_id, None)
@@ -109,4 +109,4 @@ class HybridClientCrypto(ClientCryptoConfig):
                 ok = True
             except Exception:
                 ok = False
-        return ok, {"verify_ms": t.elapsed_ms}
+        return ok, {"verify_ms": t.elapsed_ms, "verify_cpu_ms": t.cpu_ms}

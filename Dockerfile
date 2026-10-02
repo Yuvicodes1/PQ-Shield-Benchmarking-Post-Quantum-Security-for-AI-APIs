@@ -15,7 +15,7 @@
 # Run a full benchmark sweep (writes results/ inside the container -- mount
 # a volume to persist it on the host):
 #   docker run --rm -v "$(pwd)/results:/app/results" pq-shield \
-#       python -m bench.orchestrator --configs control,classical,hybrid,full-pqc \
+#       python -m bench.orchestrator --configs control,classical,classical-ecdhe,hybrid,full-pqc \
 #       --concurrency 10,100,1000 --repetitions 5
 
 FROM ubuntu:24.04 AS builder

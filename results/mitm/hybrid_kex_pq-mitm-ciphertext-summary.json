@@ -1,0 +1,13 @@
+{
+  "config": "hybrid_kex_pq",
+  "tamper_target": "ciphertext",
+  "n_requests": 100,
+  "n_detected": 100,
+  "detection_rate": 1.0,
+  "detection_ms_mean": 0.009776191436685622,
+  "detection_ms_median": 0.009083509212359786,
+  "detection_ms_std": 0.0025576651821106124,
+  "detection_ms_min": 0.0072499969974160194,
+  "detection_ms_max": 0.02254202263429761,
+  "verdict": "ALL TAMPERED RESPONSES REJECTED"
+}

@@ -99,9 +99,9 @@ results: `results/streaming/{classical,hybrid,full-pqc}-streaming.csv`;
 summarized via `analysis/streaming_analysis.py` into
 `results/streaming_summary.csv`.
 
-## 4. Live Demo — streaming panel
+## 4. Live Streamer — streaming panel
 
-`pages/1_🔴_Live_Demo.py` gained a second tab, **"🌊 Streaming Response
+`pages/1_🔴_Live_Streamer.py` gained a second tab, **"🌊 Streaming Response
 (SSE)"**, alongside the existing single-prediction demo:
 
 - Pick a protected config, a signing strategy, a prompt, max tokens, and
@@ -323,7 +323,7 @@ threat scenario + bugfixes): see `git status` — every core module under
   state (see `git status`). `PROJECT_STATUS.md` §"Known gaps" already flags
   this and recommends cleaning up the 4 pre-existing legacy test failures
   before committing.
-- The Live Demo streaming panel's widget *rendering* (vs. the logic behind
+- The Live Streamer streaming panel's widget *rendering* (vs. the logic behind
   it) hasn't been visually clicked through in a real browser — worth a
   quick look via `bash scripts/run_webapp.sh` before considering it fully
   done.
