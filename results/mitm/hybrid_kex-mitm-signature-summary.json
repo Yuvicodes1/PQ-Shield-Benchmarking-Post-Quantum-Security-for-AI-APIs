@@ -1,0 +1,13 @@
+{
+  "config": "hybrid_kex",
+  "tamper_target": "signature",
+  "n_requests": 100,
+  "n_detected": 100,
+  "detection_rate": 1.0,
+  "detection_ms_mean": 0.08421206846833229,
+  "detection_ms_median": 0.08193799294531345,
+  "detection_ms_std": 0.016935794546187013,
+  "detection_ms_min": 0.06787502206861973,
+  "detection_ms_max": 0.24654099252074957,
+  "verdict": "ALL TAMPERED RESPONSES REJECTED"
+}

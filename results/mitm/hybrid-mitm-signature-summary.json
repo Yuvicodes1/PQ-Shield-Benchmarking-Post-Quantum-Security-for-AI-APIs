@@ -1,8 +1,13 @@
 {
   "config": "hybrid",
   "tamper_target": "signature",
-  "n_requests": 25,
-  "n_detected": 25,
+  "n_requests": 100,
+  "n_detected": 100,
   "detection_rate": 1.0,
-  "detection_ms_mean": 0.09198496351018548
+  "detection_ms_mean": 0.09631711931433529,
+  "detection_ms_median": 0.08308299584314227,
+  "detection_ms_std": 0.12715641432394714,
+  "detection_ms_min": 0.06674998439848423,
+  "detection_ms_max": 1.3543750392273068,
+  "verdict": "ALL TAMPERED RESPONSES REJECTED"
 }

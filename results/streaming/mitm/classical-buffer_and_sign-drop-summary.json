@@ -2,6 +2,7 @@
   "config": "classical",
   "strategy": "buffer_and_sign",
   "attack": "drop",
+  "checkpoint_interval": null,
   "n_trials": 1,
   "n_valid_trials": 0,
   "detection_rate": null,

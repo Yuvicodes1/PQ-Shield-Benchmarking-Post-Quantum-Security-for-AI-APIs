@@ -1,0 +1,13 @@
+{
+  "config": "classical_ecdhe",
+  "tamper_target": "signature",
+  "n_requests": 100,
+  "n_detected": 100,
+  "detection_rate": 1.0,
+  "detection_ms_mean": 0.08492544235195965,
+  "detection_ms_median": 0.08277097367681563,
+  "detection_ms_std": 0.017168703657869114,
+  "detection_ms_min": 0.06954098353162408,
+  "detection_ms_max": 0.2490000333636999,
+  "verdict": "ALL TAMPERED RESPONSES REJECTED"
+}

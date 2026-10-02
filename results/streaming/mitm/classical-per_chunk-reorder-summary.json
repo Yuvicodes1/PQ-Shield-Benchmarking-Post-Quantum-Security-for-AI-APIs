@@ -2,6 +2,7 @@
   "config": "classical",
   "strategy": "per_chunk",
   "attack": "reorder",
+  "checkpoint_interval": null,
   "n_trials": 10,
   "n_valid_trials": 10,
   "detection_rate": 1.0,

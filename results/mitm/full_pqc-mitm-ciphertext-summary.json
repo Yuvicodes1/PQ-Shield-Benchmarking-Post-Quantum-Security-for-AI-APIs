@@ -1,8 +1,13 @@
 {
   "config": "full_pqc",
   "tamper_target": "ciphertext",
-  "n_requests": 25,
-  "n_detected": 25,
+  "n_requests": 100,
+  "n_detected": 100,
   "detection_rate": 1.0,
-  "detection_ms_mean": 9.64847328606993
+  "detection_ms_mean": 0.008367921109311283,
+  "detection_ms_median": 0.008187489584088326,
+  "detection_ms_std": 0.0011817861043842638,
+  "detection_ms_min": 0.006875023245811462,
+  "detection_ms_max": 0.014082994312047958,
+  "verdict": "ALL TAMPERED RESPONSES REJECTED"
 }

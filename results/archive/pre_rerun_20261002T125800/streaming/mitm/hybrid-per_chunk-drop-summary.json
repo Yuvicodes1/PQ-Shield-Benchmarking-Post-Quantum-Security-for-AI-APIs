@@ -1,0 +1,10 @@
+{
+  "config": "hybrid",
+  "strategy": "per_chunk",
+  "attack": "drop",
+  "n_trials": 10,
+  "n_valid_trials": 10,
+  "detection_rate": 1.0,
+  "mid_stream_detection_rate": 1.0,
+  "fraction_delivered_before_detection_mean": 0.5454545454545454
+}

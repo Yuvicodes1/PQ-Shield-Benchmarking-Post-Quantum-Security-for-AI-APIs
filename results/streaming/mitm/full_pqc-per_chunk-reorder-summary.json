@@ -2,8 +2,9 @@
   "config": "full_pqc",
   "strategy": "per_chunk",
   "attack": "reorder",
-  "n_trials": 20,
-  "n_valid_trials": 20,
+  "checkpoint_interval": null,
+  "n_trials": 10,
+  "n_valid_trials": 10,
   "detection_rate": 1.0,
   "mid_stream_detection_rate": 1.0,
   "fraction_delivered_before_detection_mean": 0.5

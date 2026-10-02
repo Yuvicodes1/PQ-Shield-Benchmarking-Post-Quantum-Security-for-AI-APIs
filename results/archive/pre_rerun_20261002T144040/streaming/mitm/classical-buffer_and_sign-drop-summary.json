@@ -1,0 +1,10 @@
+{
+  "config": "classical",
+  "strategy": "buffer_and_sign",
+  "attack": "drop",
+  "n_trials": 1,
+  "n_valid_trials": 0,
+  "detection_rate": null,
+  "mid_stream_detection_rate": null,
+  "fraction_delivered_before_detection_mean": null
+}
