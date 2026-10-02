@@ -1,0 +1,11 @@
+{
+  "config": "hybrid_kex",
+  "n_requests": 1000,
+  "n_ok": 1000,
+  "total_bytes_stored": 1297178,
+  "bytes_per_request_mean": 1297.178,
+  "kex_bytes_per_request": 1120,
+  "signature_bytes_per_request": 70,
+  "kex_decryptable_under_future_crqc": false,
+  "projected_bytes_per_1000_requests": 1297178.0
+}

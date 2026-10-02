@@ -1,0 +1,13 @@
+{
+  "config": "classical_ecdhe",
+  "tamper_target": "ciphertext",
+  "n_requests": 100,
+  "n_detected": 100,
+  "detection_rate": 1.0,
+  "detection_ms_mean": 0.00839705637190491,
+  "detection_ms_median": 0.008104485459625721,
+  "detection_ms_std": 0.001363608961071761,
+  "detection_ms_min": 0.0070829992182552814,
+  "detection_ms_max": 0.016457983292639256,
+  "verdict": "ALL TAMPERED RESPONSES REJECTED"
+}

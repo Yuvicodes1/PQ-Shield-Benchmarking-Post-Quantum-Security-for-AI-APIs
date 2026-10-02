@@ -48,3 +48,21 @@ These came from auditing the data and code, and they are why the results changed
 - The streaming cold-start artifact is fixed with a warm-up generation.
 - Hash-chain checkpoint signatures were sent but never verified. Now verified.
 - The "warm connection" mode never worked. Replaced by real session resumption.
+
+## Second revision (response to external review, 2026-10-02 evening)
+
+| Review point | What changed |
+|---|---|
+| HNDL claims overstated | "closes HNDL" → "prevents the modeled CRQC recovery of the session key from the recorded handshake, assuming a correct implementation"; threat model states it is not a proof against every future attack and that server keys are not certificate-authenticated |
+| Not TLS | Paper framed as "an application-layer emulation of protected inference transactions"; X25519 described as "representative of the key-establishment primitive used in modern TLS"; RSA as "RSA-2048-OAEP key transport with per-transaction key generation, a legacy worst case" |
+| Protocol vs crypto overhead | New **Control-2RT** (same two HTTP requests, no crypto). Result: at 1,000 connections Control-2RT is as slow as the protected configs (21.3 s), so the ~2× is protocol, not crypto; crypto overhead at 10 connections is 1.3–2.7 ms (Full PQC, Hybrid, ECDHE) |
+| Statistics | Repetition is the unit; differences in medians with 95% two-stage bootstrap CIs; Cliff's δ; Mann–Whitney on repetition medians, Holm-corrected per family; TOST-style equivalence (±5%): Hybrid and Full PQC equivalent to X25519 at 10 and 1,000 connections. The request-level "p < 10⁻²⁹⁹" values are gone |
+| Reproducibility | `paper/environment.json` captured automatically (OS, packages, OpenSSL, liboqs commit, model SHA-256, repo commit); Table `tab:environment`; artifact statement with repository URL |
+| Network wording | "In our byte-level emulation of a 100 ms RTT, 5 Mbit/s path, ~5 ms" |
+| HNDL definition | Formal definition of harvestable vs decryptable bytes (Eq. for D); 11.4 B/token = AEAD records, 5.8 B/token recoverable plaintext; depends on chunk size and tokenizer |
+| Stream integrity | **Real bugs fixed:** per-chunk had no signed end record (truncation undetected) and the client treated a missing terminal record as verified. Protocol v2: role label + session context + index in every signed message, signed END/FIN records with the chunk count, client requires them. New attacks measured: duplicate, cross-session replay, truncation — all detected in every trial |
+| ACVP wording | "ML-KEM outputs reproduced byte for byte; ML-DSA verification gave the expected verdicts on all tested vectors; not ACVP certification" |
+| "No measurable" | Replaced with "no practically significant" backed by the equivalence tests |
+| Conclusion | Now states the strongest-security, best-performance, and best-balance configurations and what each answer depends on (streaming, session reuse, threat model, network) |
+
+New findings disclosed in the paper: queueing bimodality at 100 connections appears only with crypto (both controls stable), and generation slowed from ~40 to ~33 tokens/s over the streaming sweep (thermal throttling), so streaming times are compared within, not across, configurations.

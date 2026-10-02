@@ -1,0 +1,25 @@
+\begin{table}[t]
+\centering
+\caption{Software and hardware environment, captured automatically at run time.}
+\label{tab:environment}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Component & Version \\
+\midrule
+Host & Apple M3, 8 cores, 16\,GB \\
+OS & macOS 26.6.2 \\
+Python & 3.13.5 \\
+FastAPI / Uvicorn / httpx & 0.141.1 / 0.52.4 / 0.28.1 \\
+cryptography / OpenSSL & 50.0.0 / 4.0.1 \\
+liboqs (commit) & 8979276ad1eb \\
+NumPy / SciPy / pandas & 2.5.2 / 1.18.1 / 3.0.5 \\
+scikit-learn & 1.9.0 \\
+llama-cpp-python (Metal) & 0.3.35 \\
+LLM file & Llama-3.2-3B-Instruct-Q4\_K\_M.gguf \\
+LLM SHA-256 (prefix) & 6c1a2b4116103267 \\
+Classifier SHA-256 (prefix) & 68b46ef7e1efce32 \\
+\bottomrule
+\end{tabular}
+\end{table}

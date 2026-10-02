@@ -2469,3 +2469,587 @@ Traceback (most recent call last):
                              output=stdout, stderr=stderr)
 subprocess.CalledProcessError: Command '['/Users/manav/Documents/pq-shield/.venv/bin/python', '-m', 'analysis.paper_figures']' returned non-zero exit status 1.
 [16:17:03] paper_runs exited with 0
+[17:25:22] REVIEW RE-RUN: steps 13,6,8,9,10 (control-2rt, stream protocol v2, new attacks)
+
+[17:25:24] Archived existing threat/validation results to /Users/manav/Documents/pq-shield/results/archive/pre_rerun_20261002T172524
+
+[17:25:24] === STEP 13: matched-protocol control (Control-2RT) ===
+run_id=20261002T172524 network_profile=localhost
+
+=== Starting server: control-2rt (api.server:app), payload_profile=tabular_small ===
+Server healthy (pid=29891).
+  -> control-2rt | concurrency=10 | rep=1 | requests=100
+     done in 0.96s, 104.1 req/s, 0 errors, server 91% CPU -> /Users/manav/Documents/pq-shield/results/raw/control-2rt-tabular_small-c10-r1-20261002T172524.csv
+  -> control-2rt | concurrency=10 | rep=2 | requests=100
+     done in 0.96s, 104.1 req/s, 0 errors, server 90% CPU -> /Users/manav/Documents/pq-shield/results/raw/control-2rt-tabular_small-c10-r2-20261002T172524.csv
+  -> control-2rt | concurrency=10 | rep=3 | requests=100
+     done in 0.95s, 105.4 req/s, 0 errors, server 93% CPU -> /Users/manav/Documents/pq-shield/results/raw/control-2rt-tabular_small-c10-r3-20261002T172524.csv
+  -> control-2rt | concurrency=10 | rep=4 | requests=100
+     done in 0.94s, 106.3 req/s, 0 errors, server 93% CPU -> /Users/manav/Documents/pq-shield/results/raw/control-2rt-tabular_small-c10-r4-20261002T172524.csv
+  -> control-2rt | concurrency=10 | rep=5 | requests=100
+     done in 0.98s, 102.2 req/s, 0 errors, server 92% CPU -> /Users/manav/Documents/pq-shield/results/raw/control-2rt-tabular_small-c10-r5-20261002T172524.csv
+  -> control-2rt | concurrency=100 | rep=1 | requests=1000
+     done in 13.09s, 76.4 req/s, 0 errors, server 88% CPU -> /Users/manav/Documents/pq-shield/results/raw/control-2rt-tabular_small-c100-r1-20261002T172524.csv
+  -> control-2rt | concurrency=100 | rep=2 | requests=1000
+     done in 12.44s, 80.4 req/s, 0 errors, server 93% CPU -> /Users/manav/Documents/pq-shield/results/raw/control-2rt-tabular_small-c100-r2-20261002T172524.csv
+  -> control-2rt | concurrency=100 | rep=3 | requests=1000
+     done in 12.58s, 79.5 req/s, 0 errors, server 92% CPU -> /Users/manav/Documents/pq-shield/results/raw/control-2rt-tabular_small-c100-r3-20261002T172524.csv
+  -> control-2rt | concurrency=100 | rep=4 | requests=1000
+     done in 12.66s, 79.0 req/s, 0 errors, server 92% CPU -> /Users/manav/Documents/pq-shield/results/raw/control-2rt-tabular_small-c100-r4-20261002T172524.csv
+  -> control-2rt | concurrency=100 | rep=5 | requests=1000
+     done in 12.67s, 78.9 req/s, 0 errors, server 93% CPU -> /Users/manav/Documents/pq-shield/results/raw/control-2rt-tabular_small-c100-r5-20261002T172524.csv
+  -> control-2rt | concurrency=1000 | rep=1 | requests=10000
+     done in 254.52s, 39.3 req/s, 24 errors, server 47% CPU -> /Users/manav/Documents/pq-shield/results/raw/control-2rt-tabular_small-c1000-r1-20261002T172524.csv
+  -> control-2rt | concurrency=1000 | rep=2 | requests=10000
+     done in 235.53s, 42.5 req/s, 15 errors, server 51% CPU -> /Users/manav/Documents/pq-shield/results/raw/control-2rt-tabular_small-c1000-r2-20261002T172524.csv
+  -> control-2rt | concurrency=1000 | rep=3 | requests=10000
+     done in 280.60s, 35.6 req/s, 19 errors, server 42% CPU -> /Users/manav/Documents/pq-shield/results/raw/control-2rt-tabular_small-c1000-r3-20261002T172524.csv
+  -> control-2rt | concurrency=1000 | rep=4 | requests=10000
+     done in 253.35s, 39.5 req/s, 34 errors, server 47% CPU -> /Users/manav/Documents/pq-shield/results/raw/control-2rt-tabular_small-c1000-r4-20261002T172524.csv
+  -> control-2rt | concurrency=1000 | rep=5 | requests=10000
+     done in 284.12s, 35.2 req/s, 25 errors, server 42% CPU -> /Users/manav/Documents/pq-shield/results/raw/control-2rt-tabular_small-c1000-r5-20261002T172524.csv
+Stopping server: control-2rt
+
+Wrote per-cell summary (incl. resource usage) to /Users/manav/Documents/pq-shield/results/sweep_summaries/20261002T172524.json
+
+[17:48:23] STEP 13 done in 23.0 min
+
+[17:48:23] === STEP 6: streaming strategies (Llama) ===
+run_id=20261002T174823 backend=llama_cpp
+
+=== Starting server: classical (api.server_config_a:app) ===
+Server healthy (pid=34028).
+  (1 warm-up transaction(s) discarded)
+  classical  per_chunk        tokens=200   chunk=5    k=None rep=1 -> ttft=138.6ms sig_bytes=2916    exposure=1 chunks OK
+  classical  per_chunk        tokens=200   chunk=5    k=None rep=2 -> ttft=134.9ms sig_bytes=2910    exposure=1 chunks OK
+  classical  per_chunk        tokens=200   chunk=5    k=None rep=3 -> ttft=136.5ms sig_bytes=2914    exposure=1 chunks OK
+  classical  per_chunk        tokens=200   chunk=5    k=None rep=4 -> ttft=126.1ms sig_bytes=2904    exposure=1 chunks OK
+  classical  per_chunk        tokens=200   chunk=5    k=None rep=5 -> ttft=133.9ms sig_bytes=2902    exposure=1 chunks OK
+  classical  per_chunk        tokens=200   chunk=5    k=None rep=6 -> ttft=133.3ms sig_bytes=2907    exposure=1 chunks OK
+  classical  per_chunk        tokens=200   chunk=5    k=None rep=7 -> ttft=130.9ms sig_bytes=2902    exposure=1 chunks OK
+  classical  per_chunk        tokens=200   chunk=5    k=None rep=8 -> ttft=127.1ms sig_bytes=2918    exposure=1 chunks OK
+  classical  per_chunk        tokens=200   chunk=5    k=None rep=9 -> ttft=137.5ms sig_bytes=2908    exposure=1 chunks OK
+  classical  per_chunk        tokens=200   chunk=5    k=None rep=10 -> ttft=126.2ms sig_bytes=2907    exposure=1 chunks OK
+  classical  hash_chain       tokens=200   chunk=5    k=None rep=1 -> ttft=126.2ms sig_bytes=72      exposure=40 chunks OK
+  classical  hash_chain       tokens=200   chunk=5    k=None rep=2 -> ttft=126.4ms sig_bytes=71      exposure=40 chunks OK
+  classical  hash_chain       tokens=200   chunk=5    k=None rep=3 -> ttft=126.9ms sig_bytes=71      exposure=40 chunks OK
+  classical  hash_chain       tokens=200   chunk=5    k=None rep=4 -> ttft=126.0ms sig_bytes=70      exposure=40 chunks OK
+  classical  hash_chain       tokens=200   chunk=5    k=None rep=5 -> ttft=126.8ms sig_bytes=71      exposure=40 chunks OK
+  classical  hash_chain       tokens=200   chunk=5    k=None rep=6 -> ttft=130.3ms sig_bytes=71      exposure=40 chunks OK
+  classical  hash_chain       tokens=200   chunk=5    k=None rep=7 -> ttft=126.4ms sig_bytes=72      exposure=40 chunks OK
+  classical  hash_chain       tokens=200   chunk=5    k=None rep=8 -> ttft=128.0ms sig_bytes=72      exposure=40 chunks OK
+  classical  hash_chain       tokens=200   chunk=5    k=None rep=9 -> ttft=129.7ms sig_bytes=70      exposure=40 chunks OK
+  classical  hash_chain       tokens=200   chunk=5    k=None rep=10 -> ttft=132.4ms sig_bytes=70      exposure=40 chunks OK
+  classical  buffer_and_sign  tokens=50    chunk=5    k=None rep=1 -> ttft=1240.9ms sig_bytes=72      exposure=0 chunks OK
+  classical  buffer_and_sign  tokens=50    chunk=5    k=None rep=2 -> ttft=1239.2ms sig_bytes=72      exposure=0 chunks OK
+  classical  buffer_and_sign  tokens=50    chunk=5    k=None rep=3 -> ttft=1239.7ms sig_bytes=70      exposure=0 chunks OK
+  classical  buffer_and_sign  tokens=50    chunk=5    k=None rep=4 -> ttft=1240.4ms sig_bytes=72      exposure=0 chunks OK
+  classical  buffer_and_sign  tokens=50    chunk=5    k=None rep=5 -> ttft=1238.7ms sig_bytes=71      exposure=0 chunks OK
+  classical  buffer_and_sign  tokens=50    chunk=5    k=None rep=6 -> ttft=1238.2ms sig_bytes=71      exposure=0 chunks OK
+  classical  buffer_and_sign  tokens=50    chunk=5    k=None rep=7 -> ttft=1241.0ms sig_bytes=72      exposure=0 chunks OK
+  classical  buffer_and_sign  tokens=50    chunk=5    k=None rep=8 -> ttft=1242.0ms sig_bytes=71      exposure=0 chunks OK
+  classical  buffer_and_sign  tokens=50    chunk=5    k=None rep=9 -> ttft=1239.4ms sig_bytes=71      exposure=0 chunks OK
+  classical  buffer_and_sign  tokens=50    chunk=5    k=None rep=10 -> ttft=1237.7ms sig_bytes=70      exposure=0 chunks OK
+  classical  hash_chain       tokens=50    chunk=5    k=None rep=1 -> ttft=134.0ms sig_bytes=71      exposure=10 chunks OK
+  classical  hash_chain       tokens=50    chunk=5    k=None rep=2 -> ttft=127.1ms sig_bytes=71      exposure=10 chunks OK
+  classical  hash_chain       tokens=50    chunk=5    k=None rep=3 -> ttft=130.8ms sig_bytes=71      exposure=10 chunks OK
+  classical  hash_chain       tokens=50    chunk=5    k=None rep=4 -> ttft=126.8ms sig_bytes=71      exposure=10 chunks OK
+  classical  hash_chain       tokens=50    chunk=5    k=None rep=5 -> ttft=127.6ms sig_bytes=71      exposure=10 chunks OK
+  classical  hash_chain       tokens=50    chunk=5    k=None rep=6 -> ttft=126.8ms sig_bytes=71      exposure=10 chunks OK
+  classical  hash_chain       tokens=50    chunk=5    k=None rep=7 -> ttft=136.7ms sig_bytes=70      exposure=10 chunks OK
+  classical  hash_chain       tokens=50    chunk=5    k=None rep=8 -> ttft=126.8ms sig_bytes=72      exposure=10 chunks OK
+  classical  hash_chain       tokens=50    chunk=5    k=None rep=9 -> ttft=131.9ms sig_bytes=70      exposure=10 chunks OK
+  classical  hash_chain       tokens=50    chunk=5    k=None rep=10 -> ttft=126.9ms sig_bytes=70      exposure=10 chunks OK
+  classical  buffer_and_sign  tokens=200   chunk=5    k=None rep=1 -> ttft=5130.7ms sig_bytes=71      exposure=0 chunks OK
+  classical  buffer_and_sign  tokens=200   chunk=5    k=None rep=2 -> ttft=5206.4ms sig_bytes=72      exposure=0 chunks OK
+  classical  buffer_and_sign  tokens=200   chunk=5    k=None rep=3 -> ttft=4989.8ms sig_bytes=70      exposure=0 chunks OK
+  classical  buffer_and_sign  tokens=200   chunk=5    k=None rep=4 -> ttft=5041.4ms sig_bytes=72      exposure=0 chunks OK
+  classical  buffer_and_sign  tokens=200   chunk=5    k=None rep=5 -> ttft=5003.6ms sig_bytes=71      exposure=0 chunks OK
+  classical  buffer_and_sign  tokens=200   chunk=5    k=None rep=6 -> ttft=5008.6ms sig_bytes=72      exposure=0 chunks OK
+  classical  buffer_and_sign  tokens=200   chunk=5    k=None rep=7 -> ttft=5014.4ms sig_bytes=71      exposure=0 chunks OK
+  classical  buffer_and_sign  tokens=200   chunk=5    k=None rep=8 -> ttft=5016.7ms sig_bytes=71      exposure=0 chunks OK
+  classical  buffer_and_sign  tokens=200   chunk=5    k=None rep=9 -> ttft=5007.0ms sig_bytes=70      exposure=0 chunks OK
+  classical  buffer_and_sign  tokens=200   chunk=5    k=None rep=10 -> ttft=5011.7ms sig_bytes=71      exposure=0 chunks OK
+  classical  per_chunk        tokens=50    chunk=5    k=None rep=1 -> ttft=128.3ms sig_bytes=783     exposure=1 chunks OK
+  classical  per_chunk        tokens=50    chunk=5    k=None rep=2 -> ttft=134.3ms sig_bytes=778     exposure=1 chunks OK
+  classical  per_chunk        tokens=50    chunk=5    k=None rep=3 -> ttft=128.6ms sig_bytes=782     exposure=1 chunks OK
+  classical  per_chunk        tokens=50    chunk=5    k=None rep=4 -> ttft=127.8ms sig_bytes=784     exposure=1 chunks OK
+  classical  per_chunk        tokens=50    chunk=5    k=None rep=5 -> ttft=131.6ms sig_bytes=783     exposure=1 chunks OK
+  classical  per_chunk        tokens=50    chunk=5    k=None rep=6 -> ttft=132.5ms sig_bytes=783     exposure=1 chunks OK
+  classical  per_chunk        tokens=50    chunk=5    k=None rep=7 -> ttft=128.6ms sig_bytes=781     exposure=1 chunks OK
+  classical  per_chunk        tokens=50    chunk=5    k=None rep=8 -> ttft=128.2ms sig_bytes=783     exposure=1 chunks OK
+  classical  per_chunk        tokens=50    chunk=5    k=None rep=9 -> ttft=128.4ms sig_bytes=783     exposure=1 chunks OK
+  classical  per_chunk        tokens=50    chunk=5    k=None rep=10 -> ttft=139.1ms sig_bytes=779     exposure=1 chunks OK
+Wrote 60 rows to /Users/manav/Documents/pq-shield/results/streaming/classical-streaming-20261002T174823.csv
+Stopping server: classical
+
+=== Starting server: classical-ecdhe (api.server_config_ecdhe:app) ===
+Server healthy (pid=34575).
+  (1 warm-up transaction(s) discarded)
+  classical-ecdhe per_chunk        tokens=200   chunk=5    k=None rep=1 -> ttft=125.4ms sig_bytes=2912    exposure=1 chunks OK
+  classical-ecdhe per_chunk        tokens=200   chunk=5    k=None rep=2 -> ttft=124.9ms sig_bytes=2913    exposure=1 chunks OK
+  classical-ecdhe per_chunk        tokens=200   chunk=5    k=None rep=3 -> ttft=125.7ms sig_bytes=2920    exposure=1 chunks OK
+  classical-ecdhe per_chunk        tokens=200   chunk=5    k=None rep=4 -> ttft=125.9ms sig_bytes=2906    exposure=1 chunks OK
+  classical-ecdhe per_chunk        tokens=200   chunk=5    k=None rep=5 -> ttft=126.3ms sig_bytes=2923    exposure=1 chunks OK
+  classical-ecdhe per_chunk        tokens=200   chunk=5    k=None rep=6 -> ttft=125.7ms sig_bytes=2913    exposure=1 chunks OK
+  classical-ecdhe per_chunk        tokens=200   chunk=5    k=None rep=7 -> ttft=126.1ms sig_bytes=2908    exposure=1 chunks OK
+  classical-ecdhe per_chunk        tokens=200   chunk=5    k=None rep=8 -> ttft=126.1ms sig_bytes=2912    exposure=1 chunks OK
+  classical-ecdhe per_chunk        tokens=200   chunk=5    k=None rep=9 -> ttft=141.6ms sig_bytes=2910    exposure=1 chunks OK
+  classical-ecdhe per_chunk        tokens=200   chunk=5    k=None rep=10 -> ttft=127.4ms sig_bytes=2918    exposure=1 chunks OK
+  classical-ecdhe hash_chain       tokens=50    chunk=5    k=None rep=1 -> ttft=128.0ms sig_bytes=70      exposure=10 chunks OK
+  classical-ecdhe hash_chain       tokens=50    chunk=5    k=None rep=2 -> ttft=128.0ms sig_bytes=71      exposure=10 chunks OK
+  classical-ecdhe hash_chain       tokens=50    chunk=5    k=None rep=3 -> ttft=127.5ms sig_bytes=71      exposure=10 chunks OK
+  classical-ecdhe hash_chain       tokens=50    chunk=5    k=None rep=4 -> ttft=127.7ms sig_bytes=70      exposure=10 chunks OK
+  classical-ecdhe hash_chain       tokens=50    chunk=5    k=None rep=5 -> ttft=129.5ms sig_bytes=72      exposure=10 chunks OK
+  classical-ecdhe hash_chain       tokens=50    chunk=5    k=None rep=6 -> ttft=130.4ms sig_bytes=70      exposure=10 chunks OK
+  classical-ecdhe hash_chain       tokens=50    chunk=5    k=None rep=7 -> ttft=129.2ms sig_bytes=70      exposure=10 chunks OK
+  classical-ecdhe hash_chain       tokens=50    chunk=5    k=None rep=8 -> ttft=128.2ms sig_bytes=72      exposure=10 chunks OK
+  classical-ecdhe hash_chain       tokens=50    chunk=5    k=None rep=9 -> ttft=128.8ms sig_bytes=71      exposure=10 chunks OK
+  classical-ecdhe hash_chain       tokens=50    chunk=5    k=None rep=10 -> ttft=129.7ms sig_bytes=72      exposure=10 chunks OK
+  classical-ecdhe buffer_and_sign  tokens=50    chunk=5    k=None rep=1 -> ttft=1308.3ms sig_bytes=72      exposure=0 chunks OK
+  classical-ecdhe buffer_and_sign  tokens=50    chunk=5    k=None rep=2 -> ttft=1320.1ms sig_bytes=71      exposure=0 chunks OK
+  classical-ecdhe buffer_and_sign  tokens=50    chunk=5    k=None rep=3 -> ttft=1318.1ms sig_bytes=71      exposure=0 chunks OK
+  classical-ecdhe buffer_and_sign  tokens=50    chunk=5    k=None rep=4 -> ttft=1315.6ms sig_bytes=72      exposure=0 chunks OK
+  classical-ecdhe buffer_and_sign  tokens=50    chunk=5    k=None rep=5 -> ttft=1329.9ms sig_bytes=70      exposure=0 chunks OK
+  classical-ecdhe buffer_and_sign  tokens=50    chunk=5    k=None rep=6 -> ttft=1333.7ms sig_bytes=71      exposure=0 chunks OK
+  classical-ecdhe buffer_and_sign  tokens=50    chunk=5    k=None rep=7 -> ttft=1334.9ms sig_bytes=70      exposure=0 chunks OK
+  classical-ecdhe buffer_and_sign  tokens=50    chunk=5    k=None rep=8 -> ttft=1377.6ms sig_bytes=71      exposure=0 chunks OK
+  classical-ecdhe buffer_and_sign  tokens=50    chunk=5    k=None rep=9 -> ttft=1333.9ms sig_bytes=71      exposure=0 chunks OK
+  classical-ecdhe buffer_and_sign  tokens=50    chunk=5    k=None rep=10 -> ttft=1349.1ms sig_bytes=71      exposure=0 chunks OK
+  classical-ecdhe hash_chain       tokens=200   chunk=5    k=None rep=1 -> ttft=135.6ms sig_bytes=72      exposure=40 chunks OK
+  classical-ecdhe hash_chain       tokens=200   chunk=5    k=None rep=2 -> ttft=136.7ms sig_bytes=72      exposure=40 chunks OK
+  classical-ecdhe hash_chain       tokens=200   chunk=5    k=None rep=3 -> ttft=140.0ms sig_bytes=72      exposure=40 chunks OK
+  classical-ecdhe hash_chain       tokens=200   chunk=5    k=None rep=4 -> ttft=141.3ms sig_bytes=71      exposure=40 chunks OK
+  classical-ecdhe hash_chain       tokens=200   chunk=5    k=None rep=5 -> ttft=147.3ms sig_bytes=71      exposure=40 chunks OK
+  classical-ecdhe hash_chain       tokens=200   chunk=5    k=None rep=6 -> ttft=141.2ms sig_bytes=70      exposure=40 chunks OK
+  classical-ecdhe hash_chain       tokens=200   chunk=5    k=None rep=7 -> ttft=143.0ms sig_bytes=70      exposure=40 chunks OK
+  classical-ecdhe hash_chain       tokens=200   chunk=5    k=None rep=8 -> ttft=142.0ms sig_bytes=72      exposure=40 chunks OK
+  classical-ecdhe hash_chain       tokens=200   chunk=5    k=None rep=9 -> ttft=148.0ms sig_bytes=71      exposure=40 chunks OK
+  classical-ecdhe hash_chain       tokens=200   chunk=5    k=None rep=10 -> ttft=138.7ms sig_bytes=71      exposure=40 chunks OK
+  classical-ecdhe per_chunk        tokens=50    chunk=5    k=None rep=1 -> ttft=140.2ms sig_bytes=780     exposure=1 chunks OK
+  classical-ecdhe per_chunk        tokens=50    chunk=5    k=None rep=2 -> ttft=135.3ms sig_bytes=779     exposure=1 chunks OK
+  classical-ecdhe per_chunk        tokens=50    chunk=5    k=None rep=3 -> ttft=137.0ms sig_bytes=784     exposure=1 chunks OK
+  classical-ecdhe per_chunk        tokens=50    chunk=5    k=None rep=4 -> ttft=137.5ms sig_bytes=784     exposure=1 chunks OK
+  classical-ecdhe per_chunk        tokens=50    chunk=5    k=None rep=5 -> ttft=134.5ms sig_bytes=782     exposure=1 chunks OK
+  classical-ecdhe per_chunk        tokens=50    chunk=5    k=None rep=6 -> ttft=134.5ms sig_bytes=779     exposure=1 chunks OK
+  classical-ecdhe per_chunk        tokens=50    chunk=5    k=None rep=7 -> ttft=134.2ms sig_bytes=777     exposure=1 chunks OK
+  classical-ecdhe per_chunk        tokens=50    chunk=5    k=None rep=8 -> ttft=134.9ms sig_bytes=779     exposure=1 chunks OK
+  classical-ecdhe per_chunk        tokens=50    chunk=5    k=None rep=9 -> ttft=134.2ms sig_bytes=779     exposure=1 chunks OK
+  classical-ecdhe per_chunk        tokens=50    chunk=5    k=None rep=10 -> ttft=135.9ms sig_bytes=785     exposure=1 chunks OK
+  classical-ecdhe buffer_and_sign  tokens=200   chunk=5    k=None rep=1 -> ttft=5409.2ms sig_bytes=71      exposure=0 chunks OK
+  classical-ecdhe buffer_and_sign  tokens=200   chunk=5    k=None rep=2 -> ttft=5388.4ms sig_bytes=71      exposure=0 chunks OK
+  classical-ecdhe buffer_and_sign  tokens=200   chunk=5    k=None rep=3 -> ttft=5343.0ms sig_bytes=70      exposure=0 chunks OK
+  classical-ecdhe buffer_and_sign  tokens=200   chunk=5    k=None rep=4 -> ttft=5324.7ms sig_bytes=71      exposure=0 chunks OK
+  classical-ecdhe buffer_and_sign  tokens=200   chunk=5    k=None rep=5 -> ttft=5308.6ms sig_bytes=70      exposure=0 chunks OK
+  classical-ecdhe buffer_and_sign  tokens=200   chunk=5    k=None rep=6 -> ttft=5310.7ms sig_bytes=71      exposure=0 chunks OK
+  classical-ecdhe buffer_and_sign  tokens=200   chunk=5    k=None rep=7 -> ttft=5322.2ms sig_bytes=70      exposure=0 chunks OK
+  classical-ecdhe buffer_and_sign  tokens=200   chunk=5    k=None rep=8 -> ttft=5536.0ms sig_bytes=71      exposure=0 chunks OK
+  classical-ecdhe buffer_and_sign  tokens=200   chunk=5    k=None rep=9 -> ttft=5625.2ms sig_bytes=71      exposure=0 chunks OK
+  classical-ecdhe buffer_and_sign  tokens=200   chunk=5    k=None rep=10 -> ttft=5571.0ms sig_bytes=72      exposure=0 chunks OK
+Wrote 60 rows to /Users/manav/Documents/pq-shield/results/streaming/classical-ecdhe-streaming-20261002T174823.csv
+Stopping server: classical-ecdhe
+
+=== Starting server: hybrid (api.server_config_b:app) ===
+Server healthy (pid=35136).
+  (1 warm-up transaction(s) discarded)
+  hybrid     buffer_and_sign  tokens=50    chunk=5    k=None rep=1 -> ttft=1234.9ms sig_bytes=71      exposure=0 chunks OK
+  hybrid     buffer_and_sign  tokens=50    chunk=5    k=None rep=2 -> ttft=1232.7ms sig_bytes=71      exposure=0 chunks OK
+  hybrid     buffer_and_sign  tokens=50    chunk=5    k=None rep=3 -> ttft=1233.5ms sig_bytes=71      exposure=0 chunks OK
+  hybrid     buffer_and_sign  tokens=50    chunk=5    k=None rep=4 -> ttft=1234.3ms sig_bytes=71      exposure=0 chunks OK
+  hybrid     buffer_and_sign  tokens=50    chunk=5    k=None rep=5 -> ttft=1241.1ms sig_bytes=72      exposure=0 chunks OK
+  hybrid     buffer_and_sign  tokens=50    chunk=5    k=None rep=6 -> ttft=1477.5ms sig_bytes=71      exposure=0 chunks OK
+  hybrid     buffer_and_sign  tokens=50    chunk=5    k=None rep=7 -> ttft=1473.9ms sig_bytes=71      exposure=0 chunks OK
+  hybrid     buffer_and_sign  tokens=50    chunk=5    k=None rep=8 -> ttft=1312.9ms sig_bytes=71      exposure=0 chunks OK
+  hybrid     buffer_and_sign  tokens=50    chunk=5    k=None rep=9 -> ttft=1333.1ms sig_bytes=71      exposure=0 chunks OK
+  hybrid     buffer_and_sign  tokens=50    chunk=5    k=None rep=10 -> ttft=1382.7ms sig_bytes=70      exposure=0 chunks OK
+  hybrid     per_chunk        tokens=200   chunk=5    k=None rep=1 -> ttft=138.7ms sig_bytes=2912    exposure=1 chunks OK
+  hybrid     per_chunk        tokens=200   chunk=5    k=None rep=2 -> ttft=137.5ms sig_bytes=2918    exposure=1 chunks OK
+  hybrid     per_chunk        tokens=200   chunk=5    k=None rep=3 -> ttft=138.7ms sig_bytes=2916    exposure=1 chunks OK
+  hybrid     per_chunk        tokens=200   chunk=5    k=None rep=4 -> ttft=139.0ms sig_bytes=2907    exposure=1 chunks OK
+  hybrid     per_chunk        tokens=200   chunk=5    k=None rep=5 -> ttft=139.9ms sig_bytes=2917    exposure=1 chunks OK
+  hybrid     per_chunk        tokens=200   chunk=5    k=None rep=6 -> ttft=147.4ms sig_bytes=2905    exposure=1 chunks OK
+  hybrid     per_chunk        tokens=200   chunk=5    k=None rep=7 -> ttft=143.2ms sig_bytes=2918    exposure=1 chunks OK
+  hybrid     per_chunk        tokens=200   chunk=5    k=None rep=8 -> ttft=141.5ms sig_bytes=2900    exposure=1 chunks OK
+  hybrid     per_chunk        tokens=200   chunk=5    k=None rep=9 -> ttft=141.1ms sig_bytes=2907    exposure=1 chunks OK
+  hybrid     per_chunk        tokens=200   chunk=5    k=None rep=10 -> ttft=144.5ms sig_bytes=2906    exposure=1 chunks OK
+  hybrid     per_chunk        tokens=50    chunk=5    k=None rep=1 -> ttft=141.7ms sig_bytes=783     exposure=1 chunks OK
+  hybrid     per_chunk        tokens=50    chunk=5    k=None rep=2 -> ttft=143.5ms sig_bytes=778     exposure=1 chunks OK
+  hybrid     per_chunk        tokens=50    chunk=5    k=None rep=3 -> ttft=142.5ms sig_bytes=784     exposure=1 chunks OK
+  hybrid     per_chunk        tokens=50    chunk=5    k=None rep=4 -> ttft=141.1ms sig_bytes=782     exposure=1 chunks OK
+  hybrid     per_chunk        tokens=50    chunk=5    k=None rep=5 -> ttft=140.3ms sig_bytes=782     exposure=1 chunks OK
+  hybrid     per_chunk        tokens=50    chunk=5    k=None rep=6 -> ttft=144.3ms sig_bytes=783     exposure=1 chunks OK
+  hybrid     per_chunk        tokens=50    chunk=5    k=None rep=7 -> ttft=143.5ms sig_bytes=788     exposure=1 chunks OK
+  hybrid     per_chunk        tokens=50    chunk=5    k=None rep=8 -> ttft=140.3ms sig_bytes=782     exposure=1 chunks OK
+  hybrid     per_chunk        tokens=50    chunk=5    k=None rep=9 -> ttft=143.3ms sig_bytes=782     exposure=1 chunks OK
+  hybrid     per_chunk        tokens=50    chunk=5    k=None rep=10 -> ttft=144.5ms sig_bytes=780     exposure=1 chunks OK
+  hybrid     buffer_and_sign  tokens=200   chunk=5    k=None rep=1 -> ttft=5911.4ms sig_bytes=71      exposure=0 chunks OK
+  hybrid     buffer_and_sign  tokens=200   chunk=5    k=None rep=2 -> ttft=5675.1ms sig_bytes=71      exposure=0 chunks OK
+  hybrid     buffer_and_sign  tokens=200   chunk=5    k=None rep=3 -> ttft=5683.1ms sig_bytes=72      exposure=0 chunks OK
+  hybrid     buffer_and_sign  tokens=200   chunk=5    k=None rep=4 -> ttft=5689.6ms sig_bytes=71      exposure=0 chunks OK
+  hybrid     buffer_and_sign  tokens=200   chunk=5    k=None rep=5 -> ttft=5657.0ms sig_bytes=72      exposure=0 chunks OK
+  hybrid     buffer_and_sign  tokens=200   chunk=5    k=None rep=6 -> ttft=5694.5ms sig_bytes=71      exposure=0 chunks OK
+  hybrid     buffer_and_sign  tokens=200   chunk=5    k=None rep=7 -> ttft=5663.0ms sig_bytes=72      exposure=0 chunks OK
+  hybrid     buffer_and_sign  tokens=200   chunk=5    k=None rep=8 -> ttft=5626.3ms sig_bytes=70      exposure=0 chunks OK
+  hybrid     buffer_and_sign  tokens=200   chunk=5    k=None rep=9 -> ttft=5616.9ms sig_bytes=72      exposure=0 chunks OK
+  hybrid     buffer_and_sign  tokens=200   chunk=5    k=None rep=10 -> ttft=5618.9ms sig_bytes=71      exposure=0 chunks OK
+  hybrid     hash_chain       tokens=50    chunk=5    k=None rep=1 -> ttft=140.1ms sig_bytes=71      exposure=10 chunks OK
+  hybrid     hash_chain       tokens=50    chunk=5    k=None rep=2 -> ttft=142.5ms sig_bytes=71      exposure=10 chunks OK
+  hybrid     hash_chain       tokens=50    chunk=5    k=None rep=3 -> ttft=138.9ms sig_bytes=70      exposure=10 chunks OK
+  hybrid     hash_chain       tokens=50    chunk=5    k=None rep=4 -> ttft=135.9ms sig_bytes=70      exposure=10 chunks OK
+  hybrid     hash_chain       tokens=50    chunk=5    k=None rep=5 -> ttft=138.2ms sig_bytes=71      exposure=10 chunks OK
+  hybrid     hash_chain       tokens=50    chunk=5    k=None rep=6 -> ttft=135.6ms sig_bytes=71      exposure=10 chunks OK
+  hybrid     hash_chain       tokens=50    chunk=5    k=None rep=7 -> ttft=137.5ms sig_bytes=72      exposure=10 chunks OK
+  hybrid     hash_chain       tokens=50    chunk=5    k=None rep=8 -> ttft=138.2ms sig_bytes=71      exposure=10 chunks OK
+  hybrid     hash_chain       tokens=50    chunk=5    k=None rep=9 -> ttft=136.5ms sig_bytes=70      exposure=10 chunks OK
+  hybrid     hash_chain       tokens=50    chunk=5    k=None rep=10 -> ttft=137.1ms sig_bytes=71      exposure=10 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=None rep=1 -> ttft=137.6ms sig_bytes=71      exposure=40 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=None rep=2 -> ttft=143.8ms sig_bytes=71      exposure=40 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=None rep=3 -> ttft=134.6ms sig_bytes=71      exposure=40 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=None rep=4 -> ttft=137.1ms sig_bytes=72      exposure=40 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=None rep=5 -> ttft=140.0ms sig_bytes=72      exposure=40 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=None rep=6 -> ttft=140.0ms sig_bytes=71      exposure=40 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=None rep=7 -> ttft=143.5ms sig_bytes=72      exposure=40 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=None rep=8 -> ttft=142.9ms sig_bytes=71      exposure=40 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=None rep=9 -> ttft=143.5ms sig_bytes=70      exposure=40 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=None rep=10 -> ttft=133.8ms sig_bytes=71      exposure=40 chunks OK
+Wrote 60 rows to /Users/manav/Documents/pq-shield/results/streaming/hybrid-streaming-20261002T174823.csv
+Stopping server: hybrid
+
+=== Starting server: hybrid-kex (api.server_config_hybridkex:app) ===
+Server healthy (pid=35717).
+  (1 warm-up transaction(s) discarded)
+  hybrid-kex buffer_and_sign  tokens=200   chunk=5    k=None rep=1 -> ttft=5583.9ms sig_bytes=72      exposure=0 chunks OK
+  hybrid-kex buffer_and_sign  tokens=200   chunk=5    k=None rep=2 -> ttft=5904.8ms sig_bytes=70      exposure=0 chunks OK
+  hybrid-kex buffer_and_sign  tokens=200   chunk=5    k=None rep=3 -> ttft=6034.1ms sig_bytes=70      exposure=0 chunks OK
+  hybrid-kex buffer_and_sign  tokens=200   chunk=5    k=None rep=4 -> ttft=6008.6ms sig_bytes=71      exposure=0 chunks OK
+  hybrid-kex buffer_and_sign  tokens=200   chunk=5    k=None rep=5 -> ttft=6126.5ms sig_bytes=72      exposure=0 chunks OK
+  hybrid-kex buffer_and_sign  tokens=200   chunk=5    k=None rep=6 -> ttft=6005.8ms sig_bytes=71      exposure=0 chunks OK
+  hybrid-kex buffer_and_sign  tokens=200   chunk=5    k=None rep=7 -> ttft=6151.3ms sig_bytes=72      exposure=0 chunks OK
+  hybrid-kex buffer_and_sign  tokens=200   chunk=5    k=None rep=8 -> ttft=6148.7ms sig_bytes=71      exposure=0 chunks OK
+  hybrid-kex buffer_and_sign  tokens=200   chunk=5    k=None rep=9 -> ttft=6276.2ms sig_bytes=70      exposure=0 chunks OK
+  hybrid-kex buffer_and_sign  tokens=200   chunk=5    k=None rep=10 -> ttft=5996.1ms sig_bytes=71      exposure=0 chunks OK
+  hybrid-kex hash_chain       tokens=50    chunk=5    k=None rep=1 -> ttft=155.3ms sig_bytes=70      exposure=10 chunks OK
+  hybrid-kex hash_chain       tokens=50    chunk=5    k=None rep=2 -> ttft=143.7ms sig_bytes=70      exposure=10 chunks OK
+  hybrid-kex hash_chain       tokens=50    chunk=5    k=None rep=3 -> ttft=176.8ms sig_bytes=69      exposure=10 chunks OK
+  hybrid-kex hash_chain       tokens=50    chunk=5    k=None rep=4 -> ttft=155.1ms sig_bytes=71      exposure=10 chunks OK
+  hybrid-kex hash_chain       tokens=50    chunk=5    k=None rep=5 -> ttft=154.3ms sig_bytes=70      exposure=10 chunks OK
+  hybrid-kex hash_chain       tokens=50    chunk=5    k=None rep=6 -> ttft=152.3ms sig_bytes=70      exposure=10 chunks OK
+  hybrid-kex hash_chain       tokens=50    chunk=5    k=None rep=7 -> ttft=144.6ms sig_bytes=71      exposure=10 chunks OK
+  hybrid-kex hash_chain       tokens=50    chunk=5    k=None rep=8 -> ttft=137.2ms sig_bytes=70      exposure=10 chunks OK
+  hybrid-kex hash_chain       tokens=50    chunk=5    k=None rep=9 -> ttft=166.4ms sig_bytes=72      exposure=10 chunks OK
+  hybrid-kex hash_chain       tokens=50    chunk=5    k=None rep=10 -> ttft=143.1ms sig_bytes=72      exposure=10 chunks OK
+  hybrid-kex per_chunk        tokens=50    chunk=5    k=None rep=1 -> ttft=150.3ms sig_bytes=781     exposure=1 chunks OK
+  hybrid-kex per_chunk        tokens=50    chunk=5    k=None rep=2 -> ttft=141.5ms sig_bytes=782     exposure=1 chunks OK
+  hybrid-kex per_chunk        tokens=50    chunk=5    k=None rep=3 -> ttft=167.6ms sig_bytes=779     exposure=1 chunks OK
+  hybrid-kex per_chunk        tokens=50    chunk=5    k=None rep=4 -> ttft=140.4ms sig_bytes=779     exposure=1 chunks OK
+  hybrid-kex per_chunk        tokens=50    chunk=5    k=None rep=5 -> ttft=146.5ms sig_bytes=784     exposure=1 chunks OK
+  hybrid-kex per_chunk        tokens=50    chunk=5    k=None rep=6 -> ttft=140.5ms sig_bytes=778     exposure=1 chunks OK
+  hybrid-kex per_chunk        tokens=50    chunk=5    k=None rep=7 -> ttft=149.3ms sig_bytes=785     exposure=1 chunks OK
+  hybrid-kex per_chunk        tokens=50    chunk=5    k=None rep=8 -> ttft=146.6ms sig_bytes=784     exposure=1 chunks OK
+  hybrid-kex per_chunk        tokens=50    chunk=5    k=None rep=9 -> ttft=144.0ms sig_bytes=783     exposure=1 chunks OK
+  hybrid-kex per_chunk        tokens=50    chunk=5    k=None rep=10 -> ttft=141.7ms sig_bytes=783     exposure=1 chunks OK
+  hybrid-kex per_chunk        tokens=200   chunk=5    k=None rep=1 -> ttft=145.6ms sig_bytes=2914    exposure=1 chunks OK
+  hybrid-kex per_chunk        tokens=200   chunk=5    k=None rep=2 -> ttft=143.6ms sig_bytes=2914    exposure=1 chunks OK
+  hybrid-kex per_chunk        tokens=200   chunk=5    k=None rep=3 -> ttft=143.9ms sig_bytes=2910    exposure=1 chunks OK
+  hybrid-kex per_chunk        tokens=200   chunk=5    k=None rep=4 -> ttft=143.5ms sig_bytes=2909    exposure=1 chunks OK
+  hybrid-kex per_chunk        tokens=200   chunk=5    k=None rep=5 -> ttft=146.1ms sig_bytes=2904    exposure=1 chunks OK
+  hybrid-kex per_chunk        tokens=200   chunk=5    k=None rep=6 -> ttft=142.9ms sig_bytes=2910    exposure=1 chunks OK
+  hybrid-kex per_chunk        tokens=200   chunk=5    k=None rep=7 -> ttft=142.4ms sig_bytes=2907    exposure=1 chunks OK
+  hybrid-kex per_chunk        tokens=200   chunk=5    k=None rep=8 -> ttft=143.5ms sig_bytes=2907    exposure=1 chunks OK
+  hybrid-kex per_chunk        tokens=200   chunk=5    k=None rep=9 -> ttft=147.1ms sig_bytes=2916    exposure=1 chunks OK
+  hybrid-kex per_chunk        tokens=200   chunk=5    k=None rep=10 -> ttft=147.6ms sig_bytes=2907    exposure=1 chunks OK
+  hybrid-kex buffer_and_sign  tokens=50    chunk=5    k=None rep=1 -> ttft=1469.2ms sig_bytes=72      exposure=0 chunks OK
+  hybrid-kex buffer_and_sign  tokens=50    chunk=5    k=None rep=2 -> ttft=1432.8ms sig_bytes=71      exposure=0 chunks OK
+  hybrid-kex buffer_and_sign  tokens=50    chunk=5    k=None rep=3 -> ttft=1541.6ms sig_bytes=71      exposure=0 chunks OK
+  hybrid-kex buffer_and_sign  tokens=50    chunk=5    k=None rep=4 -> ttft=1435.6ms sig_bytes=72      exposure=0 chunks OK
+  hybrid-kex buffer_and_sign  tokens=50    chunk=5    k=None rep=5 -> ttft=1441.7ms sig_bytes=70      exposure=0 chunks OK
+  hybrid-kex buffer_and_sign  tokens=50    chunk=5    k=None rep=6 -> ttft=1565.7ms sig_bytes=70      exposure=0 chunks OK
+  hybrid-kex buffer_and_sign  tokens=50    chunk=5    k=None rep=7 -> ttft=1376.6ms sig_bytes=71      exposure=0 chunks OK
+  hybrid-kex buffer_and_sign  tokens=50    chunk=5    k=None rep=8 -> ttft=1569.6ms sig_bytes=70      exposure=0 chunks OK
+  hybrid-kex buffer_and_sign  tokens=50    chunk=5    k=None rep=9 -> ttft=1402.7ms sig_bytes=71      exposure=0 chunks OK
+  hybrid-kex buffer_and_sign  tokens=50    chunk=5    k=None rep=10 -> ttft=1489.8ms sig_bytes=71      exposure=0 chunks OK
+  hybrid-kex hash_chain       tokens=200   chunk=5    k=None rep=1 -> ttft=147.9ms sig_bytes=71      exposure=40 chunks OK
+  hybrid-kex hash_chain       tokens=200   chunk=5    k=None rep=2 -> ttft=139.4ms sig_bytes=71      exposure=40 chunks OK
+  hybrid-kex hash_chain       tokens=200   chunk=5    k=None rep=3 -> ttft=159.0ms sig_bytes=72      exposure=40 chunks OK
+  hybrid-kex hash_chain       tokens=200   chunk=5    k=None rep=4 -> ttft=150.4ms sig_bytes=72      exposure=40 chunks OK
+  hybrid-kex hash_chain       tokens=200   chunk=5    k=None rep=5 -> ttft=142.5ms sig_bytes=70      exposure=40 chunks OK
+  hybrid-kex hash_chain       tokens=200   chunk=5    k=None rep=6 -> ttft=152.6ms sig_bytes=72      exposure=40 chunks OK
+  hybrid-kex hash_chain       tokens=200   chunk=5    k=None rep=7 -> ttft=157.0ms sig_bytes=72      exposure=40 chunks OK
+  hybrid-kex hash_chain       tokens=200   chunk=5    k=None rep=8 -> ttft=137.7ms sig_bytes=70      exposure=40 chunks OK
+  hybrid-kex hash_chain       tokens=200   chunk=5    k=None rep=9 -> ttft=136.1ms sig_bytes=70      exposure=40 chunks OK
+  hybrid-kex hash_chain       tokens=200   chunk=5    k=None rep=10 -> ttft=143.1ms sig_bytes=71      exposure=40 chunks OK
+Wrote 60 rows to /Users/manav/Documents/pq-shield/results/streaming/hybrid-kex-streaming-20261002T174823.csv
+Stopping server: hybrid-kex
+
+=== Starting server: full-pqc (api.server_config_c:app) ===
+Server healthy (pid=36357).
+  (1 warm-up transaction(s) discarded)
+  full-pqc   per_chunk        tokens=50    chunk=5    k=None rep=1 -> ttft=125.8ms sig_bytes=36399   exposure=1 chunks OK
+  full-pqc   per_chunk        tokens=50    chunk=5    k=None rep=2 -> ttft=131.3ms sig_bytes=36399   exposure=1 chunks OK
+  full-pqc   per_chunk        tokens=50    chunk=5    k=None rep=3 -> ttft=163.1ms sig_bytes=36399   exposure=1 chunks OK
+  full-pqc   per_chunk        tokens=50    chunk=5    k=None rep=4 -> ttft=132.5ms sig_bytes=36399   exposure=1 chunks OK
+  full-pqc   per_chunk        tokens=50    chunk=5    k=None rep=5 -> ttft=160.6ms sig_bytes=36399   exposure=1 chunks OK
+  full-pqc   per_chunk        tokens=50    chunk=5    k=None rep=6 -> ttft=134.9ms sig_bytes=36399   exposure=1 chunks OK
+  full-pqc   per_chunk        tokens=50    chunk=5    k=None rep=7 -> ttft=172.9ms sig_bytes=36399   exposure=1 chunks OK
+  full-pqc   per_chunk        tokens=50    chunk=5    k=None rep=8 -> ttft=142.1ms sig_bytes=36399   exposure=1 chunks OK
+  full-pqc   per_chunk        tokens=50    chunk=5    k=None rep=9 -> ttft=141.7ms sig_bytes=36399   exposure=1 chunks OK
+  full-pqc   per_chunk        tokens=50    chunk=5    k=None rep=10 -> ttft=163.7ms sig_bytes=36399   exposure=1 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=None rep=1 -> ttft=145.8ms sig_bytes=3309    exposure=40 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=None rep=2 -> ttft=174.1ms sig_bytes=3309    exposure=40 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=None rep=3 -> ttft=160.6ms sig_bytes=3309    exposure=40 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=None rep=4 -> ttft=137.5ms sig_bytes=3309    exposure=40 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=None rep=5 -> ttft=141.5ms sig_bytes=3309    exposure=40 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=None rep=6 -> ttft=145.7ms sig_bytes=3309    exposure=40 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=None rep=7 -> ttft=163.8ms sig_bytes=3309    exposure=40 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=None rep=8 -> ttft=151.1ms sig_bytes=3309    exposure=40 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=None rep=9 -> ttft=138.2ms sig_bytes=3309    exposure=40 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=None rep=10 -> ttft=163.4ms sig_bytes=3309    exposure=40 chunks OK
+  full-pqc   hash_chain       tokens=50    chunk=5    k=None rep=1 -> ttft=143.3ms sig_bytes=3309    exposure=10 chunks OK
+  full-pqc   hash_chain       tokens=50    chunk=5    k=None rep=2 -> ttft=162.4ms sig_bytes=3309    exposure=10 chunks OK
+  full-pqc   hash_chain       tokens=50    chunk=5    k=None rep=3 -> ttft=141.6ms sig_bytes=3309    exposure=10 chunks OK
+  full-pqc   hash_chain       tokens=50    chunk=5    k=None rep=4 -> ttft=166.3ms sig_bytes=3309    exposure=10 chunks OK
+  full-pqc   hash_chain       tokens=50    chunk=5    k=None rep=5 -> ttft=140.7ms sig_bytes=3309    exposure=10 chunks OK
+  full-pqc   hash_chain       tokens=50    chunk=5    k=None rep=6 -> ttft=160.3ms sig_bytes=3309    exposure=10 chunks OK
+  full-pqc   hash_chain       tokens=50    chunk=5    k=None rep=7 -> ttft=159.7ms sig_bytes=3309    exposure=10 chunks OK
+  full-pqc   hash_chain       tokens=50    chunk=5    k=None rep=8 -> ttft=142.3ms sig_bytes=3309    exposure=10 chunks OK
+  full-pqc   hash_chain       tokens=50    chunk=5    k=None rep=9 -> ttft=147.0ms sig_bytes=3309    exposure=10 chunks OK
+  full-pqc   hash_chain       tokens=50    chunk=5    k=None rep=10 -> ttft=158.1ms sig_bytes=3309    exposure=10 chunks OK
+  full-pqc   buffer_and_sign  tokens=200   chunk=5    k=None rep=1 -> ttft=6106.7ms sig_bytes=3309    exposure=0 chunks OK
+  full-pqc   buffer_and_sign  tokens=200   chunk=5    k=None rep=2 -> ttft=6067.6ms sig_bytes=3309    exposure=0 chunks OK
+  full-pqc   buffer_and_sign  tokens=200   chunk=5    k=None rep=3 -> ttft=6087.1ms sig_bytes=3309    exposure=0 chunks OK
+  full-pqc   buffer_and_sign  tokens=200   chunk=5    k=None rep=4 -> ttft=6064.7ms sig_bytes=3309    exposure=0 chunks OK
+  full-pqc   buffer_and_sign  tokens=200   chunk=5    k=None rep=5 -> ttft=6082.9ms sig_bytes=3309    exposure=0 chunks OK
+  full-pqc   buffer_and_sign  tokens=200   chunk=5    k=None rep=6 -> ttft=5988.8ms sig_bytes=3309    exposure=0 chunks OK
+  full-pqc   buffer_and_sign  tokens=200   chunk=5    k=None rep=7 -> ttft=6026.2ms sig_bytes=3309    exposure=0 chunks OK
+  full-pqc   buffer_and_sign  tokens=200   chunk=5    k=None rep=8 -> ttft=6273.5ms sig_bytes=3309    exposure=0 chunks OK
+  full-pqc   buffer_and_sign  tokens=200   chunk=5    k=None rep=9 -> ttft=6102.6ms sig_bytes=3309    exposure=0 chunks OK
+  full-pqc   buffer_and_sign  tokens=200   chunk=5    k=None rep=10 -> ttft=6127.0ms sig_bytes=3309    exposure=0 chunks OK
+  full-pqc   per_chunk        tokens=200   chunk=5    k=None rep=1 -> ttft=145.7ms sig_bytes=135669  exposure=1 chunks OK
+  full-pqc   per_chunk        tokens=200   chunk=5    k=None rep=2 -> ttft=155.8ms sig_bytes=135669  exposure=1 chunks OK
+  full-pqc   per_chunk        tokens=200   chunk=5    k=None rep=3 -> ttft=164.3ms sig_bytes=135669  exposure=1 chunks OK
+  full-pqc   per_chunk        tokens=200   chunk=5    k=None rep=4 -> ttft=159.6ms sig_bytes=135669  exposure=1 chunks OK
+  full-pqc   per_chunk        tokens=200   chunk=5    k=None rep=5 -> ttft=142.6ms sig_bytes=135669  exposure=1 chunks OK
+  full-pqc   per_chunk        tokens=200   chunk=5    k=None rep=6 -> ttft=167.1ms sig_bytes=135669  exposure=1 chunks OK
+  full-pqc   per_chunk        tokens=200   chunk=5    k=None rep=7 -> ttft=147.7ms sig_bytes=135669  exposure=1 chunks OK
+  full-pqc   per_chunk        tokens=200   chunk=5    k=None rep=8 -> ttft=146.6ms sig_bytes=135669  exposure=1 chunks OK
+  full-pqc   per_chunk        tokens=200   chunk=5    k=None rep=9 -> ttft=159.7ms sig_bytes=135669  exposure=1 chunks OK
+  full-pqc   per_chunk        tokens=200   chunk=5    k=None rep=10 -> ttft=150.4ms sig_bytes=135669  exposure=1 chunks OK
+  full-pqc   buffer_and_sign  tokens=50    chunk=5    k=None rep=1 -> ttft=1597.6ms sig_bytes=3309    exposure=0 chunks OK
+  full-pqc   buffer_and_sign  tokens=50    chunk=5    k=None rep=2 -> ttft=1487.3ms sig_bytes=3309    exposure=0 chunks OK
+  full-pqc   buffer_and_sign  tokens=50    chunk=5    k=None rep=3 -> ttft=1560.5ms sig_bytes=3309    exposure=0 chunks OK
+  full-pqc   buffer_and_sign  tokens=50    chunk=5    k=None rep=4 -> ttft=1530.8ms sig_bytes=3309    exposure=0 chunks OK
+  full-pqc   buffer_and_sign  tokens=50    chunk=5    k=None rep=5 -> ttft=1540.9ms sig_bytes=3309    exposure=0 chunks OK
+  full-pqc   buffer_and_sign  tokens=50    chunk=5    k=None rep=6 -> ttft=1529.1ms sig_bytes=3309    exposure=0 chunks OK
+  full-pqc   buffer_and_sign  tokens=50    chunk=5    k=None rep=7 -> ttft=1592.9ms sig_bytes=3309    exposure=0 chunks OK
+  full-pqc   buffer_and_sign  tokens=50    chunk=5    k=None rep=8 -> ttft=1429.7ms sig_bytes=3309    exposure=0 chunks OK
+  full-pqc   buffer_and_sign  tokens=50    chunk=5    k=None rep=9 -> ttft=1640.0ms sig_bytes=3309    exposure=0 chunks OK
+  full-pqc   buffer_and_sign  tokens=50    chunk=5    k=None rep=10 -> ttft=1497.2ms sig_bytes=3309    exposure=0 chunks OK
+Wrote 60 rows to /Users/manav/Documents/pq-shield/results/streaming/full-pqc-streaming-20261002T174823.csv
+Stopping server: full-pqc
+
+Wrote per-transaction summary (incl. resource usage) to /Users/manav/Documents/pq-shield/results/sweep_summaries/20261002T174823.json
+
+[18:06:33] STEP 6 done in 18.2 min
+
+[18:06:33] === STEP 8: streaming sequence attacks (Llama) ===
+
+=== Starting server: classical (api.server_config_a:app) ===
+Server healthy (pid=37038).
+  classical  buffer_and_sign  drop     -> n/a
+  classical  per_chunk        drop     -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.55
+  classical  per_chunk        reorder  -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  classical  per_chunk        duplicate -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.54
+  classical  per_chunk        replay   -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  classical  per_chunk        truncate -> detected=100% mid_stream=0% fraction_delivered_before_detection=1.00
+  classical  hash_chain       drop     -> detected=100% mid_stream=0% fraction_delivered_before_detection=1.00
+  classical  hash_chain       reorder  -> detected=100% mid_stream=0% fraction_delivered_before_detection=1.00
+  classical  hash_chain       duplicate -> detected=100% mid_stream=0% fraction_delivered_before_detection=1.00
+  classical  hash_chain       replay   -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  classical  hash_chain       truncate -> detected=100% mid_stream=0% fraction_delivered_before_detection=1.00
+Stopping server: classical
+
+=== Starting server: classical-ecdhe (api.server_config_ecdhe:app) ===
+Server healthy (pid=37616).
+  classical_ecdhe buffer_and_sign  drop     -> n/a
+  classical_ecdhe per_chunk        drop     -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.55
+  classical_ecdhe per_chunk        reorder  -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  classical_ecdhe per_chunk        duplicate -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.54
+  classical_ecdhe per_chunk        replay   -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  classical_ecdhe per_chunk        truncate -> detected=100% mid_stream=0% fraction_delivered_before_detection=1.00
+  classical_ecdhe hash_chain       drop     -> detected=100% mid_stream=0% fraction_delivered_before_detection=1.00
+  classical_ecdhe hash_chain       reorder  -> detected=100% mid_stream=0% fraction_delivered_before_detection=1.00
+  classical_ecdhe hash_chain       duplicate -> detected=100% mid_stream=0% fraction_delivered_before_detection=1.00
+  classical_ecdhe hash_chain       replay   -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  classical_ecdhe hash_chain       truncate -> detected=100% mid_stream=0% fraction_delivered_before_detection=1.00
+Stopping server: classical-ecdhe
+
+=== Starting server: hybrid (api.server_config_b:app) ===
+Server healthy (pid=38288).
+  hybrid     buffer_and_sign  drop     -> n/a
+  hybrid     per_chunk        drop     -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.55
+  hybrid     per_chunk        reorder  -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  hybrid     per_chunk        duplicate -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.54
+  hybrid     per_chunk        replay   -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  hybrid     per_chunk        truncate -> detected=100% mid_stream=0% fraction_delivered_before_detection=1.00
+  hybrid     hash_chain       drop     -> detected=100% mid_stream=0% fraction_delivered_before_detection=1.00
+  hybrid     hash_chain       reorder  -> detected=100% mid_stream=0% fraction_delivered_before_detection=1.00
+  hybrid     hash_chain       duplicate -> detected=100% mid_stream=0% fraction_delivered_before_detection=1.00
+  hybrid     hash_chain       replay   -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  hybrid     hash_chain       truncate -> detected=100% mid_stream=0% fraction_delivered_before_detection=1.00
+Stopping server: hybrid
+
+=== Starting server: hybrid-kex (api.server_config_hybridkex:app) ===
+Server healthy (pid=38931).
+  hybrid_kex buffer_and_sign  drop     -> n/a
+  hybrid_kex per_chunk        drop     -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.55
+  hybrid_kex per_chunk        reorder  -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  hybrid_kex per_chunk        duplicate -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.54
+  hybrid_kex per_chunk        replay   -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  hybrid_kex per_chunk        truncate -> detected=100% mid_stream=0% fraction_delivered_before_detection=1.00
+  hybrid_kex hash_chain       drop     -> detected=100% mid_stream=0% fraction_delivered_before_detection=1.00
+  hybrid_kex hash_chain       reorder  -> detected=100% mid_stream=0% fraction_delivered_before_detection=1.00
+  hybrid_kex hash_chain       duplicate -> detected=100% mid_stream=0% fraction_delivered_before_detection=1.00
+  hybrid_kex hash_chain       replay   -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  hybrid_kex hash_chain       truncate -> detected=100% mid_stream=0% fraction_delivered_before_detection=1.00
+Stopping server: hybrid-kex
+
+=== Starting server: full-pqc (api.server_config_c:app) ===
+Server healthy (pid=39491).
+  full_pqc   buffer_and_sign  drop     -> n/a
+  full_pqc   per_chunk        drop     -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.55
+  full_pqc   per_chunk        reorder  -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  full_pqc   per_chunk        duplicate -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.54
+  full_pqc   per_chunk        replay   -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  full_pqc   per_chunk        truncate -> detected=100% mid_stream=0% fraction_delivered_before_detection=1.00
+  full_pqc   hash_chain       drop     -> detected=100% mid_stream=0% fraction_delivered_before_detection=1.00
+  full_pqc   hash_chain       reorder  -> detected=100% mid_stream=0% fraction_delivered_before_detection=1.00
+  full_pqc   hash_chain       duplicate -> detected=100% mid_stream=0% fraction_delivered_before_detection=1.00
+  full_pqc   hash_chain       replay   -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  full_pqc   hash_chain       truncate -> detected=100% mid_stream=0% fraction_delivered_before_detection=1.00
+Stopping server: full-pqc
+
+[18:23:49] STEP 8 done in 17.3 min
+
+[18:23:49] === STEP 9: checkpoint frontier (Llama) ===
+run_id=20261002T182349 backend=llama_cpp
+
+=== Starting server: hybrid (api.server_config_b:app) ===
+Server healthy (pid=40068).
+  (1 warm-up transaction(s) discarded)
+  hybrid     hash_chain       tokens=200   chunk=5    k=1 rep=1 -> ttft=144.6ms sig_bytes=2914    exposure=1 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=1 rep=2 -> ttft=195.2ms sig_bytes=2913    exposure=1 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=1 rep=3 -> ttft=164.2ms sig_bytes=2907    exposure=1 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=1 rep=4 -> ttft=164.5ms sig_bytes=2917    exposure=1 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=1 rep=5 -> ttft=200.6ms sig_bytes=2908    exposure=1 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=20 rep=1 -> ttft=195.6ms sig_bytes=212     exposure=20 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=20 rep=2 -> ttft=184.9ms sig_bytes=214     exposure=20 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=20 rep=3 -> ttft=181.8ms sig_bytes=213     exposure=20 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=20 rep=4 -> ttft=176.5ms sig_bytes=212     exposure=20 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=20 rep=5 -> ttft=188.5ms sig_bytes=210     exposure=20 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=2 rep=1 -> ttft=161.6ms sig_bytes=1486    exposure=2 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=2 rep=2 -> ttft=146.2ms sig_bytes=1489    exposure=2 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=2 rep=3 -> ttft=137.8ms sig_bytes=1484    exposure=2 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=2 rep=4 -> ttft=135.7ms sig_bytes=1491    exposure=2 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=2 rep=5 -> ttft=138.7ms sig_bytes=1492    exposure=2 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=5 rep=1 -> ttft=135.8ms sig_bytes=638     exposure=5 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=5 rep=2 -> ttft=134.5ms sig_bytes=639     exposure=5 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=5 rep=3 -> ttft=134.5ms sig_bytes=638     exposure=5 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=5 rep=4 -> ttft=132.5ms sig_bytes=642     exposure=5 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=5 rep=5 -> ttft=133.4ms sig_bytes=640     exposure=5 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=None rep=1 -> ttft=133.0ms sig_bytes=71      exposure=40 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=None rep=2 -> ttft=133.9ms sig_bytes=71      exposure=40 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=None rep=3 -> ttft=132.1ms sig_bytes=71      exposure=40 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=None rep=4 -> ttft=132.2ms sig_bytes=70      exposure=40 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=None rep=5 -> ttft=134.0ms sig_bytes=72      exposure=40 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=10 rep=1 -> ttft=131.1ms sig_bytes=354     exposure=10 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=10 rep=2 -> ttft=130.2ms sig_bytes=355     exposure=10 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=10 rep=3 -> ttft=132.7ms sig_bytes=354     exposure=10 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=10 rep=4 -> ttft=135.4ms sig_bytes=355     exposure=10 chunks OK
+  hybrid     hash_chain       tokens=200   chunk=5    k=10 rep=5 -> ttft=144.0ms sig_bytes=357     exposure=10 chunks OK
+Wrote 30 rows to /Users/manav/Documents/pq-shield/results/streaming/hybrid-streaming-20261002T182349.csv
+Stopping server: hybrid
+
+=== Starting server: full-pqc (api.server_config_c:app) ===
+Server healthy (pid=40606).
+  (1 warm-up transaction(s) discarded)
+  full-pqc   hash_chain       tokens=200   chunk=5    k=1 rep=1 -> ttft=124.8ms sig_bytes=135669  exposure=1 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=1 rep=2 -> ttft=130.0ms sig_bytes=135669  exposure=1 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=1 rep=3 -> ttft=137.0ms sig_bytes=135669  exposure=1 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=1 rep=4 -> ttft=137.9ms sig_bytes=135669  exposure=1 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=1 rep=5 -> ttft=137.2ms sig_bytes=135669  exposure=1 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=10 rep=1 -> ttft=146.2ms sig_bytes=16545   exposure=10 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=10 rep=2 -> ttft=134.7ms sig_bytes=16545   exposure=10 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=10 rep=3 -> ttft=134.8ms sig_bytes=16545   exposure=10 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=10 rep=4 -> ttft=135.7ms sig_bytes=16545   exposure=10 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=10 rep=5 -> ttft=133.8ms sig_bytes=16545   exposure=10 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=20 rep=1 -> ttft=135.1ms sig_bytes=9927    exposure=20 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=20 rep=2 -> ttft=134.0ms sig_bytes=9927    exposure=20 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=20 rep=3 -> ttft=134.4ms sig_bytes=9927    exposure=20 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=20 rep=4 -> ttft=134.7ms sig_bytes=9927    exposure=20 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=20 rep=5 -> ttft=133.4ms sig_bytes=9927    exposure=20 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=2 rep=1 -> ttft=137.4ms sig_bytes=69489   exposure=2 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=2 rep=2 -> ttft=138.6ms sig_bytes=69489   exposure=2 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=2 rep=3 -> ttft=140.2ms sig_bytes=69489   exposure=2 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=2 rep=4 -> ttft=136.7ms sig_bytes=69489   exposure=2 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=2 rep=5 -> ttft=135.7ms sig_bytes=69489   exposure=2 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=None rep=1 -> ttft=138.2ms sig_bytes=3309    exposure=40 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=None rep=2 -> ttft=135.5ms sig_bytes=3309    exposure=40 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=None rep=3 -> ttft=135.7ms sig_bytes=3309    exposure=40 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=None rep=4 -> ttft=144.6ms sig_bytes=3309    exposure=40 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=None rep=5 -> ttft=136.0ms sig_bytes=3309    exposure=40 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=5 rep=1 -> ttft=141.2ms sig_bytes=29781   exposure=5 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=5 rep=2 -> ttft=137.5ms sig_bytes=29781   exposure=5 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=5 rep=3 -> ttft=159.0ms sig_bytes=29781   exposure=5 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=5 rep=4 -> ttft=150.5ms sig_bytes=29781   exposure=5 chunks OK
+  full-pqc   hash_chain       tokens=200   chunk=5    k=5 rep=5 -> ttft=146.3ms sig_bytes=29781   exposure=5 chunks OK
+Wrote 30 rows to /Users/manav/Documents/pq-shield/results/streaming/full-pqc-streaming-20261002T182349.csv
+Stopping server: full-pqc
+
+Wrote per-transaction summary (incl. resource usage) to /Users/manav/Documents/pq-shield/results/sweep_summaries/20261002T182349.json
+
+[18:29:58] STEP 9 done in 6.2 min
+
+[18:29:58] === STEP 10: checkpoint sequence attacks (Llama) ===
+
+=== Starting server: hybrid (api.server_config_b:app) ===
+Server healthy (pid=41121).
+  hybrid     hash_chain       drop     -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.51
+  hybrid     hash_chain       reorder  -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  hybrid     hash_chain       replay   -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  hybrid     hash_chain       drop     -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.51
+  hybrid     hash_chain       reorder  -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  hybrid     hash_chain       replay   -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  hybrid     hash_chain       drop     -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.59
+  hybrid     hash_chain       reorder  -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.60
+  hybrid     hash_chain       replay   -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  hybrid     hash_chain       drop     -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.72
+  hybrid     hash_chain       reorder  -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.72
+  hybrid     hash_chain       replay   -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  hybrid     hash_chain       drop     -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.97
+  hybrid     hash_chain       reorder  -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.97
+  hybrid     hash_chain       replay   -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+Stopping server: hybrid
+
+=== Starting server: full-pqc (api.server_config_c:app) ===
+Server healthy (pid=42431).
+  full_pqc   hash_chain       drop     -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.51
+  full_pqc   hash_chain       reorder  -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  full_pqc   hash_chain       replay   -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  full_pqc   hash_chain       drop     -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.51
+  full_pqc   hash_chain       reorder  -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  full_pqc   hash_chain       replay   -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  full_pqc   hash_chain       drop     -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.59
+  full_pqc   hash_chain       reorder  -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.60
+  full_pqc   hash_chain       replay   -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  full_pqc   hash_chain       drop     -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.72
+  full_pqc   hash_chain       reorder  -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.72
+  full_pqc   hash_chain       replay   -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+  full_pqc   hash_chain       drop     -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.97
+  full_pqc   hash_chain       reorder  -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.97
+  full_pqc   hash_chain       replay   -> detected=100% mid_stream=100% fraction_delivered_before_detection=0.50
+Stopping server: full-pqc
+
+[18:46:05] STEP 10 done in 16.1 min
+
+[18:46:05] All done. Failed steps: none. Manifest: /Users/manav/Documents/pq-shield/results/paper_runs.json
+[18:46:05] paper_runs exited with 0
