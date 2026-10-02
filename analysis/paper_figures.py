@@ -47,23 +47,24 @@ from webapp.colors import CONFIG_COLORS, STRATEGY_COLORS
 
 COL_W, DBL_W = 3.5, 7.16  # IEEE column widths (inches)
 
-CONFIGS = ["control", "classical", "classical_ecdhe", "hybrid", "hybrid_kex", "full_pqc"]
+CONFIGS = ["control", "control_2rt", "classical", "classical_ecdhe", "hybrid", "hybrid_kex", "full_pqc"]
 PROTECTED = ["classical", "classical_ecdhe", "hybrid", "hybrid_kex", "full_pqc"]
-LABEL = {"control": "Control", "classical": "Classical-RSA", "classical_ecdhe": "Classical-ECDHE",
+LABEL = {"control": "Control", "control_2rt": "Control-2RT", "classical": "Classical-RSA", "classical_ecdhe": "Classical-ECDHE",
          "hybrid": "Hybrid", "hybrid_kex": "Hybrid-KEX", "full_pqc": "Full PQC"}
 LABEL_LONG = {
     "control": "Control (no crypto)",
+    "control_2rt": "Control-2RT (no crypto, two requests)",
     "classical": "Classical-RSA (RSA-2048 + ECDSA P-256, legacy)",
     "classical_ecdhe": "Classical-ECDHE (X25519 + ECDSA P-256)",
     "hybrid_kex": "Hybrid-KEX (X25519MLKEM768 + ECDSA P-256)",
     "hybrid": "Hybrid (ML-KEM-768 + ECDSA P-256)",
     "full_pqc": "Full PQC (ML-KEM-768 + ML-DSA-65)",
 }
-HATCH = {"control": "", "classical": "", "classical_ecdhe": "....", "hybrid": "////", "hybrid_kex": "\\\\\\\\",
+HATCH = {"control": "", "control_2rt": "", "classical": "", "classical_ecdhe": "....", "hybrid": "////", "hybrid_kex": "\\\\\\\\",
          "full_pqc": "xxxx"}
-MARKER = {"control": "o", "classical": "s", "classical_ecdhe": "v", "hybrid": "^", "hybrid_kex": "P",
+MARKER = {"control": "o", "control_2rt": "h", "classical": "s", "classical_ecdhe": "v", "hybrid": "^", "hybrid_kex": "P",
           "full_pqc": "D"}
-LINESTYLE = {"control": ":", "classical": "-", "classical_ecdhe": (0, (5, 1.5, 1, 1.5, 1, 1.5)),
+LINESTYLE = {"control": ":", "control_2rt": (0, (1, 2)), "classical": "-", "classical_ecdhe": (0, (5, 1.5, 1, 1.5, 1, 1.5)),
              "hybrid": "--", "hybrid_kex": (0, (1, 1)), "full_pqc": "-."}
 STRATS = ["buffer_and_sign", "per_chunk", "hash_chain"]
 STRAT_LABEL = {"buffer_and_sign": "Buffer-and-sign", "per_chunk": "Per-chunk", "hash_chain": "Hash-chain"}
@@ -359,16 +360,116 @@ def fig_decomposition(out: Out, df: pd.DataFrame, provisional: bool, concurrency
     out.fig(fig, "fig_latency_decomposition", provisional)
 
 
-def table_concurrency(out: Out, st: pd.DataFrame, sig: pd.DataFrame, provisional: bool) -> None:
-    sig = sig[sig["metric"] == "total_ms"].set_index(["concurrency", "config"])
+# --- inference: repetition is the statistical unit ----------------------------------------
+#
+# Requests within one repetition share a server process, warm-up state, and
+# queue, so they are not independent observations; treating thousands of them
+# as independent is what produced p-values like 1e-299. Significance is
+# therefore tested on the five per-repetition medians, effect sizes and
+# uncertainty come from a two-stage (repetition, then request) bootstrap, and
+# p-values are Holm-corrected across the family of comparisons reported.
+
+BOOT_B = 1000
+BOOT_CAP = 3000  # max requests drawn per repetition per bootstrap draw (speed; preserves the distribution)
+
+
+def _rep_arrays(ok: pd.DataFrame, cfg: str, conc: int) -> list[np.ndarray]:
+    g = ok[(ok["config"] == cfg) & (ok["concurrency"] == conc)]
+    return [r["total_ms"].dropna().to_numpy() for _, r in g.groupby("repetition")]
+
+
+def _hboot_diff(a: list[np.ndarray], b: list[np.ndarray], rng: np.random.Generator) -> np.ndarray:
+    """Bootstrap distribution of median(a) - median(b): resample repetitions,
+    then requests within each chosen repetition."""
+    out = np.empty(BOOT_B)
+
+    def draw(reps):
+        picks = rng.integers(0, len(reps), len(reps))
+        return np.concatenate([rng.choice(reps[k], size=min(len(reps[k]), BOOT_CAP)) for k in picks])
+
+    for t in range(BOOT_B):
+        out[t] = np.median(draw(a)) - np.median(draw(b))
+    return out
+
+
+def _cliffs_delta(x: np.ndarray, y: np.ndarray) -> float:
+    """P(X>Y) - P(X<Y), via the Mann-Whitney U statistic (request level, descriptive)."""
+    u = stats.mannwhitneyu(x, y, alternative="two-sided").statistic
+    return 2 * u / (len(x) * len(y)) - 1
+
+
+def _holm(pvals: list[float]) -> list[float]:
+    order = np.argsort(pvals)
+    m = len(pvals)
+    adj = np.empty(m)
+    running = 0.0
+    for rank, idx in enumerate(order):
+        running = max(running, (m - rank) * pvals[idx])
+        adj[idx] = min(1.0, running)
+    return list(adj)
+
+
+def comparison_stats(df: pd.DataFrame, pairs: list[tuple[str, str]], seed: int = 7) -> pd.DataFrame:
+    """For each (config, reference) pair at each concurrency: median difference
+    (ms and % of the reference median), 95% and 90% two-stage bootstrap CIs,
+    Mann-Whitney U on per-repetition medians (Holm-corrected over all rows
+    returned), and Cliff's delta on requests."""
+    ok = _ok(df)
+    rng = np.random.default_rng(seed)
+    rows = []
+    for conc in sorted(ok["concurrency"].unique()):
+        for cfg, ref in pairs:
+            a, b = _rep_arrays(ok, cfg, conc), _rep_arrays(ok, ref, conc)
+            if len(a) < 2 or len(b) < 2:
+                continue
+            ref_med = np.median(np.concatenate(b))
+            diff = np.median(np.concatenate(a)) - ref_med
+            boot = _hboot_diff(a, b, rng)
+            p_rep = stats.mannwhitneyu([np.median(x) for x in a], [np.median(x) for x in b],
+                                       alternative="two-sided", method="exact").pvalue
+            rows.append({
+                "concurrency": int(conc), "config": cfg, "reference": ref,
+                "diff_ms": diff, "ci95_lo": np.percentile(boot, 2.5), "ci95_hi": np.percentile(boot, 97.5),
+                "ci90_lo": np.percentile(boot, 5), "ci90_hi": np.percentile(boot, 95),
+                "ref_median": ref_med, "diff_pct": 100 * diff / ref_med,
+                "p_rep": p_rep, "cliffs_delta": _cliffs_delta(np.concatenate(a), np.concatenate(b)),
+                "n_reps": (len(a), len(b)),
+            })
+    res = pd.DataFrame(rows)
+    if not res.empty:
+        # Holm family = all configurations compared with one reference at one
+        # concurrency level (the question "which configs differ from X here?").
+        res["p_holm"] = np.nan
+        for _, idx in res.groupby(["concurrency", "reference"]).groups.items():
+            res.loc[idx, "p_holm"] = _holm(res.loc[idx, "p_rep"].tolist())
+    return res
+
+
+def _fmt_ci(v: float, lo: float, hi: float) -> str:
+    big = max(abs(v), abs(lo), abs(hi)) >= 1000
+    f = (lambda x: f"{x / 1000:+.2f}") if big else (lambda x: f"{x:+.1f}")
+    unit = r"\,s" if big else ""
+    return f"{f(v)} [{f(lo)}, {f(hi)}]{unit}"
+
+
+def table_concurrency(out: Out, st: pd.DataFrame, cmp: pd.DataFrame, provisional: bool) -> None:
+    ctl = cmp[cmp["reference"] == "control"].set_index(["concurrency", "config"])
+    rt2 = cmp[cmp["reference"] == "control_2rt"].set_index(["concurrency", "config"])
+    has_2rt = not rt2.empty
     lines = [r"\begin{table*}[t]", r"\centering",
-             r"\caption{End-to-end latency (handshake + protected request) by configuration and concurrency. "
-             r"Statistics over successful requests after 5\% warm-up trimming; ``Rep.\ range'' is the spread of "
-             r"the five per-repetition medians. Overhead and $p$ are versus Control at the same concurrency "
-             r"(two-sided Mann--Whitney $U$).}",
-             r"\label{tab:concurrency}", r"\setlength{\tabcolsep}{4pt}",
-             r"\begin{tabular}{@{}rlrrrrrrrrr@{}}", r"\toprule",
-             r"Conc. & Configuration & Reps & OK / attempted & Fail & Median (ms) & Rep.\ range (ms) & p95 (ms) & p99 (ms) & Overhead & $p$ \\",
+             r"\caption{End-to-end latency (handshake + protected request) by configuration and concurrency, over "
+             r"successful requests after 5\% warm-up trimming. ``Rep.\ range'': spread of the five per-repetition "
+             r"medians. $\Delta$: difference in medians (ms) with a 95\% two-stage bootstrap CI (repetitions, then "
+             r"requests), versus Control and"
+             + (r" versus Control-2RT, the matched no-crypto protocol (making $\Delta_{2RT}$ the cryptographic "
+                r"overhead alone)" if has_2rt else "")
+             + r". $\delta$: Cliff's delta versus Control. $p$: two-sided Mann--Whitney $U$ on per-repetition "
+               r"medians (5 vs.\ 5; smallest attainable 0.008), Holm-corrected within each concurrency level.}",
+             r"\label{tab:concurrency}", r"\setlength{\tabcolsep}{2pt}", r"\footnotesize",
+             r"\begin{tabular}{@{}rlrrrr" + ("rr" if has_2rt else "r") + r"rr@{}}", r"\toprule",
+             r"Conc. & Configuration & Median (ms) & Rep.\ range (ms) & p95 (ms) & Fail & "
+             r"$\Delta$ vs.\ Control & " + (r"$\Delta_{2RT}$ (crypto) & " if has_2rt else "")
+             + r"$\delta$ & $p_{\mathrm{Holm}}$ \\",
              r"\midrule"]
     for conc in sorted(st["concurrency"].unique()):
         sub = st[st["concurrency"] == conc].set_index("config")
@@ -378,19 +479,61 @@ def table_concurrency(out: Out, st: pd.DataFrame, sig: pd.DataFrame, provisional
                 continue
             r = sub.loc[cfg]
             key = (conc, cfg)
-            ov = f"{sig.loc[key, 'overhead_pct_vs_control']:+.0f}\\%" if key in sig.index else ("ref." if cfg == "control" else "--")
-            p = _fmt_p(sig.loc[key, "p_value"]) if key in sig.index else "--"
+            if key in ctl.index:
+                c = ctl.loc[key]
+                d_ctl = _fmt_ci(c["diff_ms"], c["ci95_lo"], c["ci95_hi"])
+                delta, p = f"{c['cliffs_delta']:+.2f}", f"{c['p_holm']:.3f}"
+            else:
+                d_ctl, delta, p = ("ref." if cfg == "control" else "--"), "--", "--"
+            cells = [d_ctl]
+            if has_2rt:
+                cells.append(_fmt_ci(rt2.loc[key, "diff_ms"], rt2.loc[key, "ci95_lo"], rt2.loc[key, "ci95_hi"])
+                             if key in rt2.index else ("ref." if cfg == "control_2rt" else "--"))
             lines.append(
-                f"{f'{conc:,}' if first else ''} & {LABEL[cfg]} & {int(r['n_reps'])} & "
-                f"{int(r['n_ok']):,} / {int(r['n_attempted']):,} & {r['error_rate'] * 100:.0f}\\% & "
-                f"{_fmt_ms(r['median'])} & {_fmt_ms(r['rep_min'])}--{_fmt_ms(r['rep_max'])} & "
-                f"{_fmt_ms(r['p95'])} & {_fmt_ms(r['p99'])} & {ov} & {p} \\\\"
-            )
+                f"{f'{conc:,}' if first else ''} & {LABEL[cfg]} & {_fmt_ms(r['median'])} & "
+                f"{_fmt_ms(r['rep_min'])}--{_fmt_ms(r['rep_max'])} & {_fmt_ms(r['p95'])} & "
+                f"{r['error_rate'] * 100:.1f}\\% & " + " & ".join(cells) + f" & {delta} & {p} \\\\")
             first = False
         lines.append(r"\addlinespace")
     lines[-1] = r"\bottomrule"
     lines += [r"\end{tabular}", r"\end{table*}", ""]
     out.table("tab_concurrency", "\n".join(lines), provisional)
+
+
+EQUIV_MARGIN_PCT = 5.0
+
+
+def table_equivalence(out: Out, cmp: pd.DataFrame) -> None:
+    """TOST-style equivalence: the ML-KEM configurations are declared
+    equivalent to Classical-ECDHE at a concurrency level if the 90% bootstrap
+    CI of the median difference lies within +/- EQUIV_MARGIN_PCT of the
+    Classical-ECDHE median."""
+    eq = cmp[cmp["reference"] == "classical_ecdhe"]
+    if eq.empty:
+        return
+    lines = [r"\begin{table}[t]", r"\centering",
+             fr"\caption{{Equivalence of ML-KEM-based key establishment to the X25519 baseline (Classical-ECDHE): "
+             fr"median end-to-end difference with its 90\% two-stage bootstrap CI, as a percentage of the "
+             fr"Classical-ECDHE median. ``Equiv.'': the CI lies within $\pm${EQUIV_MARGIN_PCT:.0f}\% "
+             fr"(two one-sided tests at $\alpha=0.05$).}}",
+             r"\label{tab:equivalence}", r"\setlength{\tabcolsep}{3pt}", r"\footnotesize",
+             r"\begin{tabular}{@{}rlrl@{}}", r"\toprule",
+             r"Conc. & Configuration & $\Delta$ (\%) [90\% CI] & Equiv. \\", r"\midrule"]
+    for conc in sorted(eq["concurrency"].unique()):
+        first = True
+        for _, r in eq[eq["concurrency"] == conc].iterrows():
+            lo, hi = 100 * r["ci90_lo"] / r["ref_median"], 100 * r["ci90_hi"] / r["ref_median"]
+            ok_ = -EQUIV_MARGIN_PCT < lo and hi < EQUIV_MARGIN_PCT
+            lines.append(f"{f'{conc:,}' if first else ''} & {LABEL[r['config']]} & "
+                         f"{r['diff_pct']:+.1f} [{lo:+.1f}, {hi:+.1f}] & {'yes' if ok_ else 'no'} \\\\")
+            out.num("Equivalence vs Classical-ECDHE (90% CI, +/-5% margin)",
+                    f"{LABEL[r['config']]} @ {conc:,}",
+                    f"{r['diff_pct']:+.1f}% [{lo:+.1f}, {hi:+.1f}] -> {'equivalent' if ok_ else 'not shown equivalent'}")
+            first = False
+        lines.append(r"\addlinespace")
+    lines[-1] = r"\bottomrule"
+    lines += [r"\end{tabular}", r"\end{table}", ""]
+    out.table("tab_equivalence", "\n".join(lines))
 
 
 # --------------------------------------------------------------------------- primitives
@@ -568,6 +711,12 @@ def fig_streaming_hndl(out: Out, results_dir: str) -> None:
             out.num("Streaming HNDL exposure", f"{LABEL[cfg]} decryptable bytes vs generated tokens (linear fit)",
                     f"{fit.slope:.2f} B/token, R^2 = {fit.rvalue ** 2:.4f}, n = {len(s)} lengths, "
                     f"{int(s['tokens'].min())}-{int(s['tokens'].max())} tokens")
+            # Decryptable volume counts whole AEAD records (12 B nonce + ciphertext + 16 B GCM tag);
+            # the plaintext a CRQC would actually recover excludes those 28 B of framing per chunk.
+            plain = s["decryptable_bytes_under_future_crqc"] - 28 * s["n_chunks"]
+            pfit = stats.linregress(s["tokens"], plain)
+            out.num("Streaming HNDL exposure", f"{LABEL[cfg]} recoverable plaintext vs generated tokens (linear fit)",
+                    f"{pfit.slope:.2f} B/token, R^2 = {pfit.rvalue ** 2:.4f} (records minus 28 B framing per chunk)")
             out.num("Streaming HNDL exposure", f"{LABEL[cfg]} decryptable bytes at each length",
                     ", ".join(f"{int(t)} tok -> {int(b):,} B" for t, b in
                               zip(s["tokens"], s["decryptable_bytes_under_future_crqc"])))
@@ -1064,14 +1213,18 @@ def fig_checkpoint_frontier(out: Out, df: pd.DataFrame, run_id: str, attacks: li
         # Detection depends only on where the checkpoints fall, not on the
         # signature scheme -- Hybrid and Full PQC give identical curves -- so
         # plot one line per attack (mean over configurations).
-        for attack, ls, mk in (("drop", "-", "o"), ("reorder", "--", "s")):
+        styles = {"drop": ("-", "o", INK), "reorder": ("--", "s", "white"), "replay": (":", "^", INK_2),
+                  "duplicate": ("-.", "D", "white")}
+        names = {"drop": "Drop one chunk", "reorder": "Reorder two chunks", "replay": "Cross-session replay",
+                 "duplicate": "Duplicate one chunk"}
+        for attack in [a for a in styles if a in set(at["attack"])]:
+            ls, mk, mfc = styles[attack]
             g = at[at["attack"] == attack].groupby("checkpoint_interval")["fraction_delivered_before_detection_mean"].mean()
-            axd.plot(g.index, g.values * 100, color=INK, marker=mk, ls=ls, mfc="white" if attack == "reorder" else INK,
-                     label=f"{attack.capitalize()} one chunk")
+            axd.plot(g.index, g.values * 100, color=INK, marker=mk, ls=ls, mfc=mfc, label=names[attack])
         axd.axhline(50, color=INK_2, lw=0.6, ls=":")
         axd.text(1, 47, "attack position (mid-stream)", fontsize=5.5, color=INK_2, va="top")
         for cfg in [c for c in PROTECTED if c in set(at["config"])]:
-            for attack in ("drop", "reorder"):
+            for attack in sorted(set(at["attack"])):
                 g = at[(at["config"] == cfg) & (at["attack"] == attack)].sort_values("checkpoint_interval")
                 for _, r in g.iterrows():
                     out.num("Checkpoint sequence attacks", f"{LABEL[cfg]} {attack} k={int(r['checkpoint_interval'])}",
@@ -1082,7 +1235,7 @@ def fig_checkpoint_frontier(out: Out, df: pd.DataFrame, run_id: str, attacks: li
         axd.set_xlabel("Checkpoint interval k (chunks)")
         axd.set_ylabel("Stream delivered before detection (%)")
         axd.set_ylim(0, 105)
-        axd.set_title("(b) When a drop/reorder is caught (Hybrid = Full PQC)", loc="left")
+        axd.set_title("(b) When an attack is caught (Hybrid = Full PQC)", loc="left")
         axd.legend(fontsize=6, loc="upper left")
     else:
         axd.axis("off")
@@ -1161,6 +1314,39 @@ def fig_amortization(out: Out, df: pd.DataFrame) -> None:
     out.fig(fig, "fig_handshake_amortization")
 
 
+# --------------------------------------------------------------------------- environment
+
+def table_environment(out: Out, env_path: str) -> None:
+    if not os.path.isfile(env_path):
+        out.notes.append("paper/environment.json missing: run bench.paper_runs to capture versions.")
+        return
+    with open(env_path) as f:
+        env = json.load(f)
+    pk = env.get("packages", {})
+    osname = env.get("os", "").replace("Darwin", "macOS")
+    rows = [
+        ("Host", f"{env.get('cpu')}, {env.get('cpu_count')} cores, {env.get('memory_gb'):g}\\,GB"),
+        ("OS", osname),
+        ("Python", env.get("python")),
+        ("FastAPI / Uvicorn / httpx", f"{pk.get('fastapi')} / {pk.get('uvicorn')} / {pk.get('httpx')}"),
+        ("cryptography / OpenSSL", f"{pk.get('cryptography')} / {(env.get('openssl') or '').replace('OpenSSL ', '').split(' ')[0]}"),
+        ("liboqs (commit)", (env.get("liboqs_commit") or "")[:12]),
+        ("NumPy / SciPy / pandas", f"{pk.get('numpy')} / {pk.get('scipy')} / {pk.get('pandas')}"),
+        ("scikit-learn", pk.get("scikit-learn")),
+        ("llama-cpp-python (Metal)", pk.get("llama_cpp_python")),
+        ("LLM file", (env.get("llama_model_file") or "").replace("_", "\\_")),
+        ("LLM SHA-256 (prefix)", (env.get("llama_model_sha256") or "")[:16]),
+        ("Classifier SHA-256 (prefix)", (env.get("classifier_model_sha256") or "")[:16]),
+    ]
+    lines = [r"\begin{table}[t]", r"\centering",
+             r"\caption{Software and hardware environment, captured automatically at run time.}",
+             r"\label{tab:environment}", r"\footnotesize", r"\setlength{\tabcolsep}{3pt}", r"\begin{tabular}{@{}ll@{}}", r"\toprule",
+             r"Component & Version \\", r"\midrule"]
+    lines += [f"{a} & {b} \\\\" for a, b in rows]
+    lines += [r"\bottomrule", r"\end{tabular}", r"\end{table}", ""]
+    out.table("tab_environment", "\n".join(lines))
+
+
 # --------------------------------------------------------------------------- main
 
 def main() -> None:
@@ -1188,7 +1374,8 @@ def main() -> None:
         with open(manifest_path) as f:
             manifest = json.load(f)
         args.concurrency_run_id = args.concurrency_run_id or (
-            [r for r in (manifest.get("concurrency"), manifest.get("concurrency_supplement")) if r] or None)
+            [r for r in (manifest.get("concurrency"), manifest.get("concurrency_supplement"),
+                         manifest.get("concurrency_control_2rt")) if r] or None)
         args.payload_run_id = args.payload_run_id or manifest.get("payload") or None
         args.network_run_id = args.network_run_id or (
             (manifest.get("network") or []) + (manifest.get("network_supplement") or []) or None)
@@ -1205,10 +1392,18 @@ def main() -> None:
 
     st = concurrency_stats(conc_df)
     sig = pd.concat([mann_whitney_vs_control(conc_df, metric=m) for m in ("total_ms", "rtt_ms")], ignore_index=True)
+    present_cfgs = set(conc_df["config"])
+    pairs = [(c, "control") for c in CONFIGS if c != "control" and c in present_cfgs]
+    if "control_2rt" in present_cfgs:
+        pairs += [(c, "control_2rt") for c in PROTECTED if c in present_cfgs]
+    if "classical_ecdhe" in present_cfgs:
+        pairs += [(c, "classical_ecdhe") for c in ("hybrid", "hybrid_kex", "full_pqc") if c in present_cfgs]
+    cmp = comparison_stats(conc_df, pairs)
     fig_concurrency(out, st, provisional,
                     _resource_cells(args.results_dir, args.concurrency_run_id) if args.concurrency_run_id else None)
     fig_decomposition(out, conc_df, provisional, args.decomposition_concurrency)
-    table_concurrency(out, st, sig, provisional)
+    table_concurrency(out, st, cmp, provisional)
+    table_equivalence(out, cmp)
     table_tradeoff(out, conc_df, provisional)
     missing = [c for c in CONFIGS if c not in set(st["config"])]
     if missing:
@@ -1221,10 +1416,12 @@ def main() -> None:
         out.num(sec, f"{LABEL[r['config']]} @ {r['concurrency']:,}: median [rep range] / p95 / failed",
                 f"{r['median']:,.0f} [{r['rep_min']:,.0f}-{r['rep_max']:,.0f}] / {r['p95']:,.0f} ms / {r['error_rate']:.1%} "
                 f"({int(r['n_attempted']):,} attempted, {int(r['n_reps'])} reps)")
-    for _, r in sig[sig["metric"] == "total_ms"].iterrows():
-        out.num("Significance vs Control (total_ms, Mann-Whitney U)" + (" -- PROVISIONAL" if provisional else ""),
+    for _, r in cmp[cmp["reference"].isin(["control", "control_2rt"])].iterrows():
+        out.num(f"Difference vs {LABEL[r['reference']]} (median, 95% two-stage bootstrap CI; "
+                f"p: rep-level Mann-Whitney, Holm)" + (" -- PROVISIONAL" if provisional else ""),
                 f"{LABEL[r['config']]} @ {int(r['concurrency']):,}",
-                f"{r['overhead_pct_vs_control']:+.1f}% (p = {r['p_value']:.2g})")
+                f"{r['diff_ms']:+.1f} ms [{r['ci95_lo']:+.1f}, {r['ci95_hi']:+.1f}] ({r['diff_pct']:+.1f}%), "
+                f"Cliff's delta {r['cliffs_delta']:+.2f}, p_Holm = {r['p_holm']:.3f}")
 
     with open(os.path.join(args.results_dir, "validation", "primitive_bench.json")) as f:
         bench = json.load(f)
@@ -1261,6 +1458,7 @@ def main() -> None:
     else:
         out.notes.append("No network-emulation sweep given (--network-run-id); all latency is over loopback.")
 
+    table_environment(out, os.path.join(args.output_dir, "environment.json"))
     out.write_numbers({
         "Concurrency sweep": conc_label + ("  **(PROVISIONAL)**" if provisional else ""),
         "Streaming sweep": f"{args.streaming_run_id} ({sdf['backend'].iloc[0] if 'backend' in sdf else 'backend not recorded'}; "

@@ -26,9 +26,10 @@ STREAMING_DIR = os.path.join(REPO_ROOT, "results", "streaming")
 STREAMING_MITM_DIR = os.path.join(REPO_ROOT, "results", "streaming", "mitm")
 STREAMING_HNDL_DIR = os.path.join(REPO_ROOT, "results", "hndl", "streaming")
 
-CONFIG_ORDER = ["control", "classical", "classical_ecdhe", "hybrid", "hybrid_kex", "full_pqc"]
+CONFIG_ORDER = ["control", "control_2rt", "classical", "classical_ecdhe", "hybrid", "hybrid_kex", "full_pqc"]
 CONFIG_LABELS = {
     "control": "Control",
+    "control_2rt": "Control-2RT (no crypto, 2 requests)",
     "classical": "A: Classical-RSA",
     "classical_ecdhe": "A': Classical-ECDHE",
     "hybrid_kex": "B': Hybrid-KEX",

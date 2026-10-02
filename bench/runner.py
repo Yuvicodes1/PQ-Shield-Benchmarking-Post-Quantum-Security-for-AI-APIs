@@ -38,6 +38,7 @@ from model.profiles.registry import get_profile
 
 CONFIG_TO_MODULE_NAME = {
     "control": "control",
+    "control-2rt": "control_2rt",
     "classical": "classical",
     "classical-ecdhe": "classical_ecdhe",
     "hybrid": "hybrid",
@@ -76,17 +77,29 @@ def _sample_request() -> dict:
     return get_profile().sample_request()
 
 
-async def _control_transaction(client: httpx.AsyncClient, base_url: str) -> dict:
-    row = {"config": "control", "error": None}
+async def _control_transaction(client: httpx.AsyncClient, base_url: str, two_round_trips: bool = False) -> dict:
+    """Unprotected transaction. With two_round_trips (config "control_2rt"),
+    first makes a no-crypto GET /handshake, mirroring the two HTTP requests of
+    every protected transaction -- the matched control that separates
+    protocol overhead from cryptographic overhead."""
+    row = {"config": "control_2rt" if two_round_trips else "control", "error": None}
     body = _sample_request()
     request_bytes = len(json.dumps(body).encode())
-    t0 = time.perf_counter()
     try:
+        handshake_ms = 0.0
+        if two_round_trips:
+            t_h = time.perf_counter()
+            hs = await client.get(f"{base_url}/handshake")
+            handshake_ms = (time.perf_counter() - t_h) * 1000
+            if hs.status_code != 200:
+                row["error"] = f"HTTP {hs.status_code} (handshake)"
+                return row
+        t0 = time.perf_counter()
         resp = await client.post(f"{base_url}/predict", json=body)
         rtt_ms = (time.perf_counter() - t0) * 1000
         row["rtt_ms"] = rtt_ms
-        row["total_ms"] = rtt_ms
-        row["handshake_ms"] = 0.0
+        row["total_ms"] = handshake_ms + rtt_ms
+        row["handshake_ms"] = handshake_ms
         row["request_plaintext_bytes"] = request_bytes
         if resp.status_code == 200:
             row["response_plaintext_bytes"] = len(resp.content)
@@ -158,7 +171,7 @@ async def run_sweep_cell(
     limits = httpx.Limits(max_connections=concurrency + 10, max_keepalive_connections=concurrency)
     async with httpx.AsyncClient(timeout=30.0, limits=limits) as client:
         cached_handshake = None
-        if reuse_handshake and config_name != "control":
+        if reuse_handshake and config_name not in ("control", "control_2rt"):
             from api.secure_client import do_handshake
 
             cached_handshake, _ = await do_handshake(client, base_url)
@@ -175,8 +188,8 @@ async def run_sweep_cell(
                     idx = counter["n"]
                     counter["n"] += 1
                 async with semaphore:
-                    if config_name == "control":
-                        row = await _control_transaction(client, base_url)
+                    if config_name in ("control", "control_2rt"):
+                        row = await _control_transaction(client, base_url, two_round_trips=config_name == "control_2rt")
                     else:
                         if requests_per_handshake > 1 and (session is None or session.requests_left <= 0):
                             session = ClientSession(requests_left=requests_per_handshake)

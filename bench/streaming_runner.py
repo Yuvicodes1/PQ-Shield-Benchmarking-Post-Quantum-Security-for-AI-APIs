@@ -39,6 +39,7 @@ from api.secure_streaming_client import run_streaming_transaction
 from bench.orchestrator import REPO_ROOT, SERVER_MODULES, _start_server, _stop_server, _wait_healthy
 from bench.runner import new_run_id
 from crypto.instrumentation import ResourceSampler
+from crypto.streaming import PROTOCOL_VERSION as STREAM_PROTOCOL_VERSION
 
 DEFAULT_PROMPT = (
     "Summarize the key risks of migrating a production API to post-quantum "
@@ -64,7 +65,7 @@ CSV_FIELDS = [
     "n_chunks", "total_signature_bytes", "total_signing_ms", "total_verify_ms",
     "all_signatures_valid", "all_aead_ok", "all_in_order", "stream_fully_verified",
     "reconstructed_bytes", "checkpoint_interval", "n_signatures",
-    "max_unverified_chunks", "max_verification_lag_ms", "error",
+    "max_unverified_chunks", "max_verification_lag_ms", "protocol_version", "error",
 ]
 
 
@@ -83,6 +84,7 @@ async def _run_one(base_url: str, config_key: str, strategy: str, max_tokens: in
     metrics["repetition"] = repetition
     metrics["run_id"] = run_id
     metrics["backend"] = backend
+    metrics["protocol_version"] = STREAM_PROTOCOL_VERSION
     return {k: metrics.get(k) for k in CSV_FIELDS}
 
 

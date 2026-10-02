@@ -13,6 +13,7 @@ pydantic schema.
 
 from __future__ import annotations
 
+import uuid
 from contextlib import asynccontextmanager
 
 from fastapi import Body, FastAPI
@@ -36,6 +37,14 @@ def healthz():
         "config": "control",
         "payload_profile": model_service.active_profile_name(),
     }
+
+
+@app.get("/handshake")
+def handshake():
+    # Matched-protocol control (bench config "control-2rt"): the same first
+    # round trip a protected transaction makes, with no cryptographic work,
+    # so protocol overhead and cryptographic overhead can be separated.
+    return {"handshake_id": str(uuid.uuid4())}
 
 
 @app.post("/predict")

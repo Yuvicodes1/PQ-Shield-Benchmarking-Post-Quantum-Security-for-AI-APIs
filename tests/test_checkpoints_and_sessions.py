@@ -42,7 +42,7 @@ def _stream(config_name: str, k: int):
 
 
 def _verify(rows, client, bundle, session_key):
-    state = HashChainClientState()
+    state = HashChainClientState(bundle.handshake_id)
     return [verify_hash_chain_chunk(r, state, session_key, bundle.sig_public_key, client) for r in rows]
 
 

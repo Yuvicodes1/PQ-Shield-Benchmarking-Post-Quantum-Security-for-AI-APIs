@@ -47,7 +47,13 @@ from api.secure_client import _b64d, _b64e, do_handshake
 from bench.orchestrator import REPO_ROOT, SERVER_MODULES, _start_server, _stop_server, _wait_healthy
 from crypto.aead import aead_encrypt
 from crypto.registry import get_client_crypto
-from crypto.streaming import HashChainClientState, verify_hash_chain_chunk, verify_hash_chain_final, verify_per_chunk
+from crypto.streaming import (
+    HashChainClientState,
+    verify_hash_chain_chunk,
+    verify_hash_chain_final,
+    verify_per_chunk,
+    verify_per_chunk_final,
+)
 
 DEFAULT_PROMPT = (
     "Summarize the key risks of migrating a production API to post-quantum "
@@ -57,6 +63,66 @@ DEFAULT_PROMPT = (
 CONFIG_TO_CRYPTO_NAME = {"classical": "classical", "classical-ecdhe": "classical_ecdhe",
                          "hybrid": "hybrid", "hybrid-kex": "hybrid_kex", "full-pqc": "full_pqc"}
 ATTACKABLE_STRATEGIES = ["per_chunk", "hash_chain"]  # buffer_and_sign has no intermediate chunks
+
+
+ATTACKS = ["drop", "reorder", "duplicate", "replay", "truncate"]
+
+
+async def _collect_stream(client: httpx.AsyncClient, base_url: str, config_name: str, strategy: str,
+                          prompt: str, max_tokens: int, chunk_size_tokens: int,
+                          checkpoint_interval: int | None) -> dict:
+    """One real protected streaming response, captured whole (as an on-path
+    attacker would see it) together with the client's session material."""
+    client_crypto = get_client_crypto(config_name)
+    handshake_json, _ = await do_handshake(client, base_url)
+    est = client_crypto.establish(_b64d(handshake_json["kex_public_key"]))
+    request_body = {"prompt": prompt, "strategy": strategy,
+                    "chunk_size_tokens": chunk_size_tokens, "max_tokens": max_tokens}
+    if checkpoint_interval is not None:
+        request_body["checkpoint_interval"] = checkpoint_interval
+    req_aead = aead_encrypt(est.session_key, json.dumps(request_body).encode())
+    payload = {"handshake_id": handshake_json["handshake_id"], "kex_blob": _b64e(est.kex_blob),
+               "nonce": _b64e(req_aead.nonce), "ciphertext": _b64e(req_aead.ciphertext)}
+    chunks: list[dict] = []
+    final_event: dict | None = None
+    async with client.stream("POST", f"{base_url}/secure/predict/stream", json=payload, timeout=120.0) as resp:
+        if resp.status_code != 200:
+            raise RuntimeError(f"HTTP {resp.status_code}")
+        async for line in resp.aiter_lines():
+            if not line.startswith("data:"):
+                continue
+            data = json.loads(line[len("data:"):].strip())
+            kind = data.get("kind")
+            if kind == "chunk":
+                chunks.append(data)
+            elif kind in ("final_buffered", "final_chain", "final_per_chunk"):
+                final_event = data
+            # else: the trailing "event: done" data line -- not a signed record.
+    return {"handshake_id": handshake_json["handshake_id"], "session_key": est.session_key,
+            "sig_public_key": _b64d(handshake_json["sig_public_key"]), "client_crypto": client_crypto,
+            "chunks": chunks, "final": final_event}
+
+
+def _mutate(chunks: list[dict], final: dict | None, attack: str, foreign: list[dict] | None):
+    """Applies the attack to the captured sequence without forging any record.
+    Returns (mutated_chunks, final_event_or_None)."""
+    mutated = list(chunks)
+    mid = len(mutated) // 2
+    if attack == "drop":
+        del mutated[mid]
+    elif attack == "reorder":
+        mutated[mid], mutated[mid + 1] = mutated[mid + 1], mutated[mid]
+    elif attack == "duplicate":
+        mutated.insert(mid + 1, dict(mutated[mid]))
+    elif attack == "replay":
+        # a validly signed record from a DIFFERENT session, same position
+        mutated[mid] = dict(foreign[min(mid, len(foreign) - 1)])
+    elif attack == "truncate":
+        # cut the connection two-thirds through: tail chunks and the terminal record never arrive
+        return mutated[: max(1, (2 * len(mutated)) // 3)], None
+    else:
+        raise ValueError(f"Unknown attack {attack!r}. Valid: {ATTACKS}")
+    return mutated, final
 
 
 async def run_trial(
@@ -69,126 +135,75 @@ async def run_trial(
     max_tokens: int = 60,
     chunk_size_tokens: int = 5,
     checkpoint_interval: int | None = None,
+    foreign_chunks: list[dict] | None = None,
 ) -> dict:
-    """One trial: collect a real streaming response in full, apply `attack`
-    ("drop" or "reorder") to the middle of its chunk sequence -- exactly what
-    an active proxy sitting on the wire could do to the SSE bytes without
-    forging any single chunk's contents -- then replay the mutated sequence
-    through the same client-side verification logic
-    (crypto/streaming.py's verify_per_chunk / verify_hash_chain_chunk) a real
-    client runs incrementally, tracking the position (if any) where the
-    tamper is first flagged.
-    """
-    client_crypto = get_client_crypto(config_name)
+    """One trial: capture a real streaming response, apply `attack` mid-stream
+    (drop, reorder, duplicate, cross-session replay, or truncation) exactly
+    as an on-path adversary could without forging any record, then replay the
+    mutated sequence through the client's incremental verification
+    (crypto/streaming.py), recording where -- if anywhere -- it is first
+    flagged. Detection "at the end" means only the terminal record (or its
+    absence) revealed the attack."""
     result: dict = {
         "config": config_name, "strategy": strategy, "attack": attack, "error": None,
         "n_chunks": None, "detected": None, "detected_mid_stream": None,
         "chunks_before_detection": None, "fraction_delivered_before_detection": None,
         "checkpoint_interval": checkpoint_interval,
     }
-
     if strategy not in ATTACKABLE_STRATEGIES:
-        result["error"] = (
-            "not applicable -- buffer_and_sign has no intermediate chunks to attack; "
-            "it never delivers anything before the end regardless"
-        )
+        result["error"] = ("not applicable -- buffer_and_sign has no intermediate chunks to attack; "
+                           "it never delivers anything before the end regardless")
         return result
 
     try:
-        handshake_json, _ = await do_handshake(client, base_url)
-        kex_public_key = _b64d(handshake_json["kex_public_key"])
-        sig_public_key = _b64d(handshake_json["sig_public_key"])
-        handshake_id = handshake_json["handshake_id"]
-        est = client_crypto.establish(kex_public_key)
-
-        request_body = {
-            "prompt": prompt, "strategy": strategy,
-            "chunk_size_tokens": chunk_size_tokens, "max_tokens": max_tokens,
-        }
-        if checkpoint_interval is not None:
-            request_body["checkpoint_interval"] = checkpoint_interval
-        request_plaintext = json.dumps(request_body).encode()
-        req_aead = aead_encrypt(est.session_key, request_plaintext)
-        payload = {
-            "handshake_id": handshake_id, "kex_blob": _b64e(est.kex_blob),
-            "nonce": _b64e(req_aead.nonce), "ciphertext": _b64e(req_aead.ciphertext),
-        }
-
-        chunks: list[dict] = []
-        final_event: dict | None = None
-        async with client.stream("POST", f"{base_url}/secure/predict/stream", json=payload, timeout=60.0) as resp:
-            if resp.status_code != 200:
-                result["error"] = f"HTTP {resp.status_code}"
-                return result
-            async for line in resp.aiter_lines():
-                if not line.startswith("data:"):
-                    continue
-                data = json.loads(line[len("data:"):].strip())
-                kind = data.get("kind")
-                if kind == "chunk":
-                    chunks.append(data)
-                elif kind in ("final_buffered", "final_chain"):
-                    final_event = data
-                # else: the trailing "event: done" trailer's data line (no "kind" field
-                # at all) -- not a signed/verifiable event, must not be mistaken for one.
-
-        result["n_chunks"] = len(chunks)
-        if len(chunks) < 3:
-            result["error"] = f"stream too short to attack ({len(chunks)} chunks, need >=3)"
+        cap = await _collect_stream(client, base_url, config_name, strategy, prompt, max_tokens,
+                                    chunk_size_tokens, checkpoint_interval)
+        if attack == "replay" and not foreign_chunks:
+            donor = await _collect_stream(client, base_url, config_name, strategy, prompt, max_tokens,
+                                          chunk_size_tokens, checkpoint_interval)
+            foreign_chunks = donor["chunks"]
+        result["foreign_chunks"] = cap["chunks"]  # handed to the next trial as its replay donor
+        result["n_chunks"] = len(cap["chunks"])
+        if len(cap["chunks"]) < 3:
+            result["error"] = f"stream too short to attack ({len(cap['chunks'])} chunks, need >=3)"
             return result
 
-        # --- the attacker acts here: mutate the sequence, touching no chunk's own bytes ---
-        mutated = list(chunks)
-        mid = len(mutated) // 2
-        if attack == "drop":
-            del mutated[mid]
-        elif attack == "reorder":
-            mutated[mid], mutated[mid + 1] = mutated[mid + 1], mutated[mid]
-        else:
-            raise ValueError(f"Unknown attack {attack!r}. Valid: drop, reorder")
-
-        detected_at = None  # 0-based position in `mutated` where first flagged, if any
+        mutated, final = _mutate(cap["chunks"], cap["final"], attack, foreign_chunks)
+        hid, key, pk, cc = cap["handshake_id"], cap["session_key"], cap["sig_public_key"], cap["client_crypto"]
+        detected_at = None  # position in `mutated` where first flagged; len(mutated) = at the end
 
         if strategy == "per_chunk":
             expected_index = 0
             for pos, data in enumerate(mutated):
-                chunk = {
-                    "index": data["index"], "nonce": _b64d(data["nonce"]),
-                    "ciphertext": _b64d(data["ciphertext"]), "signature": _b64d(data["signature"]),
-                }
-                r = verify_per_chunk(chunk, expected_index, est.session_key, sig_public_key, client_crypto)
+                chunk = {"index": data["index"], "nonce": _b64d(data["nonce"]),
+                         "ciphertext": _b64d(data["ciphertext"]), "signature": _b64d(data["signature"])}
+                r = verify_per_chunk(chunk, expected_index, key, pk, cc, hid)
                 expected_index += 1
                 if detected_at is None and (not r["in_order"] or not r["signature_valid"] or not bool(r["aead_ok"])):
                     detected_at = pos
-            result["detected_mid_stream"] = detected_at is not None
-            result["detected"] = detected_at is not None
+            if detected_at is None:
+                ok = final is not None and verify_per_chunk_final(
+                    {"n_chunks": final["n_chunks"], "signature": _b64d(final["signature"])},
+                    expected_index, pk, cc, hid)["stream_fully_verified"]
+                detected_at = None if ok else len(mutated)
 
         elif strategy == "hash_chain":
-            chain_state = HashChainClientState()
+            chain_state = HashChainClientState(hid)
             for pos, data in enumerate(mutated):
-                chunk = {
-                    "index": data["index"], "nonce": _b64d(data["nonce"]),
-                    "ciphertext": _b64d(data["ciphertext"]), "chain_hash": _b64d(data["chain_hash"]),
-                    "signature": _b64d(data["signature"]) if data.get("signature") else None,
-                }
-                r = verify_hash_chain_chunk(chunk, chain_state, est.session_key, sig_public_key, client_crypto)
-                # Without checkpoints only byte-level tampering (AEAD) fires mid-stream; with them,
-                # the first checkpoint after a dropped/reordered chunk fails to verify against the
-                # client's own chain hash.
+                chunk = {"index": data["index"], "nonce": _b64d(data["nonce"]),
+                         "ciphertext": _b64d(data["ciphertext"]), "chain_hash": _b64d(data["chain_hash"]),
+                         "signature": _b64d(data["signature"]) if data.get("signature") else None}
+                r = verify_hash_chain_chunk(chunk, chain_state, key, pk, cc)
                 if detected_at is None and (not bool(r["aead_ok"]) or (r["checkpoint"] and not r["checkpoint_valid"])):
                     detected_at = pos
-            mid_stream_detected = detected_at is not None
-            final_detected = False
-            if final_event is not None and final_event.get("kind") == "final_chain":
-                final_chunk = {
-                    "final_chain_hash": _b64d(final_event["final_chain_hash"]),
-                    "signature": _b64d(final_event["signature"]),
-                }
-                fr = verify_hash_chain_final(final_chunk, chain_state, sig_public_key, client_crypto)
-                final_detected = not fr["stream_fully_verified"]
-            result["detected_mid_stream"] = mid_stream_detected
-            result["detected"] = mid_stream_detected or final_detected
+            if detected_at is None:
+                ok = final is not None and verify_hash_chain_final(
+                    {"final_chain_hash": _b64d(final["final_chain_hash"]), "n_chunks": final["n_chunks"],
+                     "signature": _b64d(final["signature"])}, chain_state, pk, cc)["stream_fully_verified"]
+                detected_at = None if ok else len(mutated)
 
+        result["detected"] = detected_at is not None
+        result["detected_mid_stream"] = detected_at is not None and detected_at < len(mutated)
         result["chunks_before_detection"] = detected_at if detected_at is not None else len(mutated)
         result["fraction_delivered_before_detection"] = result["chunks_before_detection"] / len(mutated)
 
@@ -240,12 +255,14 @@ async def run_experiment(
                 for attack in combo_attacks:
                     combo_rows = []
                     n_trials = trials if strategy in ATTACKABLE_STRATEGIES else 1
+                    foreign = None  # previous trial's chunks: a different session's records, for replay
                     for _ in range(n_trials):
                         row = await run_trial(
                             client, base_url, config_name, strategy, attack,
                             prompt=prompt, max_tokens=max_tokens, chunk_size_tokens=chunk_size_tokens,
-                            checkpoint_interval=checkpoint_interval,
+                            checkpoint_interval=checkpoint_interval, foreign_chunks=foreign,
                         )
+                        foreign = row.pop("foreign_chunks", None) or foreign
                         combo_rows.append(row)
                     raw_rows.extend(combo_rows)
                     summaries.append(summarize(combo_rows, config_name, strategy, attack))
@@ -256,7 +273,7 @@ def main():
     parser = argparse.ArgumentParser(description="PQ-Shield streaming sequence-integrity MITM experiment")
     parser.add_argument("--configs", default="classical,classical-ecdhe,hybrid,hybrid-kex,full-pqc")
     parser.add_argument("--strategies", default="buffer_and_sign,per_chunk,hash_chain")
-    parser.add_argument("--attacks", default="drop,reorder")
+    parser.add_argument("--attacks", default=",".join(ATTACKS))
     parser.add_argument("--trials", type=int, default=20)
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--max-tokens", type=int, default=60)

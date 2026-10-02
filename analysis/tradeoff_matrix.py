@@ -63,6 +63,7 @@ from analysis.aggregate import discard_warmup, load_raw, resolve_baseline_config
 
 SECURITY_SCORES = {
     "control": None,   # excluded from the matrix -- it is the zero-overhead reference, not a real option
+    "control_2rt": None,  # matched-protocol reference, also not a real option
     "classical": 0.0,
     "classical_ecdhe": 0.0,  # X25519 falls to Shor exactly as RSA does: no quantum resistance on either axis
     "hybrid": 0.8,

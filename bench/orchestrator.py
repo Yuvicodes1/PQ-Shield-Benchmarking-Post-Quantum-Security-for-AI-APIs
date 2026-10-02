@@ -33,6 +33,7 @@ from crypto.instrumentation import ResourceSampler
 
 SERVER_MODULES = {
     "control": "api.server:app",
+    "control-2rt": "api.server:app",  # same server; the client makes the extra no-crypto round trip
     "classical": "api.server_config_a:app",
     "classical-ecdhe": "api.server_config_ecdhe:app",
     "hybrid": "api.server_config_b:app",
@@ -232,7 +233,8 @@ def run_full_sweep(
 
 
 def _crypto_name(config_key: str) -> str:
-    return {"control": "control", "classical": "classical", "classical-ecdhe": "classical_ecdhe",
+    return {"control": "control", "control-2rt": "control_2rt", "classical": "classical",
+            "classical-ecdhe": "classical_ecdhe",
             "hybrid": "hybrid", "hybrid-kex": "hybrid_kex", "full-pqc": "full_pqc"}[
         config_key
     ]

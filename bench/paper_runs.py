@@ -17,6 +17,7 @@ the manifest is rewritten after every step so a partial run is still usable):
  10. checkpoint sequence attacks (Llama)  same k values, drop/reorder x 5 trials
  11. handshake amortization              6 configs x {1,10,100} requests per key exchange x 5 reps
  12. concurrency supplement              Control (re-run after endpoint fix) + Hybrid-KEX, same settings as step 2
+ 13. matched-protocol control            Control-2RT (two no-crypto requests), same settings as step 2
 
 Nothing else should run on the machine meanwhile -- every step measures time.
 Existing threat/validation result files are copied to
@@ -42,7 +43,7 @@ from bench.orchestrator import PYTHON_BIN, REPO_ROOT, _start_server, _stop_serve
 
 RESULTS = os.path.join(REPO_ROOT, "results")
 MANIFEST = os.path.join(RESULTS, "paper_runs.json")
-ALL_CONFIGS = ["control", "classical", "classical-ecdhe", "hybrid", "hybrid-kex", "full-pqc"]
+ALL_CONFIGS = ["control", "control-2rt", "classical", "classical-ecdhe", "hybrid", "hybrid-kex", "full-pqc"]
 PROTECTED = ["classical", "classical-ecdhe", "hybrid", "hybrid-kex", "full-pqc"]
 CRYPTO = {"classical": "classical", "classical-ecdhe": "classical_ecdhe", "hybrid": "hybrid",
           "hybrid-kex": "hybrid_kex", "full-pqc": "full_pqc"}
@@ -191,7 +192,7 @@ def step_checkpoint(m: dict) -> None:
 
 def step_checkpoint_attacks(m: dict) -> None:
     _run([PYTHON_BIN, "-m", "threats.streaming_mitm_experiment", "--configs", "hybrid,full-pqc",
-          "--strategies", "hash_chain", "--attacks", "drop,reorder", "--trials", "5", "--max-tokens", "200",
+          "--strategies", "hash_chain", "--attacks", "drop,reorder,replay", "--trials", "5", "--max-tokens", "200",
           "--checkpoint-intervals", ",".join(str(k) for k in CHECKPOINT_KS if k), "--port", str(PORT)],
          env=_llama_env())
     m["checkpoint_attacks"] = "results/streaming/mitm/checkpoints/ (llama_cpp)"
@@ -205,6 +206,73 @@ def step_amortization(m: dict) -> None:
                                         requests_per_concurrency=100, min_requests=1000,
                                         requests_per_handshake=n))
         _save_manifest(m)
+
+
+def step_control_2rt(m: dict) -> None:
+    """Control-2RT makes the same two HTTP requests as a protected transaction
+    (no-crypto GET /handshake, then POST /predict), so protected minus
+    Control-2RT isolates cryptographic overhead from protocol overhead."""
+    m["concurrency_control_2rt"] = _sweep(configs=["control-2rt"], concurrency_levels=[10, 100, 1000],
+                                          repetitions=5, requests_per_concurrency=10, min_requests=50)
+
+
+def capture_environment() -> dict:
+    """Versions and hashes needed to reproduce the run, written to
+    paper/environment.json (committed with the paper)."""
+    import hashlib
+    import importlib.metadata as md
+    import platform
+
+    def ver(pkg: str) -> str | None:
+        try:
+            return md.version(pkg)
+        except md.PackageNotFoundError:
+            return None
+
+    def sh(cmd: list[str]) -> str | None:
+        try:
+            return subprocess.run(cmd, capture_output=True, text=True, cwd=REPO_ROOT, timeout=20).stdout.strip() or None
+        except Exception:
+            return None
+
+    def sha256(path: str | None) -> str | None:
+        if not path or not os.path.isfile(path):
+            return None
+        h = hashlib.sha256()
+        with open(path, "rb") as f:
+            for block in iter(lambda: f.read(1 << 20), b""):
+                h.update(block)
+        return h.hexdigest()
+
+    try:
+        from cryptography.hazmat.backends.openssl.backend import backend as ossl
+        openssl = ossl.openssl_version_text()
+    except Exception:
+        openssl = None
+    model_path = os.environ.get("PQ_SHIELD_LLAMA_MODEL_PATH")
+    env = {
+        "captured": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "os": f"{platform.system()} {platform.mac_ver()[0] or platform.release()}",
+        "machine": platform.machine(),
+        "cpu": sh(["sysctl", "-n", "machdep.cpu.brand_string"]),
+        "cpu_count": os.cpu_count(),
+        "memory_gb": round(int(sh(["sysctl", "-n", "hw.memsize"]) or 0) / 2**30, 1),
+        "python": platform.python_version(),
+        "packages": {p: ver(p) for p in ["fastapi", "uvicorn", "httpx", "cryptography", "numpy", "scipy", "pandas",
+                                         "scikit-learn", "matplotlib", "llama_cpp_python", "psutil"]},
+        "openssl": openssl,
+        "liboqs_commit": sh(["git", "-C", "liboqs", "rev-parse", "HEAD"]),
+        "repo_commit": sh(["git", "rev-parse", "HEAD"]),
+        "repo_dirty": bool(sh(["git", "status", "--porcelain", "--untracked-files=no"])),
+        "llama_model_file": os.path.basename(model_path) if model_path else None,
+        "llama_model_sha256": sha256(model_path),
+        "classifier_model_sha256": sha256(os.path.join(REPO_ROOT, "model", "artifacts", "model.pkl")),
+        "power": sh(["pmset", "-g", "batt"]),
+    }
+    out = os.path.join(REPO_ROOT, "paper", "environment.json")
+    with open(out, "w") as f:
+        json.dump(env, f, indent=2)
+    return env
 
 
 def step_concurrency_supplement(m: dict) -> None:
@@ -229,6 +297,7 @@ STEPS = {
     10: ("checkpoint sequence attacks (Llama)", step_checkpoint_attacks),
     11: ("handshake amortization", step_amortization),
     12: ("concurrency supplement: Control re-run + Hybrid-KEX", step_concurrency_supplement),
+    13: ("matched-protocol control (Control-2RT)", step_control_2rt),
 }
 
 
@@ -246,6 +315,7 @@ def main() -> None:
 
     m = _load_manifest()
     m.setdefault("started", time.strftime("%Y-%m-%dT%H:%M:%S"))
+    m["environment"] = capture_environment()
     if any(s in steps for s in (1, 5, 7, 8, 10)):
         m["archive"] = _archive()
         _log(f"Archived existing threat/validation results to {m['archive']}")

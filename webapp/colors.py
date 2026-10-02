@@ -15,6 +15,7 @@ from __future__ import annotations
 # Every config-colored chart across the app uses this exact dict.
 CONFIG_COLORS = {
     "control": "#888888",
+    "control_2rt": "#4d4d4d",  # matched-protocol control: control's gray, darker
     "classical": "#c0392b",
     # Teal: validated all-pairs against red/orange/blue (worst normal-vision
     # dE 16.3, CVD 11.0). It sits close to STRATEGY_COLORS["per_chunk"] green,
@@ -33,7 +34,8 @@ CONFIG_COLORS = {
 # so callers reading that data don't need a translation step.
 CONFIG_COLORS_HYPHENATED = {**CONFIG_COLORS, "full-pqc": CONFIG_COLORS["full_pqc"],
                             "classical-ecdhe": CONFIG_COLORS["classical_ecdhe"],
-                            "hybrid-kex": CONFIG_COLORS["hybrid_kex"]}
+                            "hybrid-kex": CONFIG_COLORS["hybrid_kex"],
+                            "control-2rt": CONFIG_COLORS["control_2rt"]}
 
 # Per-signing-strategy colors (buffer_and_sign/per_chunk/hash_chain) --
 # purple/green/magenta, deliberately non-overlapping with CONFIG_COLORS'

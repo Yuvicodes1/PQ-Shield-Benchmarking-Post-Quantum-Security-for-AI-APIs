@@ -26,6 +26,7 @@ from crypto.streaming import (
     verify_hash_chain_chunk,
     verify_hash_chain_final,
     verify_per_chunk,
+    verify_per_chunk_final,
 )
 from threats.mitm_harness import _tamper_response_body
 
@@ -249,7 +250,8 @@ async def run_streaming_transaction_live(
             }
 
             t_start = time.perf_counter()
-            chain_state = HashChainClientState() if strategy == "hash_chain" else None
+            chain_state = HashChainClientState(handshake_id) if strategy == "hash_chain" else None
+            terminal_seen = False
             expected_index = 0
             reconstructed = bytearray()
 
@@ -281,7 +283,7 @@ async def run_streaming_transaction_live(
                             "ciphertext": ciphertext, "signature": signature,
                         }
                         result = verify_per_chunk(chunk, expected_index, est.session_key,
-                                                   sig_public_key, client_crypto)
+                                                   sig_public_key, client_crypto, handshake_id)
                         metrics["all_signatures_valid"] &= result["signature_valid"]
                         metrics["all_aead_ok"] &= bool(result["aead_ok"])
                         metrics["all_in_order"] &= result["in_order"]
@@ -333,7 +335,8 @@ async def run_streaming_transaction_live(
                             "nonce": _b64d(data["nonce"]), "ciphertext": ciphertext, "signature": signature,
                         }
                         result = verify_buffer_and_sign_final(final_chunk, est.session_key,
-                                                                sig_public_key, client_crypto)
+                                                                sig_public_key, client_crypto, handshake_id)
+                        terminal_seen = True
                         metrics["all_signatures_valid"] &= result["signature_valid"]
                         metrics["all_aead_ok"] &= bool(result["aead_ok"])
                         metrics["total_signature_bytes"] += data.get("signature_bytes", 0)
@@ -351,12 +354,32 @@ async def run_streaming_transaction_live(
                             "text": result["plaintext"].decode(errors="replace") if result["plaintext"] else None,
                         }
 
+                    elif kind == "final_per_chunk":
+                        signature, sig_tampered = _maybe_tamper(None, _b64d(data["signature"]), "signature")
+                        result = verify_per_chunk_final({"n_chunks": data["n_chunks"], "signature": signature},
+                                                        expected_index, sig_public_key, client_crypto, handshake_id)
+                        metrics["stream_fully_verified"] = (
+                            result["stream_fully_verified"] and metrics["all_signatures_valid"]
+                            and metrics["all_aead_ok"] and metrics["all_in_order"])
+                        metrics["total_signature_bytes"] += data.get("signature_bytes", 0)
+                        metrics["total_verify_ms"] += result["verify_ms"]
+                        metrics["total_signing_ms"] += data.get("sign_ms", 0.0)
+                        terminal_seen = True
+                        yield {
+                            "type": "final",
+                            "stream_fully_verified": metrics["stream_fully_verified"],
+                            "tampered": sig_tampered,
+                            "text": None,
+                        }
+
                     elif kind == "final_chain":
                         signature, sig_tampered = _maybe_tamper(None, _b64d(data["signature"]), "signature")
                         final_chunk = {
-                            "final_chain_hash": _b64d(data["final_chain_hash"]), "signature": signature,
+                            "final_chain_hash": _b64d(data["final_chain_hash"]),
+                            "n_chunks": data["n_chunks"], "signature": signature,
                         }
                         result = verify_hash_chain_final(final_chunk, chain_state, sig_public_key, client_crypto)
+                        terminal_seen = True
                         metrics["stream_fully_verified"] = result["stream_fully_verified"]
                         metrics["total_signature_bytes"] += data.get("signature_bytes", 0)
                         metrics["total_verify_ms"] += result["verify_ms"]
@@ -370,10 +393,8 @@ async def run_streaming_transaction_live(
 
             metrics["total_ms"] = (time.perf_counter() - t_start) * 1000
             metrics["reconstructed_bytes"] = len(reconstructed)
-            if metrics["stream_fully_verified"] is None:
-                metrics["stream_fully_verified"] = (
-                    metrics["all_signatures_valid"] and metrics["all_aead_ok"] and metrics["all_in_order"]
-                )
+            if not terminal_seen:
+                metrics["stream_fully_verified"] = False  # truncated: no signed terminal record
 
         yield {"type": "summary", "metrics": metrics}
 
