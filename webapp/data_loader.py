@@ -26,10 +26,12 @@ STREAMING_DIR = os.path.join(REPO_ROOT, "results", "streaming")
 STREAMING_MITM_DIR = os.path.join(REPO_ROOT, "results", "streaming", "mitm")
 STREAMING_HNDL_DIR = os.path.join(REPO_ROOT, "results", "hndl", "streaming")
 
-CONFIG_ORDER = ["control", "classical", "hybrid", "full_pqc"]
+CONFIG_ORDER = ["control", "classical", "classical_ecdhe", "hybrid", "hybrid_kex", "full_pqc"]
 CONFIG_LABELS = {
     "control": "Control",
-    "classical": "A: Classical",
+    "classical": "A: Classical-RSA",
+    "classical_ecdhe": "A': Classical-ECDHE",
+    "hybrid_kex": "B': Hybrid-KEX",
     "hybrid": "B: Hybrid",
     "full_pqc": "C: Full PQC",
 }
@@ -293,7 +295,7 @@ def get_trimmed_and_summary(warmup_fraction: float = 0.05, run_id: str | None = 
     return trimmed, summarize(trimmed)
 
 
-def get_significance(trimmed_df: pd.DataFrame | None, metric: str = "rtt_ms") -> pd.DataFrame | None:
+def get_significance(trimmed_df: pd.DataFrame | None, metric: str = "total_ms") -> pd.DataFrame | None:
     """Concurrency-sweep significance table -- unchanged call, unchanged
     output: baseline_config auto-resolves to "control" (present in every
     concurrency-sweep run), so every existing number here is untouched."""
@@ -319,7 +321,7 @@ def get_streaming_significance(streaming_df: pd.DataFrame | None, metric: str = 
 
 def build_custom_tradeoff(
     trimmed_df: pd.DataFrame, w_sec: float, w_perf: float,
-    scale_col: str = "concurrency", metric_col: str = "rtt_ms",
+    scale_col: str = "concurrency", metric_col: str = "total_ms",
     security_scores: dict[str, float | None] | None = None,
 ) -> pd.DataFrame:
     """Thin call-through into analysis.tradeoff_matrix.build_matrix_at -- the
@@ -328,7 +330,7 @@ def build_custom_tradeoff(
     but the score formula itself lives in exactly one place (tradeoff_matrix.py),
     not reimplemented here. baseline_config auto-resolves inside
     build_matrix_at (see its docstring) -- "control" for the concurrency
-    sweep's default (scale_col="concurrency", metric_col="rtt_ms") call,
+    sweep's default (scale_col="concurrency", metric_col="total_ms") call,
     "classical" for a streaming call (scale_col="max_tokens",
     metric_col="ttft_ms", say). Check the result's "baseline_config" column
     before labeling it.

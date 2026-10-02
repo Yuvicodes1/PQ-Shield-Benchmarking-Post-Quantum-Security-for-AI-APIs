@@ -32,19 +32,21 @@ import time
 
 import httpx
 
-from api.secure_client import secure_predict_transaction
+from api.secure_client import ClientSession, secure_predict_transaction
 from crypto.instrumentation import ResourceSampler
 from model.profiles.registry import get_profile
 
 CONFIG_TO_MODULE_NAME = {
     "control": "control",
     "classical": "classical",
+    "classical-ecdhe": "classical_ecdhe",
     "hybrid": "hybrid",
+    "hybrid-kex": "hybrid_kex",
     "full-pqc": "full_pqc",
 }
 
 CSV_FIELDS = [
-    "run_id", "config", "payload_profile", "concurrency", "repetition", "request_index",
+    "run_id", "config", "payload_profile", "network_profile", "requests_per_handshake", "resumed", "concurrency", "repetition", "request_index",
     "rtt_ms", "handshake_ms", "total_ms",
     "client_establish_ms", "verify_ms", "valid_signature",
     "kex_blob_bytes", "signature_bytes",
@@ -103,6 +105,9 @@ def _flatten(row: dict, config_name: str, concurrency: int, repetition: int, idx
         "run_id": run_id,
         "config": config_name,
         "payload_profile": get_profile().name,
+        "network_profile": "localhost",  # bench.orchestrator overrides when a netem proxy is in the path
+        "requests_per_handshake": row.get("requests_per_handshake", 1),
+        "resumed": row.get("resumed", False),
         "concurrency": concurrency,
         "repetition": repetition,
         "request_index": idx,
@@ -136,6 +141,7 @@ async def run_sweep_cell(
     repetition: int,
     reuse_handshake: bool = False,
     run_id: str | None = None,
+    requests_per_handshake: int = 1,
 ) -> list[dict]:
     """Runs one (config, concurrency, repetition) cell and returns flattened rows.
 
@@ -158,6 +164,10 @@ async def run_sweep_cell(
             cached_handshake, _ = await do_handshake(client, base_url)
 
         async def worker():
+            # Session resumption (requests_per_handshake > 1): each worker -- one
+            # client connection's worth of traffic -- runs one key exchange and
+            # reuses it for the next requests_per_handshake requests.
+            session = None
             while True:
                 async with counter_lock:
                     if counter["n"] >= n_requests:
@@ -168,10 +178,16 @@ async def run_sweep_cell(
                     if config_name == "control":
                         row = await _control_transaction(client, base_url)
                     else:
+                        if requests_per_handshake > 1 and (session is None or session.requests_left <= 0):
+                            session = ClientSession(requests_left=requests_per_handshake)
                         row = await secure_predict_transaction(
                             client, base_url, config_name, _sample_request(),
                             debug_metrics=True, cached_handshake=cached_handshake,
+                            session=session if requests_per_handshake > 1 else None,
                         )
+                        if row.get("error"):
+                            session = None  # start a fresh session after any failure
+                    row["requests_per_handshake"] = requests_per_handshake
                     results.append(_flatten(row, config_name, concurrency, repetition, idx, run_id))
 
         workers = [asyncio.create_task(worker()) for _ in range(concurrency)]

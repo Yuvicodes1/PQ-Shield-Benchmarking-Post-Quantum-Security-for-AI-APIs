@@ -40,8 +40,8 @@ with tab_concurrency:
         with col1:
             configs = st.multiselect(
                 "Configurations",
-                ["control", "classical", "hybrid", "full-pqc"],
-                default=["control", "classical", "hybrid", "full-pqc"],
+                ["control", "classical", "classical-ecdhe", "hybrid", "hybrid-kex", "full-pqc"],
+                default=["control", "classical", "classical-ecdhe", "hybrid", "hybrid-kex", "full-pqc"],
             )
             concurrency_choices = st.multiselect(
                 "Concurrency levels",
@@ -158,8 +158,8 @@ with tab_streaming:
         col1, col2 = st.columns(2)
         with col1:
             stream_configs = st.multiselect(
-                "Configurations", ["classical", "hybrid", "full-pqc"],
-                default=["classical", "hybrid", "full-pqc"],
+                "Configurations", ["classical", "classical-ecdhe", "hybrid", "hybrid-kex", "full-pqc"],
+                default=["classical", "classical-ecdhe", "hybrid", "hybrid-kex", "full-pqc"],
             )
             strategies = st.multiselect(
                 "Signing strategies", ["buffer_and_sign", "per_chunk", "hash_chain"],

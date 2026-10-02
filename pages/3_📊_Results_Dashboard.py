@@ -143,14 +143,16 @@ else:
 st.divider()
 
 if mode == "concurrency":
-    st.subheader("Latency vs. Scale — RTT vs. Concurrency (RQ1)")
+    st.subheader("Latency vs. Scale — End-to-End Latency vs. Concurrency (RQ1)")
+    st.caption("End-to-end = handshake + protected request (`total_ms`), the cost a client actually pays. "
+               "RTT alone omits the handshake round trip and understates protected configurations.")
     fig1 = go.Figure()
     latency_chart_series = {}
     for config in dl.CONFIG_ORDER:
         sub = ok[ok["config"] == config]
         if sub.empty:
             continue
-        grouped = sub.groupby("concurrency")["rtt_ms"]
+        grouped = sub.groupby("concurrency")["total_ms"]
         x = sorted(grouped.groups.keys())
         median = [grouped.get_group(c).median() for c in x]
         p95 = [grouped.get_group(c).quantile(0.95) for c in x]
@@ -159,14 +161,14 @@ if mode == "concurrency":
                                    line=dict(color=color)))
         fig1.add_trace(go.Scatter(x=x, y=p95, mode="lines+markers", name=f"{dl.CONFIG_LABELS[config]} (p95)",
                                    line=dict(color=color, dash="dash"), opacity=0.6))
-        latency_chart_series[config] = {"concurrency": x, "median_rtt_ms": median, "p95_rtt_ms": p95}
-    fig1.update_layout(xaxis_type="log", xaxis_title="Concurrency (log scale)", yaxis_title="RTT (ms)",
+        latency_chart_series[config] = {"concurrency": x, "median_total_ms": median, "p95_total_ms": p95}
+    fig1.update_layout(xaxis_type="log", xaxis_title="Concurrency (log scale)", yaxis_title="End-to-end latency (ms)",
                         height=450, legend=dict(orientation="h", yanchor="bottom", y=-0.4))
     st.plotly_chart(fig1, width='stretch')
     chart_explainer.render_explain_button(
         chart_key=f"latency_vs_scale:{selected_key}",
-        chart_title="Latency vs. Scale — RTT vs. Concurrency (RQ1)",
-        chart_data={"x_axis": "concurrency", "y_axis": "RTT (ms)", "series_by_config": latency_chart_series},
+        chart_title="Latency vs. Scale — End-to-End Latency vs. Concurrency (RQ1)",
+        chart_data={"x_axis": "concurrency", "y_axis": "End-to-end latency (handshake + request, ms)", "series_by_config": latency_chart_series},
     )
 else:
     st.subheader("Latency vs. Scale — TTFT & Total Duration vs. Response Length")
@@ -240,7 +242,7 @@ if mode == "concurrency":
     sel_concurrency = st.select_slider("Concurrency level", options=available_concurrency,
                                         value=available_concurrency[len(available_concurrency) // 2])
     sub = ok[ok["concurrency"] == sel_concurrency]
-    protected_configs = [c for c in ["classical", "hybrid", "full_pqc"] if c in sub["config"].unique()]
+    protected_configs = [c for c in ["classical", "classical_ecdhe", "hybrid", "hybrid_kex", "full_pqc"] if c in sub["config"].unique()]
 
     if protected_configs:
         metrics = [
@@ -421,7 +423,7 @@ if resource_df.empty:
 else:
     cpu_by_config = resource_df.groupby("config")["cpu_percent_mean"].mean()
     rss_by_config = resource_df.groupby("config")["rss_mb_mean"].mean()
-    configs_present = [c for c in ["control", "classical", "hybrid", "full-pqc"] if c in cpu_by_config.index]
+    configs_present = [c for c in ["control", "classical", "classical-ecdhe", "hybrid", "hybrid-kex", "full-pqc"] if c in cpu_by_config.index]
     fig_res = make_subplots(specs=[[{"secondary_y": True}]])
     fig_res.add_trace(go.Bar(name="Mean server CPU %", x=configs_present,
                               y=[cpu_by_config[c] for c in configs_present], marker_color=CONFIG_COLORS["classical"]),
@@ -457,7 +459,7 @@ st.subheader("Aggregate Statistics")
 if mode == "concurrency":
     st.dataframe(summary, width='stretch')
     sig = dl.get_significance(trimmed)
-    st.subheader("Mann-Whitney U Test vs. Control (RTT)")
+    st.subheader("Mann-Whitney U Test vs. Control (end-to-end latency)")
     if sig is None or sig.empty:
         st.info("Need at least a 'control' configuration and one protected configuration at the same "
                 "concurrency level to compute significance.")
@@ -570,7 +572,7 @@ w_perf = 1.0 - w_sec
 st.caption(f"Performance weight (w_perf) = {w_perf:.2f} (linked to w_sec so weights sum to 1)")
 
 if mode == "concurrency":
-    scale_col, metric_col = "concurrency", "rtt_ms"
+    scale_col, metric_col = "concurrency", "total_ms"
     matrix = dl.build_custom_tradeoff(trimmed, w_sec, w_perf, scale_col=scale_col, metric_col=metric_col)
     scale_axis_label = "Concurrency"
     sel_scale_val = sel_concurrency
@@ -630,7 +632,7 @@ else:
         )
 
     pivot = matrix.pivot(index="config", columns=scale_col, values="composite_score")
-    pivot = pivot.reindex([c for c in ["classical", "hybrid", "full_pqc"] if c in pivot.index])
+    pivot = pivot.reindex([c for c in ["classical", "classical_ecdhe", "hybrid", "hybrid_kex", "full_pqc"] if c in pivot.index])
 
     fig6 = px.imshow(
         pivot.values, x=[str(c) for c in pivot.columns], y=[dl.CONFIG_LABELS[c] for c in pivot.index],
@@ -658,23 +660,58 @@ else:
         caveats=tradeoff_caveats,
     )
 
-    best_per_scale = matrix.loc[matrix.groupby(scale_col)["composite_score"].idxmax()]
-    st.markdown(f"**Recommended configuration per {scale_axis_label.lower()} level, at this weighting:**")
+    # Full breakdown table: every config's score at every swept scale level,
+    # not just the winner -- so a reviewer can sanity-check a recommendation
+    # against its runners-up without cross-referencing the heatmap by eye.
+    # Rows stay in fixed config order within each scale-level group (never
+    # sorted by score) so the same config's row lines up vertically across
+    # groups. Winner flag is a plain groupby-idxmax over this same `matrix`
+    # dataframe -- the one place composite_score is computed
+    # (analysis.tradeoff_matrix.build_matrix_at) -- so the heatmap, this
+    # table, and the recommendation sentence below can never disagree.
+    config_rank = {"classical": 0, "classical_ecdhe": 1, "hybrid": 2, "hybrid_kex": 3, "full_pqc": 4}
+    full_table = matrix[matrix["config"].isin(config_rank)].copy()
+    full_table["_config_rank"] = full_table["config"].map(config_rank)
+    full_table = full_table.sort_values([scale_col, "_config_rank"]).drop(columns="_config_rank")
+    group_max = full_table.groupby(scale_col)["composite_score"].transform("max")
+    full_table["is_winner"] = full_table["composite_score"] == group_max
+
+    st.markdown(f"**All configurations per {scale_axis_label.lower()} level, at this weighting:**")
     st.dataframe(
-        best_per_scale[[scale_col, "config", "composite_score", "normalized_latency_overhead"]]
-        .assign(config=lambda d: d["config"].map(dl.CONFIG_LABELS))
-        .style.format({"composite_score": "{:.3f}", "normalized_latency_overhead": "{:.1%}"}),
+        full_table[[scale_col, "config", "security_score", "normalized_latency_overhead",
+                    "composite_score", "is_winner"]]
+        .assign(
+            config=lambda d: d["config"].map(dl.CONFIG_LABELS),
+            winner=lambda d: d["is_winner"].map(lambda w: "✓ winner" if w else ""),
+        )
+        .drop(columns="is_winner")
+        .style.format({"security_score": "{:.3f}", "composite_score": "{:.3f}",
+                        "normalized_latency_overhead": "{:+.1%}"},
+                       na_rep="— (all requests failed)"),
         width='stretch',
+        hide_index=True,
     )
+    n_ties = int((full_table.groupby(scale_col)["is_winner"].sum() > 1).sum())
+    if n_ties:
+        st.caption(f"⚠️ {n_ties} {scale_axis_label.lower()} level(s) have a tied composite_score — "
+                   "all tied configs are flagged as winners above.")
 
     # The plain-language conclusion this whole page is for: one sentence a
     # non-crypto-expert reviewer can act on without reading the heatmap.
-    conclusion_scale_val = sel_scale_val if sel_scale_val in matrix[scale_col].values else None
+    # Reads the winner from `full_table` above, not a separate lookup.
+    conclusion_scale_val = sel_scale_val if sel_scale_val in full_table[scale_col].values else None
     conclusion_slice = (
-        matrix[matrix[scale_col] == conclusion_scale_val] if conclusion_scale_val is not None else matrix
+        full_table[full_table[scale_col] == conclusion_scale_val] if conclusion_scale_val is not None
+        else full_table
     )
     if not conclusion_slice.empty:
-        best_row = conclusion_slice.loc[conclusion_slice["composite_score"].idxmax()]
+        winners = (
+            conclusion_slice[conclusion_slice["is_winner"]] if conclusion_scale_val is not None
+            # No single scale level selected: best across all levels combined --
+            # a different question than the per-level "is_winner" flag answers.
+            else conclusion_slice[conclusion_slice["composite_score"] == conclusion_slice["composite_score"].max()]
+        )
+        best_row = winners.iloc[0]
         scale_note = (
             f"and {scale_col}={int(best_row[scale_col])}" if conclusion_scale_val is not None
             else f"(best across all {scale_col} levels combined, shown at {scale_col}={int(best_row[scale_col])})"

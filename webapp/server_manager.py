@@ -21,15 +21,18 @@ import streamlit as st
 
 from bench.orchestrator import REPO_ROOT, SERVER_MODULES, _start_server, _wait_healthy
 
-DEMO_PORTS = {"control": 8100, "classical": 8101, "hybrid": 8102, "full_pqc": 8103}
+DEMO_PORTS = {"control": 8100, "classical": 8101, "hybrid": 8102, "full_pqc": 8103, "classical_ecdhe": 8104, "hybrid_kex": 8105}
 
 # webapp/demo code uses crypto-module names ("full_pqc"); bench.orchestrator
 # uses hyphenated config keys ("full-pqc") for its SERVER_MODULES lookup.
-CONFIG_KEY = {"control": "control", "classical": "classical", "hybrid": "hybrid", "full_pqc": "full-pqc"}
+CONFIG_KEY = {"control": "control", "classical": "classical", "classical_ecdhe": "classical-ecdhe",
+              "hybrid": "hybrid", "hybrid_kex": "hybrid-kex", "full_pqc": "full-pqc"}
 
 DISPLAY_NAME = {
     "control": "Control (unprotected)",
-    "classical": "A — Classical (RSA-2048 + ECDSA)",
+    "classical": "A — Classical-RSA (RSA-2048 + ECDSA, legacy)",
+    "classical_ecdhe": "A' — Classical-ECDHE (X25519 + ECDSA)",
+    "hybrid_kex": "B' — Hybrid-KEX (X25519MLKEM768 + ECDSA)",
     "hybrid": "B — Hybrid (ML-KEM-768 + ECDSA)",
     "full_pqc": "C — Full PQC (ML-KEM-768 + ML-DSA-65)",
 }

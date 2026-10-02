@@ -21,8 +21,8 @@ st.caption(
     "transaction at a time."
 )
 
-CRYPTO_NAMES = ["control", "classical", "hybrid", "full_pqc"]
-STREAMING_CRYPTO_NAMES = ["classical", "hybrid", "full_pqc"]  # streaming needs a crypto config; no control
+CRYPTO_NAMES = ["control", "classical", "classical_ecdhe", "hybrid", "hybrid_kex", "full_pqc"]
+STREAMING_CRYPTO_NAMES = ["classical", "classical_ecdhe", "hybrid", "hybrid_kex", "full_pqc"]  # streaming needs a crypto config; no control
 STRATEGY_LABELS = {
     "buffer_and_sign": "buffer_and_sign — sign once at the end (cheapest bytes, worst TTFT)",
     "per_chunk": "per_chunk — sign every chunk (best TTFT, most signature bytes)",

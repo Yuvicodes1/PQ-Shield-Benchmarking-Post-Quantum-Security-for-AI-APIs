@@ -8,12 +8,16 @@ configuration everywhere in the project.
 from __future__ import annotations
 
 from .classical import ClassicalClientCrypto, ClassicalServerCrypto
+from .classical_ecdhe import ClassicalECDHEClientCrypto, ClassicalECDHEServerCrypto
 from .full_pqc import FullPQCClientCrypto, FullPQCServerCrypto
 from .hybrid import HybridClientCrypto, HybridServerCrypto
+from .hybrid_kex import HybridKEXClientCrypto, HybridKEXServerCrypto
 
 CONFIGS = {
     "classical": (ClassicalServerCrypto, ClassicalClientCrypto),
+    "classical_ecdhe": (ClassicalECDHEServerCrypto, ClassicalECDHEClientCrypto),
     "hybrid": (HybridServerCrypto, HybridClientCrypto),
+    "hybrid_kex": (HybridKEXServerCrypto, HybridKEXClientCrypto),
     "full_pqc": (FullPQCServerCrypto, FullPQCClientCrypto),
 }
 

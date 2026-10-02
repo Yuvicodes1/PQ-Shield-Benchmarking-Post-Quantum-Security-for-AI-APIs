@@ -54,7 +54,8 @@ DEFAULT_PROMPT = (
     "cryptography, focusing on latency-sensitive workloads."
 )
 
-CONFIG_TO_CRYPTO_NAME = {"classical": "classical", "hybrid": "hybrid", "full-pqc": "full_pqc"}
+CONFIG_TO_CRYPTO_NAME = {"classical": "classical", "classical-ecdhe": "classical_ecdhe",
+                         "hybrid": "hybrid", "hybrid-kex": "hybrid_kex", "full-pqc": "full_pqc"}
 ATTACKABLE_STRATEGIES = ["per_chunk", "hash_chain"]  # buffer_and_sign has no intermediate chunks
 
 
@@ -67,6 +68,7 @@ async def run_trial(
     prompt: str = DEFAULT_PROMPT,
     max_tokens: int = 60,
     chunk_size_tokens: int = 5,
+    checkpoint_interval: int | None = None,
 ) -> dict:
     """One trial: collect a real streaming response in full, apply `attack`
     ("drop" or "reorder") to the middle of its chunk sequence -- exactly what
@@ -82,6 +84,7 @@ async def run_trial(
         "config": config_name, "strategy": strategy, "attack": attack, "error": None,
         "n_chunks": None, "detected": None, "detected_mid_stream": None,
         "chunks_before_detection": None, "fraction_delivered_before_detection": None,
+        "checkpoint_interval": checkpoint_interval,
     }
 
     if strategy not in ATTACKABLE_STRATEGIES:
@@ -102,6 +105,8 @@ async def run_trial(
             "prompt": prompt, "strategy": strategy,
             "chunk_size_tokens": chunk_size_tokens, "max_tokens": max_tokens,
         }
+        if checkpoint_interval is not None:
+            request_body["checkpoint_interval"] = checkpoint_interval
         request_plaintext = json.dumps(request_body).encode()
         req_aead = aead_encrypt(est.session_key, request_plaintext)
         payload = {
@@ -164,10 +169,14 @@ async def run_trial(
                 chunk = {
                     "index": data["index"], "nonce": _b64d(data["nonce"]),
                     "ciphertext": _b64d(data["ciphertext"]), "chain_hash": _b64d(data["chain_hash"]),
+                    "signature": _b64d(data["signature"]) if data.get("signature") else None,
                 }
-                r = verify_hash_chain_chunk(chunk, chain_state, est.session_key)
-                if detected_at is None and not bool(r["aead_ok"]):
-                    detected_at = pos  # would only fire for byte-level tampering, not drop/reorder
+                r = verify_hash_chain_chunk(chunk, chain_state, est.session_key, sig_public_key, client_crypto)
+                # Without checkpoints only byte-level tampering (AEAD) fires mid-stream; with them,
+                # the first checkpoint after a dropped/reordered chunk fails to verify against the
+                # client's own chain hash.
+                if detected_at is None and (not bool(r["aead_ok"]) or (r["checkpoint"] and not r["checkpoint_valid"])):
+                    detected_at = pos
             mid_stream_detected = detected_at is not None
             final_detected = False
             if final_event is not None and final_event.get("kind") == "final_chain":
@@ -204,6 +213,7 @@ def summarize(rows: list[dict], config: str, strategy: str, attack: str) -> dict
                  if r.get("fraction_delivered_before_detection") is not None]
     return {
         "config": config, "strategy": strategy, "attack": attack,
+        "checkpoint_interval": rows[0].get("checkpoint_interval") if rows else None,
         "n_trials": n, "n_valid_trials": n_valid,
         "detection_rate": (n_detected / n_valid) if n_valid else None,
         "mid_stream_detection_rate": (n_detected_mid_stream / n_valid) if n_valid else None,
@@ -214,6 +224,7 @@ def summarize(rows: list[dict], config: str, strategy: str, attack: str) -> dict
 async def run_experiment(
     configs: list[str], strategies: list[str], attacks: list[str], trials: int,
     base_url: str, prompt: str = DEFAULT_PROMPT, max_tokens: int = 60, chunk_size_tokens: int = 5,
+    checkpoint_interval: int | None = None,
 ) -> tuple[list[dict], list[dict]]:
     """Runs `trials` repetitions of every (config, strategy, attack) combo
     against an already-running server for that config. Returns
@@ -233,6 +244,7 @@ async def run_experiment(
                         row = await run_trial(
                             client, base_url, config_name, strategy, attack,
                             prompt=prompt, max_tokens=max_tokens, chunk_size_tokens=chunk_size_tokens,
+                            checkpoint_interval=checkpoint_interval,
                         )
                         combo_rows.append(row)
                     raw_rows.extend(combo_rows)
@@ -242,16 +254,20 @@ async def run_experiment(
 
 def main():
     parser = argparse.ArgumentParser(description="PQ-Shield streaming sequence-integrity MITM experiment")
-    parser.add_argument("--configs", default="classical,hybrid,full-pqc")
+    parser.add_argument("--configs", default="classical,classical-ecdhe,hybrid,hybrid-kex,full-pqc")
     parser.add_argument("--strategies", default="buffer_and_sign,per_chunk,hash_chain")
     parser.add_argument("--attacks", default="drop,reorder")
     parser.add_argument("--trials", type=int, default=20)
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--max-tokens", type=int, default=60)
     parser.add_argument("--chunk-size-tokens", type=int, default=5)
+    parser.add_argument("--checkpoint-intervals", default="0",
+                        help="hash_chain checkpoint intervals (chunks), comma-separated; 0 = none. "
+                             "Non-zero intervals run hash_chain only and write to <output-dir>/checkpoints/")
     parser.add_argument("--output-dir", default=os.path.join(REPO_ROOT, "results", "streaming", "mitm"))
     parser.add_argument("--log-dir", default=os.path.join(REPO_ROOT, "results", "server_logs"))
     args = parser.parse_args()
+    checkpoint_intervals = [int(x) or None for x in args.checkpoint_intervals.split(",") if x.strip()]
 
     configs = [c.strip() for c in args.configs.split(",") if c.strip()]
     strategies = [s.strip() for s in args.strategies.split(",") if s.strip()]
@@ -269,10 +285,14 @@ def main():
             _wait_healthy(base_url)
             print(f"Server healthy (pid={proc.pid}).", flush=True)
 
-            _, summaries = asyncio.run(run_experiment(
-                [crypto_name], strategies, attacks, args.trials, base_url,
-                max_tokens=args.max_tokens, chunk_size_tokens=args.chunk_size_tokens,
-            ))
+            summaries = []
+            for k in checkpoint_intervals:
+                _, ks = asyncio.run(run_experiment(
+                    [crypto_name], strategies if k is None else ["hash_chain"], attacks, args.trials, base_url,
+                    max_tokens=args.max_tokens, chunk_size_tokens=args.chunk_size_tokens,
+                    checkpoint_interval=k,
+                ))
+                summaries.extend(ks)
             for s in summaries:
                 if s["detection_rate"] is None:
                     print(f"  {s['config']:<10} {s['strategy']:<16} {s['attack']:<8} -> n/a", flush=True)
@@ -284,7 +304,13 @@ def main():
                         f"{s['fraction_delivered_before_detection_mean']:.2f}",
                         flush=True,
                     )
-                out_path = os.path.join(args.output_dir, f"{crypto_name}-{s['strategy']}-{s['attack']}-summary.json")
+                k = s.get("checkpoint_interval")
+                if k is None:
+                    out_path = os.path.join(args.output_dir, f"{crypto_name}-{s['strategy']}-{s['attack']}-summary.json")
+                else:
+                    os.makedirs(os.path.join(args.output_dir, "checkpoints"), exist_ok=True)
+                    out_path = os.path.join(args.output_dir, "checkpoints",
+                                            f"{crypto_name}-{s['strategy']}-k{k}-{s['attack']}-summary.json")
                 with open(out_path, "w") as f:
                     json.dump(s, f, indent=2)
         finally:

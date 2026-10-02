@@ -55,6 +55,10 @@ def _b64d(data: str) -> bytes:
 
 def build_app(config_name: str) -> FastAPI:
     server_crypto = get_server_crypto(config_name)
+    # Session keys kept for resumed requests (keep_session=True), keyed by
+    # handshake_id. Empty unless a client opts in, so the default
+    # one-key-exchange-per-transaction measurement is unchanged.
+    session_keys: dict[str, bytes] = {}
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI):
@@ -95,12 +99,21 @@ def build_app(config_name: str) -> FastAPI:
         except Exception:
             raise HTTPException(status_code=400, detail="Malformed base64 in request")
 
-        try:
-            session_key, accept_meta = server_crypto.accept(req.handshake_id, kex_blob)
-        except KeyError:
-            raise HTTPException(status_code=404, detail="Unknown or expired handshake_id")
-        except Exception as exc:
-            raise HTTPException(status_code=400, detail=f"Key establishment failed: {exc}")
+        if kex_blob:
+            try:
+                session_key, accept_meta = server_crypto.accept(req.handshake_id, kex_blob)
+            except KeyError:
+                raise HTTPException(status_code=404, detail="Unknown or expired handshake_id")
+            except Exception as exc:
+                raise HTTPException(status_code=400, detail=f"Key establishment failed: {exc}")
+            if req.keep_session:
+                session_keys[req.handshake_id] = session_key
+        else:
+            # Resumed request: no key establishment at all.
+            session_key = session_keys.get(req.handshake_id)
+            if session_key is None:
+                raise HTTPException(status_code=404, detail="Unknown or expired session")
+            accept_meta = {"decapsulate_ms": 0.0, "kex_blob_bytes": 0}
 
         try:
             plaintext = aead_decrypt(session_key, req_nonce, req_ciphertext)
@@ -120,7 +133,9 @@ def build_app(config_name: str) -> FastAPI:
         envelope = resp_aead.nonce + resp_aead.ciphertext
         signature, sign_meta = server_crypto.sign(req.handshake_id, envelope)
 
-        server_crypto.forget(req.handshake_id)
+        if not req.keep_session:
+            session_keys.pop(req.handshake_id, None)
+            server_crypto.forget(req.handshake_id)
 
         total_ms = (time.perf_counter() - t_total_start) * 1000
         timing = {

@@ -12,8 +12,8 @@
 
 set -euo pipefail
 
-CONFIG="${1:?Usage: run_threat_experiments.sh <classical|hybrid|full-pqc> <server_port>}"
-PORT="${2:?Usage: run_threat_experiments.sh <classical|hybrid|full-pqc> <server_port>}"
+CONFIG="${1:?Usage: run_threat_experiments.sh <classical|classical-ecdhe|hybrid|hybrid-kex|full-pqc> <server_port>}"
+PORT="${2:?Usage: run_threat_experiments.sh <classical|classical-ecdhe|hybrid|hybrid-kex|full-pqc> <server_port>}"
 PROXY_PORT="$((PORT + 1000))"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

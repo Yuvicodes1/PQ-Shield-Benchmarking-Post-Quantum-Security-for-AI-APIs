@@ -25,7 +25,7 @@ import pandas as pd
 
 from webapp.colors import CONFIG_COLORS
 
-CONFIG_ORDER = ["control", "classical", "hybrid", "full_pqc"]
+CONFIG_ORDER = ["control", "classical", "classical_ecdhe", "hybrid", "hybrid_kex", "full_pqc"]
 
 
 def main():

@@ -282,14 +282,28 @@ def verify_per_chunk(chunk: dict, expected_index: int, session_key: bytes, sig_p
     return result
 
 
-def verify_hash_chain_chunk(chunk: dict, chain_state: HashChainClientState, session_key: bytes) -> dict:
+def verify_hash_chain_chunk(chunk: dict, chain_state: HashChainClientState, session_key: bytes,
+                            sig_public_key: bytes | None = None,
+                            client_crypto: ClientCryptoConfig | None = None) -> dict:
+    """Absorbs one chunk into the client's chain and decrypts it. If the chunk
+    carries a checkpoint signature (HashChainStrategy with checkpoint_interval)
+    and a verification key is supplied, the signature is checked against the
+    client's OWN running hash -- so a dropped, reordered, or altered chunk
+    anywhere before this checkpoint makes it fail here, mid-stream, instead
+    of only at the terminal signature."""
     expected_hash = chain_state.absorb(chunk["index"], chunk["nonce"], chunk["ciphertext"])
     result = {
         "index": chunk["index"],
         "chain_ok_so_far": expected_hash == chunk["chain_hash"],
         "aead_ok": None,
         "plaintext": None,
+        "checkpoint": False,
+        "checkpoint_valid": None,
+        "verify_ms": 0.0,
     }
+    if chunk.get("signature") and sig_public_key is not None and client_crypto is not None:
+        valid, meta = client_crypto.verify(expected_hash, chunk["signature"], sig_public_key)
+        result.update(checkpoint=True, checkpoint_valid=valid, verify_ms=meta["verify_ms"])
     try:
         result["plaintext"] = aead_decrypt(session_key, chunk["nonce"], chunk["ciphertext"])
         result["aead_ok"] = True

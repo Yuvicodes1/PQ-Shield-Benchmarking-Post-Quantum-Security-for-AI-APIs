@@ -33,6 +33,7 @@ import asyncio
 import csv
 import json
 import os
+import statistics
 
 import httpx
 
@@ -55,7 +56,10 @@ async def run(config_name: str, proxy_url: str, n_requests: int, tamper_target: 
             if row.get("error") and "AEAD authentication failed" in str(row.get("error")):
                 detected = True
                 detection_layer = "aead_ciphertext"
-                detection_ms = row.get("rtt_ms")  # decrypt happens right after the HTTP round trip
+                # Time of the rejecting step itself (the GCM tag check), not the
+                # whole HTTP round trip -- the signature branch below likewise
+                # reports only verify_ms, so the two layers are comparable.
+                detection_ms = row.get("aead_decrypt_ms")
             elif row.get("valid_signature") is False:
                 detected = True
                 detection_layer = "signature"
@@ -73,6 +77,7 @@ async def run(config_name: str, proxy_url: str, n_requests: int, tamper_target: 
                 "detection_ms": detection_ms,
                 "rtt_ms": row.get("rtt_ms"),
                 "verify_ms": row.get("verify_ms"),
+                "aead_decrypt_ms": row.get("aead_decrypt_ms"),
                 "valid_signature": row.get("valid_signature"),
                 "error": row.get("error"),
             })
@@ -90,6 +95,8 @@ def summarize(rows: list[dict], config_name: str, tamper_target: str) -> dict:
         "n_detected": n_detected,
         "detection_rate": n_detected / n if n else None,
         "detection_ms_mean": sum(detect_times) / len(detect_times) if detect_times else None,
+        "detection_ms_median": statistics.median(detect_times) if detect_times else None,
+        "detection_ms_std": statistics.stdev(detect_times) if len(detect_times) > 1 else None,
         "detection_ms_min": min(detect_times) if detect_times else None,
         "detection_ms_max": max(detect_times) if detect_times else None,
         "verdict": "ALL TAMPERED RESPONSES REJECTED" if n_detected == n and n > 0 else "GAP DETECTED -- INVESTIGATE",

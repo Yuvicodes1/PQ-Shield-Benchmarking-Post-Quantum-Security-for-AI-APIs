@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import Body, FastAPI
 
 from api import model_service
 
@@ -39,8 +39,13 @@ def healthz():
 
 
 @app.post("/predict")
-async def predict(request: Request):
-    body = await request.json()
+def predict(body: dict = Body(...)):
+    # Plain `def`, like the protected /secure/predict: FastAPI runs it in its
+    # worker thread pool. It used to be `async def` calling the blocking model
+    # directly on the event loop, which serialized every request and stopped
+    # the server accepting connections under load (52-66% ConnectErrors at
+    # 1,000 connections in sweep 20261002T125818) -- a handicap only the
+    # baseline had, which biased every overhead-vs-control number.
     result = model_service.predict(body)
     result.pop("_inference_ms", None)
     return result

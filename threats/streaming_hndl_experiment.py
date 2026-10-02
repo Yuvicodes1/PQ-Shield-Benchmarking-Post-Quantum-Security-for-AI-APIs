@@ -105,7 +105,8 @@ DEFAULT_PROMPT = (
     "cryptography, focusing on latency-sensitive workloads."
 )
 
-CONFIG_TO_CRYPTO_NAME = {"classical": "classical", "hybrid": "hybrid", "full-pqc": "full_pqc"}
+CONFIG_TO_CRYPTO_NAME = {"classical": "classical", "classical-ecdhe": "classical_ecdhe",
+                         "hybrid": "hybrid", "hybrid-kex": "hybrid_kex", "full-pqc": "full_pqc"}
 
 
 async def capture_transaction(

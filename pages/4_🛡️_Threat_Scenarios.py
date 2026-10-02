@@ -1,6 +1,7 @@
 import asyncio
 import os
 import sys
+import time
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from webapp.bootstrap import load_dotenv_if_needed
@@ -55,7 +56,7 @@ with tab_hndl:
     st.markdown("**Run a new HNDL capture:**")
     col1, col2, col3 = st.columns([1, 1, 1])
     with col1:
-        hndl_config = st.selectbox("Configuration", ["classical", "hybrid", "full_pqc"], key="hndl_config")
+        hndl_config = st.selectbox("Configuration", ["classical", "classical_ecdhe", "hybrid", "hybrid_kex", "full_pqc"], key="hndl_config")
     with col2:
         hndl_n = st.number_input("Requests to capture", min_value=10, max_value=2000, value=200, step=10)
     with col3:
@@ -127,7 +128,7 @@ with tab_mitm:
     st.markdown("**Run a new tamper-detection demo:**")
     col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
     with col1:
-        mitm_config = st.selectbox("Configuration", ["classical", "hybrid", "full_pqc"], key="mitm_config")
+        mitm_config = st.selectbox("Configuration", ["classical", "classical_ecdhe", "hybrid", "hybrid_kex", "full_pqc"], key="mitm_config")
     with col2:
         mitm_target = st.selectbox("Tamper target", ["ciphertext", "signature"], key="mitm_target")
     with col3:
@@ -236,7 +237,7 @@ with tab_streaming_mitm:
     st.markdown("**Run a new sequence-attack demo:**")
     col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
     with col1:
-        sm_config = st.selectbox("Configuration", ["classical", "hybrid", "full_pqc"], key="sm_config")
+        sm_config = st.selectbox("Configuration", ["classical", "classical_ecdhe", "hybrid", "hybrid_kex", "full_pqc"], key="sm_config")
     with col2:
         sm_strategy = st.selectbox("Strategy", ["per_chunk", "hash_chain"], key="sm_strategy",
                                     help="buffer_and_sign has no intermediate chunks to attack.")
@@ -306,9 +307,9 @@ with tab_streaming_hndl:
         "vulnerability class** — it's the same Shor's-algorithm-breaks-RSA/ECDH threat, made worse "
         "in direct proportion to response length. Only `kex_blob` and each chunk's `(nonce, "
         "ciphertext)` count toward *harvestable* bytes here — signatures and chain hashes protect "
-        "authenticity, not confidentiality, and are tracked separately (see the strategy-"
-        "independence check below, and the *separate* 🌊 Streaming Sequence Attack tab for what "
-        "signatures/chain-hash timing metadata actually exposes)."
+        "authenticity, not confidentiality, and are tracked separately (verified independent of "
+        "signing strategy; see docs/STREAMING.md's HNDL section, and the *separate* 🌊 Streaming "
+        "Sequence Attack tab for what signatures/chain-hash timing metadata actually exposes)."
     )
 
     existing_stream_hndl = dl.load_streaming_hndl_summaries()
@@ -333,16 +334,6 @@ with tab_streaming_hndl:
             "of length — both fully protect confidentiality here."
         )
         st.dataframe(existing_stream_hndl, width='stretch')
-
-        existing_independence = dl.load_streaming_hndl_independence()
-        if existing_independence:
-            st.markdown("**Strategy-independence check** (does signing strategy affect confidentiality exposure?)")
-            for ind in existing_independence:
-                match = "✅ exact match" if ind.get("exact_match_across_strategies") else "see byte deltas below"
-                st.markdown(f"- **{ind['config']}** @ max_tokens={ind['max_tokens']}: "
-                             f"`{ind['total_bytes_harvestable_by_strategy']}` — {match}")
-            with st.expander("Full strategy-independence details (AEAD-envelope-overhead explanation)"):
-                st.json(existing_independence)
     else:
         st.info("No streaming HNDL results on disk yet.")
 
@@ -350,7 +341,7 @@ with tab_streaming_hndl:
     st.markdown("**Run a new streaming HNDL length sweep:**")
     col1, col2, col3 = st.columns([1, 2, 1])
     with col1:
-        sh_config = st.selectbox("Configuration", ["classical", "hybrid", "full_pqc"], key="sh_config")
+        sh_config = st.selectbox("Configuration", ["classical", "classical_ecdhe", "hybrid", "hybrid_kex", "full_pqc"], key="sh_config")
     with col2:
         sh_max_tokens = st.text_input("Response lengths (comma-separated)", value="50,200,500,2000", key="sh_max_tokens")
     with col3:
@@ -358,7 +349,11 @@ with tab_streaming_hndl:
     sh_run = st.button("Run streaming HNDL sweep", type="primary")
 
     if sh_run:
-        from threats.streaming_hndl_experiment import run_one_config
+        import httpx
+
+        from threats.streaming_hndl_experiment import (
+            capture_transaction, run_strategy_independence_check, summarize_length_sweep,
+        )
 
         try:
             sh_lengths = [int(x.strip()) for x in sh_max_tokens.split(",") if x.strip()]
@@ -371,25 +366,104 @@ with tab_streaming_hndl:
             with st.spinner(f"Starting {server_manager.DISPLAY_NAME[sh_config]} server if needed..."):
                 base_url = server_manager.ensure_server(sh_config)
 
-            with st.spinner(f"Sweeping {len(sh_lengths)} response lengths + strategy-independence check..."):
-                sh_result = asyncio.run(run_one_config(base_url, sh_config, sh_lengths, int(sh_chunk_size), "per_chunk"))
+            # Inlines the same capture_transaction / run_strategy_independence_check /
+            # summarize_length_sweep calls run_one_config makes internally
+            # (threats/streaming_hndl_experiment.py) -- same computation, just
+            # orchestrated here instead of behind one opaque awaited call, so the page
+            # can update progress after every response length instead of appearing
+            # frozen until the whole sweep (which can take tens of seconds per length
+            # against a real backend) finishes.
+            n_lengths = len(sh_lengths)
+            sweep_rows: list[dict] = []
+            start_time = time.monotonic()
 
-            sh_summary = sh_result["sweep_summary"]
-            st.success(
-                f"kex_decryptable_under_future_crqc = {sh_summary['kex_decryptable_under_future_crqc']}  "
-                f"({sh_summary['fraction_of_harvested_bytes_eventually_decryptable']:.0%} of harvested bytes "
-                f"eventually decryptable)"
-            )
+            with st.status(f"Running streaming HNDL sweep ({n_lengths} lengths)...", expanded=True) as sh_status:
+                sh_progress = st.progress(0.0)
+                sh_live_line = st.empty()
+
+                async def _run_sweep():
+                    async with httpx.AsyncClient(timeout=120.0) as client:
+                        for i, mt in enumerate(sh_lengths, start=1):
+                            elapsed = time.monotonic() - start_time
+                            sh_live_line.text(
+                                f"Running length {i} of {n_lengths} ({mt} tokens)... elapsed {elapsed:.1f}s"
+                            )
+                            row = await capture_transaction(
+                                client, base_url, sh_config, "per_chunk", mt, int(sh_chunk_size)
+                            )
+                            sweep_rows.append(row)
+                            sh_progress.progress(i / n_lengths)
+                            elapsed = time.monotonic() - start_time
+                            if row["error"]:
+                                sh_status.write(f"✗ {mt} tokens — error: {row['error']} ({elapsed:.1f}s elapsed)")
+                            else:
+                                sh_status.write(
+                                    f"✓ {mt} tokens — {row['decryptable_bytes_under_future_crqc']:,} "
+                                    f"decryptable bytes ({elapsed:.1f}s elapsed)"
+                                )
+                        sh_live_line.text(
+                            f"Running strategy-independence check... elapsed {time.monotonic() - start_time:.1f}s"
+                        )
+                        return await run_strategy_independence_check(
+                            client, base_url, sh_config, min(sh_lengths), int(sh_chunk_size)
+                        )
+
+                ind = asyncio.run(_run_sweep())
+                sh_live_line.empty()
+                sh_status.update(label="Sweep complete", state="complete")
+
+            sh_summary = summarize_length_sweep(sweep_rows, sh_config, "per_chunk")
+            sh_result = {
+                "config": sh_config, "primary_strategy": "per_chunk",
+                "sweep_rows": sweep_rows, "sweep_summary": sh_summary,
+                "strategy_independence": ind,
+            }
+            sh_frac = sh_summary["fraction_of_harvested_bytes_eventually_decryptable"]
+            # Styling reacts to the security finding itself, not to "the sweep ran" --
+            # a True (vulnerable) result must look alarming regardless of which config
+            # produced it, so this branches on the boolean's meaning, never on
+            # `sh_config == "classical"` by name (a future config or a strategy fix
+            # could move which side of this line a config falls on).
+            if sh_summary["kex_decryptable_under_future_crqc"]:
+                st.error(
+                    f"⚠️ Quantum-vulnerable key establishment — {sh_frac:.0%} of captured traffic for "
+                    f"this configuration will be decryptable once a cryptographically relevant quantum "
+                    f"computer exists."
+                )
+            else:
+                st.success(
+                    f"✅ Quantum-safe key establishment — {sh_frac:.0%} decryptable under a future CRQC, "
+                    f"regardless of response length."
+                )
+
+            # Same-page comparison against whatever other configs' summaries already
+            # exist on disk (loaded into `existing_stream_hndl` above) -- no new sweep
+            # triggered here, and silently absent if those files don't exist yet.
+            _short_labels = {"classical": "Classical-RSA", "classical_ecdhe": "Classical-ECDHE", "hybrid": "Hybrid", "hybrid_kex": "Hybrid-KEX", "full_pqc": "Full PQC"}
+            other_summaries = {
+                s["config"]: s for s in existing_stream_hndl
+                if s.get("config") in _short_labels and s.get("config") != sh_config
+            }
+            if other_summaries:
+                groups: dict[float, list[str]] = {}
+                for c, s in other_summaries.items():
+                    frac = s.get("fraction_of_harvested_bytes_eventually_decryptable", 0.0)
+                    groups.setdefault(frac, []).append(_short_labels[c])
+                parts = []
+                for frac, names in groups.items():
+                    verb = "shows" if len(names) == 1 else "show"
+                    parts.append(f"{' and '.join(sorted(names))} {verb} {frac:.0%} decryptable")
+                st.caption(f"For comparison: {'; '.join(parts)} at every length tested — see chart below.")
+
             m1, m2, m3 = st.columns(3)
             m1.metric("Response lengths swept", sh_summary["n_lengths"])
             m2.metric("Harvestable bytes (longest)", f"{sh_summary['total_bytes_harvestable_by_length'][-1]:,}"
                        if sh_summary["total_bytes_harvestable_by_length"] else "—")
             m3.metric("Monotonic in length?", "✅ Yes" if sh_summary["harvestable_bytes_monotonic_in_length"] else "❌ No")
 
-            ind = sh_result["strategy_independence"]
-            st.markdown("**Strategy-independence check:**")
-            st.json({k: v for k, v in ind.items() if k != "rows"})
-
+            # ind (strategy_independence) is still computed and saved below -- it's a
+            # settled robustness result (see docs/STREAMING.md's HNDL section), not
+            # something worth re-displaying on every sweep run.
             os.makedirs(dl.STREAMING_HNDL_DIR, exist_ok=True)
             crypto_name = sh_config
             from threats.streaming_hndl_experiment import _write_csv

@@ -16,7 +16,7 @@ test:
 # single core; scale --requests-per-concurrency down further if needed).
 sweep:
 	.venv/bin/python -m bench.orchestrator \
-		--configs control,classical,hybrid,full-pqc \
+		--configs control,classical,classical-ecdhe,hybrid,hybrid-kex,full-pqc \
 		--concurrency 10,100,1000 \
 		--repetitions 5 \
 		--requests-per-concurrency 5 \
@@ -25,7 +25,7 @@ sweep:
 # Fast sanity-check sweep (seconds, not minutes) -- for development only.
 smoke-sweep:
 	.venv/bin/python -m bench.orchestrator \
-		--configs control,classical,hybrid,full-pqc \
+		--configs control,classical,classical-ecdhe,hybrid,hybrid-kex,full-pqc \
 		--concurrency 5 --repetitions 1 --requests-per-concurrency 2 --min-requests 5 \
 		--raw-dir /tmp/smoke_raw --summary-out /tmp/smoke_summary.json
 
