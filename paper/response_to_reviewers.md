@@ -144,3 +144,25 @@ The equivalence table now distinguishes "no", "no (faster)" and "no (slower)", a
 - `threats/key_substitution.py`, `threats/streaming_attack_campaign.py`, `validation/contention_check.py`: the new experiments.
 - `analysis/paper_figures.py`: failure analysis, dominance table, timing, campaign, key-substitution and authentication-cost tables.
 - `tests/test_review_round2.py` and `tests/test_nist_kat.py`: tests for all of the above.
+
+---
+
+# Response to the Third-Round Review (Minor Revision)
+
+We thank the reviewer for the re-review. We made the three changes listed under "What must change before acceptance". These are analysis and text changes only; no new data were collected.
+
+**1. Equivalence verdicts at 1,000 connections (§2.1, §4.1, §4.5).**
+- Removed. Table XI now gives an equivalence verdict only at 10 connections. Rows at 100 and 1,000 connections are marked "n/i" (not interpreted), and the caption explains why.
+- Table XII no longer prints equivalence verdicts or Control-2RT differences. Its sensitivity analysis now reports medians and differences versus Classical-ECDHE with and without the failed requests: counting failures at the 30 s timeout changes medians by at most 0.19 s and differences by at most 1.5 percentage points.
+- Section VI-H now says that a negative cryptographic overhead has no physical meaning: the matched-protocol decomposition is valid only at low concurrency. At 1,000 connections the non-RSA configurations are described as indistinguishable under contention, with no verdict.
+- The decision table (Table XVIII) now compares latency at 10 connections only. H1 and the limitations section are aligned, so the body no longer claims more than the abstract.
+
+**2. Attack-campaign confidence bounds (§2.2).**
+- Bounds are now computed with the captured stream as the unit: 60 distinct streams per pooled entry, ten per configuration. Every all-detected entry was detected at every sampled position on all 60 streams, which gives an exact 95% lower bound of 94.0% of streams; the "never detected" entry has an upper bound of 6.0%.
+- The table caption, Section V-I, Section VI-D and the limitations state plainly that the trial-level figure (99.88%) assumes an independence the position-sampling design does not provide. The abstract notes the 60 streams per attack and cell.
+
+**3. Disclosures (§2.3, §2.4).**
+- **Hybrid-KEX-PQ:** the limitations, Section IV and the recommendation table now state that it is absent from the payload, network and session-reuse sweeps, and that its concurrency data come from a separate run about seven hours after the main sweep. It is therefore the least-measured configuration, and its recommendation rests on its construction and the experiments in which it was measured.
+- **Streaming resumption gap:** a new limitation states that the streaming path uses one handshake per response. The session context is derived from the handshake identifier, so the session-reuse result applies only to the non-streaming endpoint. A streaming deployment as designed pays one key exchange per response and presents one recorded handshake per response to an HNDL adversary. Cross-stream resumption would need a per-stream context, which we neither implemented nor measured. Section VI-K and the conclusion carry the same qualifier.
+
+The remaining suggestions (cluster bootstrap beyond the stream-level bound, C′ in the remaining sweeps, per-cell CIs for Table IV, a second host, TLS-native validation) are acknowledged as future work.

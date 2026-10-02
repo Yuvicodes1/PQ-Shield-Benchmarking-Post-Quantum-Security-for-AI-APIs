@@ -1,6 +1,6 @@
 \begin{table*}[t]
 \centering
-\caption{Stream-integrity campaign on real Llama streams (100 tokens, 5-token chunks), pooled over 6 configurations: 500 trials per configuration and cell, each on a random one of 10 captured streams at a random position (3,000 trials per entry). Each entry: \% detected / \% detected before the stream ended / mean chunks shown with no verified signature covering them when the client rejected. 100\% detected means 3,000/3,000 (exact 95\% lower bound 99.88\%); 0\% means 0/3,000 (upper bound 0.12\%). Benign: unmodified streams rejected (false rejections).}
+\caption{Stream-integrity campaign on real Llama streams (100 tokens, 5-token chunks), pooled over 6 configurations: 500 trials per configuration and cell, each on a random one of 10 captured streams at a random position (3,000 trials and 60 distinct streams per entry). Each entry: \% detected / \% detected before the stream ended / mean chunks shown with no verified signature covering them when the client rejected. Trials on the same stream differ only in attack position and are not independent, so we take the stream as the unit: 100\% detected means the attack was detected at every sampled position on all 60 streams (exact 95\% lower bound 94.0\% of streams); 0\% means it was detected on none (upper bound 6.0\%). Treating trials as independent would give 99.88\%, which the design does not support. Benign: unmodified streams rejected (false rejections).}
 \label{tab:campaign}
 \setlength{\tabcolsep}{2.5pt}
 \scriptsize

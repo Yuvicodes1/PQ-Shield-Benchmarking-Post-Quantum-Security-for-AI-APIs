@@ -519,17 +519,21 @@ def table_equivalence(out: Out, cmp: pd.DataFrame) -> None:
              fr"\caption{{Equivalence of ML-KEM-based key establishment to the X25519 baseline (Classical-ECDHE): "
              fr"median end-to-end difference with its 90\% two-stage bootstrap CI, as a percentage of the "
              fr"Classical-ECDHE median. ``Equiv.'': the CI lies within $\pm${EQUIV_MARGIN_PCT:.0f}\% "
-             fr"(two one-sided tests at $\alpha=0.05$); ``faster''/``slower'': not equivalent, and the CI excludes "
-             fr"zero. Rows at 100 connections are shown for completeness only (bimodal; not interpreted).}}",
+             fr"(two one-sided tests at $\alpha=0.05$). A verdict is given only at 10 connections. At 100 connections the "
+             fr"protected configurations are bimodal, and at 1,000 client--server contention on the shared host dominates "
+             fr"(the protected configurations are faster than the no-crypto Control-2RT), so differences there are shown "
+             fr"for completeness and are not interpreted as equivalence or difference.}}",
              r"\label{tab:equivalence}", r"\setlength{\tabcolsep}{3pt}", r"\footnotesize",
              r"\begin{tabular}{@{}rlrl@{}}", r"\toprule",
              r"Conc. & Configuration & $\Delta$ (\%) [90\% CI] & Equiv. \\", r"\midrule"]
+    # "n/i" = not interpreted (see caption)
+    verdict_level = int(eq["concurrency"].min())  # the only level not dominated by single-host contention
     for conc in sorted(eq["concurrency"].unique()):
         first = True
         for _, r in eq[eq["concurrency"] == conc].iterrows():
             lo, hi = 100 * r["ci90_lo"] / r["ref_median"], 100 * r["ci90_hi"] / r["ref_median"]
             ok_ = -EQUIV_MARGIN_PCT < lo and hi < EQUIV_MARGIN_PCT
-            verdict = "yes" if ok_ else ("no (faster)" if hi < 0 else "no (slower)" if lo > 0 else "no")
+            verdict = ("yes" if ok_ else "no") if conc == verdict_level else "n/i"
             lines.append(f"{f'{conc:,}' if first else ''} & {LABEL[r['config']]} & "
                          f"{r['diff_pct']:+.1f} [{lo:+.1f}, {hi:+.1f}] & {verdict} \\\\")
             out.num("Equivalence vs Classical-ECDHE (90% CI, +/-5% margin)",
@@ -1369,10 +1373,11 @@ def _equiv(r, margin: float = EQUIV_MARGIN_PCT) -> bool:
 
 def table_failures(out: Out, df: pd.DataFrame, cmp: pd.DataFrame) -> None:
     """Where requests failed: by stage and cause, and whether excluding them
-    changes any conclusion. The sensitivity re-analysis counts every failed
+    changes the comparisons. The sensitivity re-analysis counts every failed
     request at the client timeout (30 s) -- slower than any successful
-    request -- and recomputes the crypto overhead (vs Control-2RT) and the
-    equivalence verdicts (vs Classical-ECDHE)."""
+    request -- and recomputes each median and each difference versus
+    Classical-ECDHE. No equivalence verdict is drawn here: the levels with
+    failures are dominated by single-host contention (Section VI-H)."""
     is_err = df["error"].notna() & (df["error"] != "")
     rate = is_err.groupby([df["config"], df["concurrency"]]).mean()
     # only levels where some configuration lost a non-trivial share (>= 0.5%) of requests
@@ -1384,25 +1389,35 @@ def table_failures(out: Out, df: pd.DataFrame, cmp: pd.DataFrame) -> None:
     imp.loc[e, "total_ms"] = CLIENT_TIMEOUT_MS
     imp.loc[e, "error"] = np.nan
     present = set(imp["config"])
-    pairs = [(c, "control_2rt") for c in PROTECTED if c in present] if "control_2rt" in present else []
-    pairs += [(c, "classical_ecdhe") for c in ("hybrid", "hybrid_kex", "full_pqc", "hybrid_kex_pq") if c in present]
-    cmp_imp = comparison_stats(imp, pairs, seed=11)
+    pairs = [(c, "classical_ecdhe") for c in PROTECTED if c in present and c != "classical_ecdhe"]
+    cmp0 = comparison_stats(df[df["concurrency"].isin(levels)], pairs, seed=11)
+    cmp1 = comparison_stats(imp, pairs, seed=11)
 
-    def get(c, cfg, ref, conc):
-        r = c[(c["config"] == cfg) & (c["reference"] == ref) & (c["concurrency"] == conc)]
+    def get(c, cfg, conc):
+        r = c[(c["config"] == cfg) & (c["reference"] == "classical_ecdhe") & (c["concurrency"] == conc)]
         return None if r.empty else r.iloc[0]
 
+    def pct(r):
+        if r is None:
+            return "--"
+        f = lambda v: 100 * v / r["ref_median"]
+        return f"{r['diff_pct']:+.1f} [{f(r['ci95_lo']):+.1f}, {f(r['ci95_hi']):+.1f}]"
+
     lines = [r"\begin{table*}[t]", r"\centering",
-             r"\caption{Failed requests and their effect on the conclusions. All failures were connection resets "
+             r"\caption{Failed requests and their effect on the comparisons. All failures were connection resets "
              r"(httpx \texttt{ReadError}): no timeouts and no HTTP errors. ``At handshake'': the first request of the "
              r"transaction failed. Sensitivity: every failed request re-counted at the 30\,s client timeout (slower than "
-             r"any successful request) and the statistics recomputed. $\Delta_{2RT}$: cryptographic overhead versus "
-             r"Control-2RT with 95\% CI. Equiv.: within $\pm5$\% of Classical-ECDHE (90\% CI).}",
+             r"any successful request) and the statistics recomputed. $\Delta$: difference in medians versus "
+             r"Classical-ECDHE, \% of its median, with 95\% CI. These levels are dominated by single-host contention, "
+             r"so the table tests only whether excluding failures changes the comparisons; it draws no equivalence "
+             r"verdicts.}",
              r"\label{tab:failures}", r"\setlength{\tabcolsep}{3pt}", r"\footnotesize",
              r"\begin{tabular}{@{}rlrrrrrll@{}}", r"\toprule",
-             r" & & & \multicolumn{2}{c}{Failed at} & \multicolumn{2}{c}{$\Delta_{2RT}$ (s)} & \multicolumn{2}{c}{Equiv.} \\",
+             r" & & & \multicolumn{2}{c}{Failed at} & \multicolumn{2}{c}{Median (s)} & "
+             r"\multicolumn{2}{c}{$\Delta$ vs.\ Classical-ECDHE (\%)} \\",
              r"\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}",
-             r"Conc. & Configuration & Failed & handshake & request & successful only & failures at 30\,s & succ. & 30\,s \\",
+             r"Conc. & Configuration & Failed & handshake & request & succ.\ only & fail.\ at 30\,s & "
+             r"successful only & failures at 30\,s \\",
              r"\midrule"]
     for conc in levels:
         first = True
@@ -1413,19 +1428,18 @@ def table_failures(out: Out, df: pd.DataFrame, cmp: pd.DataFrame) -> None:
             ge = g[g["error"].notna() & (g["error"] != "")]
             n_hs = int(ge["handshake_ms"].isna().sum()) if cfg != "control" else 0
             kinds = ge["error"].map(_err_kind).value_counts().to_dict()
-            d0, d1 = get(cmp, cfg, "control_2rt", conc), get(cmp_imp, cfg, "control_2rt", conc)
-            q0, q1 = get(cmp, cfg, "classical_ecdhe", conc), get(cmp_imp, cfg, "classical_ecdhe", conc)
-            f = lambda r: "--" if r is None else _fmt_ci(r["diff_ms"], r["ci95_lo"], r["ci95_hi"]).replace(r"\,s", "")
-            eq = lambda r: "--" if r is None else ("yes" if _equiv(r) else "no")
-            lines.append(f"{f'{conc:,}' if first else ''} & {LABEL[cfg]} & {len(ge) / len(g):.1%} & "
-                         f"{n_hs if cfg != 'control' else '--'} & {len(ge) - n_hs} & {f(d0)} & {f(d1)} & "
-                         f"{eq(q0)} & {eq(q1)} \\\\".replace("%", r"\%"))
+            ok = g[~(g["error"].notna() & (g["error"] != ""))]
+            m0 = ok["total_ms"].median()
+            m1 = imp[(imp["config"] == cfg) & (imp["concurrency"] == conc)]["total_ms"].median()
+            q0, q1 = get(cmp0, cfg, conc), get(cmp1, cfg, conc)
+            lines.append(f"{f'{conc:,}' if first else ''} & {LABEL[cfg]} & {100 * len(ge) / len(g):.1f}\\% & "
+                         f"{n_hs if cfg != 'control' else '--'} & {len(ge) - n_hs} & {m0 / 1000:.2f} & {m1 / 1000:.2f} & "
+                         f"{'ref.' if cfg == 'classical_ecdhe' else pct(q0)} & "
+                         f"{'ref.' if cfg == 'classical_ecdhe' else pct(q1)} \\\\")
             out.num(f"Failures at {conc:,} connections (stage, cause, sensitivity)", LABEL[cfg],
                     f"{len(ge)}/{len(g)} failed ({len(ge) / len(g):.2%}); at handshake {n_hs}, at request "
-                    f"{len(ge) - n_hs}; causes {kinds}; "
-                    + (f"Delta_2RT {d0['diff_ms']:+.0f} ms -> {d1['diff_ms']:+.0f} ms with failures at 30 s; "
-                       if d0 is not None and d1 is not None else "")
-                    + (f"equiv. vs ECDHE {_equiv(q0)} -> {_equiv(q1)}" if q0 is not None and q1 is not None else ""))
+                    f"{len(ge) - n_hs}; causes {kinds}; median {m0:,.0f} -> {m1:,.0f} ms with failures at 30 s"
+                    + (f"; vs ECDHE {q0['diff_pct']:+.1f}% -> {q1['diff_pct']:+.1f}%" if q0 is not None and q1 is not None else ""))
             first = False
         lines.append(r"\addlinespace")
     lines[-1] = r"\bottomrule"
@@ -1453,7 +1467,10 @@ def table_dominance(out: Out, df: pd.DataFrame, sdf: pd.DataFrame | None, result
     weights are needed. Only the 10- and 1,000-connection levels are used: the
     100-connection level is bimodal (Section VI-A) and is not ranked."""
     present = [c for c in PROTECTED if c in set(df["config"])]
-    levels = [c for c in (10, 1000) if c in set(df["concurrency"])]
+    # Latency is compared at 10 connections only: at 100 the protected configurations are
+    # bimodal, and at 1,000 single-host contention makes the matched-protocol subtraction
+    # meaningless (protected configurations come out faster than the no-crypto control).
+    levels = [c for c in (10,) if c in set(df["concurrency"])]
     pairs = [(a, b) for i, a in enumerate(present) for b in present[i + 1:]]
     pw = comparison_stats(df[df["concurrency"].isin(levels)], pairs, seed=13)
     ov = comparison_stats(df[df["concurrency"].isin(levels)], [(c, "control_2rt") for c in present], seed=17) \
@@ -1478,8 +1495,8 @@ def table_dominance(out: Out, df: pd.DataFrame, sdf: pd.DataFrame | None, result
         n_max = sdf["max_tokens"].max()
         for c in present:
             v = sdf[(sdf["config"] == c) & (sdf["strategy"] == "per_chunk") & (sdf["max_tokens"] == n_max)]
-            if not v.empty:
-                pc_bytes[c] = v["total_signature_bytes"].median()
+            if not v.empty:  # a streamed response also pays for its handshake
+                pc_bytes[c] = v["total_signature_bytes"].median() + hs_bytes.get(c, 0)
 
     def dominates(a, b, byte_map):
         sec_ge = all(ax[a] >= ax[b] for _, ax in SEC_AXES)
@@ -1498,16 +1515,17 @@ def table_dominance(out: Out, df: pd.DataFrame, sdf: pd.DataFrame | None, result
              r"(\checkmark = holds): key establishment resists a CRQC (KEX-Q); key establishment survives a break of "
              r"ML-KEM (KEX-H); signatures resist a CRQC (Sig-Q). $\Delta_{2RT}$: cryptographic overhead versus "
              r"Control-2RT (median, 95\% CI). Bytes: key-establishment blob + one signature per transaction (API), "
-             r"and signatures on a 200-token per-chunk stream. A configuration is \emph{dominated} if another is at "
-             r"least as secure on every property, no worse on latency at 10 and 1,000 connections (90\% CI of the "
+             r"and key-establishment blob + signatures on a 200-token per-chunk stream. A configuration is \emph{dominated} if another is at "
+             r"least as secure on every property, no worse on latency at 10 connections (90\% CI of the "
              r"difference below $+5$\%), no larger in the workload's bytes, and strictly better somewhere; the last two "
              r"columns name the dominating configurations (codes as in Table~\ref{tab:configs}), or ``--'' if none. "
-             r"The 100-connection level is not used (bimodal; Section~\ref{sec:res-concurrency}).}",
+             r"The 100- and 1,000-connection levels are not used: the first is bimodal and the second dominated by "
+             r"single-host contention (Section~\ref{sec:res-concurrency}).}",
              r"\label{tab:dominance}", r"\setlength{\tabcolsep}{3.5pt}", r"\footnotesize",
              r"\begin{tabular}{@{}l" + "c" * len(SEC_AXES) + "r" * len(levels) + r"rrcc@{}}", r"\toprule",
-             r" & \multicolumn{3}{c}{Security} & \multicolumn{2}{c}{$\Delta_{2RT}$} & \multicolumn{2}{c}{Bytes} "
+             r" & \multicolumn{3}{c}{Security} & $\Delta_{2RT}$ & \multicolumn{2}{c}{Bytes} "
              r"& \multicolumn{2}{c}{Dominated by} \\",
-             r"\cmidrule(lr){2-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(lr){9-10}",
+             r"\cmidrule(lr){2-4}\cmidrule(lr){5-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}",
              "Configuration & KEX-Q & KEX-H & Sig-Q & "
              + " & ".join(f"@{c:,} ({'s' if c >= 1000 else 'ms'})" for c in levels)
              + r" & API & Per-chunk & API & Per-chunk \\", r"\midrule"]
@@ -1622,13 +1640,28 @@ def table_attack_campaign(out: Out, results_dir: str) -> None:
     df["k"] = df["checkpoint_interval"].fillna(0).astype(int)
     configs = [c for c in PROTECTED if c in set(df["config"])]
     chunk = 5
+    # Trials within one captured stream are not independent (they differ only in attack
+    # position), so the defensible unit is the stream: each entry pools pool x configs
+    # distinct streams. Every stream in every all-detected entry was detected at every
+    # sampled position, so the stream-level bound is Clopper-Pearson on n_streams/n_streams.
+    n_streams = int(doc["pool"]) * len(configs)
+    n_trials = int(doc["trials"]) * len(configs)
+    s_lo = clopper_pearson_ci(n_streams, n_streams)[0]
+    t_lo = clopper_pearson_ci(n_trials, n_trials)[0]
+    out.num("Stream attack campaign: confidence bounds", "Stream-level (cluster) 95% bound, all-detected entry",
+            f"{n_streams}/{n_streams} streams -> lower bound {s_lo:.1%} (trial-level, assuming independence: "
+            f"{n_trials}/{n_trials} -> {t_lo:.2%})")
     lines = [r"\begin{table*}[t]", r"\centering",
              fr"\caption{{Stream-integrity campaign on real Llama streams ({doc['max_tokens']} tokens, {chunk}-token chunks), "
              fr"pooled over {len(configs)} configurations: {doc['trials']} trials per configuration and cell, each on a random "
-             fr"one of {doc['pool']} captured streams at a random position (3,000 trials per entry). Each entry: \% "
-             r"detected / \% detected before the stream ended / mean chunks shown with no verified signature covering "
-             r"them when the client rejected. 100\% detected means 3,000/3,000 (exact 95\% lower bound 99.88\%); 0\% "
-             r"means 0/3,000 (upper bound 0.12\%). Benign: unmodified streams rejected (false rejections).}",
+             fr"one of {doc['pool']} captured streams at a random position ({n_trials:,} trials and {n_streams} distinct streams "
+             fr"per entry). Each entry: \% detected / \% detected before the stream ended / mean chunks shown with no "
+             r"verified signature covering them when the client rejected. Trials on the same stream differ only in attack "
+             r"position and are not independent, so we take the stream as the unit: 100\% detected means the attack was "
+             fr"detected at every sampled position on all {n_streams} streams (exact 95\% lower bound "
+             fr"{100 * s_lo:.1f}\% of streams); 0\% means it was detected on none (upper bound {100 * (1 - s_lo):.1f}\%). "
+             fr"Treating trials as independent would give {100 * t_lo:.2f}\%, which the design does not support. "
+             r"Benign: unmodified streams rejected (false rejections).}",
              r"\label{tab:campaign}", r"\setlength{\tabcolsep}{2.5pt}", r"\scriptsize",
              r"\begin{tabular}{@{}l" + "r" * len(CAMPAIGN_CELLS) + r"@{}}", r"\toprule",
              "Attack & " + " & ".join(n for _, _, n in CAMPAIGN_CELLS) + r" \\", r"\midrule"]

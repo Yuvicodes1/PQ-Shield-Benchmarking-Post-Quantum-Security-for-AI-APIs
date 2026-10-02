@@ -1,6 +1,6 @@
 \begin{table}[t]
 \centering
-\caption{Equivalence of ML-KEM-based key establishment to the X25519 baseline (Classical-ECDHE): median end-to-end difference with its 90\% two-stage bootstrap CI, as a percentage of the Classical-ECDHE median. ``Equiv.'': the CI lies within $\pm$5\% (two one-sided tests at $\alpha=0.05$); ``faster''/``slower'': not equivalent, and the CI excludes zero. Rows at 100 connections are shown for completeness only (bimodal; not interpreted).}
+\caption{Equivalence of ML-KEM-based key establishment to the X25519 baseline (Classical-ECDHE): median end-to-end difference with its 90\% two-stage bootstrap CI, as a percentage of the Classical-ECDHE median. ``Equiv.'': the CI lies within $\pm$5\% (two one-sided tests at $\alpha=0.05$). A verdict is given only at 10 connections. At 100 connections the protected configurations are bimodal, and at 1,000 client--server contention on the shared host dominates (the protected configurations are faster than the no-crypto Control-2RT), so differences there are shown for completeness and are not interpreted as equivalence or difference.}
 \label{tab:equivalence}
 \setlength{\tabcolsep}{3pt}
 \footnotesize
@@ -13,15 +13,15 @@ Conc. & Configuration & $\Delta$ (\%) [90\% CI] & Equiv. \\
  & Full PQC & -1.5 [-3.1, +0.2] & yes \\
  & Hybrid-KEX-PQ & +1.6 [-0.3, +3.9] & yes \\
 \addlinespace
-100 & Hybrid & -25.2 [-43.1, +1.7] & no \\
- & Hybrid-KEX & -2.5 [-26.9, +27.3] & no \\
- & Full PQC & -4.6 [-35.6, +29.4] & no \\
- & Hybrid-KEX-PQ & +12.9 [-4.0, +36.3] & no \\
+100 & Hybrid & -25.2 [-43.1, +1.7] & n/i \\
+ & Hybrid-KEX & -2.5 [-26.9, +27.3] & n/i \\
+ & Full PQC & -4.6 [-35.6, +29.4] & n/i \\
+ & Hybrid-KEX-PQ & +12.9 [-4.0, +36.3] & n/i \\
 \addlinespace
-1,000 & Hybrid & -1.7 [-3.7, +0.4] & yes \\
- & Hybrid-KEX & +2.6 [-1.2, +8.2] & no \\
- & Full PQC & -0.4 [-1.9, +1.0] & yes \\
- & Hybrid-KEX-PQ & -5.4 [-8.5, -0.8] & no (faster) \\
+1,000 & Hybrid & -1.7 [-3.7, +0.4] & n/i \\
+ & Hybrid-KEX & +2.6 [-1.2, +8.2] & n/i \\
+ & Full PQC & -0.4 [-1.9, +1.0] & n/i \\
+ & Hybrid-KEX-PQ & -5.4 [-8.5, -0.8] & n/i \\
 \bottomrule
 \end{tabular}
 \end{table}

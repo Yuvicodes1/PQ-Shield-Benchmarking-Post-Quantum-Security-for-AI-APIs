@@ -86,3 +86,7 @@ The full point-by-point response is in `response_to_reviewers.md`. In short:
 - Replace the four `x@vit.com` addresses (`TODO(authors)` in the `.tex`) and confirm the Acknowledgment.
 - **IEEE Access requires its own LaTeX template** (`ieeeaccess.cls`, from the IEEE Author Center). The content ports directly; the current file uses IEEEtran.
 - Check the IEEE Access article processing charge and any VIT discount.
+
+## Fourth revision (third-round review, minor revision)
+
+Analysis and text only; no new data. Equivalence verdicts are drawn only at 10 connections (the 1,000-connection level is described as indistinguishable under contention). The failures table reports medians and differences vs. Classical-ECDHE instead of verdicts. Attack-campaign bounds use the stream as the unit (60 streams per entry, 95% lower bound 94.0%). C′'s thinner evidence and the absence of session resumption on the streaming path are disclosed. See the last section of `response_to_reviewers.md`.

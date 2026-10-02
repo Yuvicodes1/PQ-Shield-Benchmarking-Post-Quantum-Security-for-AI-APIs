@@ -66,7 +66,7 @@ Per-signature time inside a stream reaches up to 18$\times$ a back-to-back micro
 processor slows between chunks; we bound it rather than predict it. Binding role, session, and position into
 every signed message, a signed end-of-stream record, and client enforcement of the requested checkpoint
 schedule detected every one of 135,000 trials of static and adaptive attacks across six
-configurations, with no false rejections in 750 genuine streams; without the schedule check, stripping
+configurations (60 distinct streams per attack and cell), with no false rejections in 750 genuine streams; without the schedule check, stripping
 checkpoints went undetected in all 9,000 trials. Detection, however, arrives only with a signature,
 and $k$ bounds how much unverified text was shown by then. Against an unauthenticated handshake, key
 substitution succeeded in all 1,800 trials regardless of post-quantum primitives; a transcript signature
@@ -346,8 +346,8 @@ X25519 public key (1,216\,B), the client's is the ML-KEM ciphertext followed by 
 signature code, A$'\!\rightarrow$B$'$ is the migration step deployed on the web today, and
 B$\rightarrow$B$'$ the price of hedging against an ML-KEM break. Configuration C$'$ combines B$'$'s key
 exchange with C's ML-DSA-65 signatures: post-quantum on both axes and hedged in the key exchange. It
-was added in revision and is measured in the concurrency, streaming, checkpoint, threat, and
-authentication experiments, but not in the payload, network, and session-reuse sweeps.
+was added in revision and is measured in the concurrency (a separate, later run), streaming, checkpoint,
+threat, and authentication experiments, but not in the payload, network, and session-reuse sweeps.
 
 \paragraph*{Authenticated handshake (optional)}\label{sec:auth}
 In the default handshake nothing binds the key shares to the server. In the authenticated variant
@@ -551,8 +551,10 @@ at a random point (losing the terminal record), and replay of an entire other se
 for checkpointed chains, strip every checkpoint signature, move a checkpoint signature to the next chunk,
 drop the chunk just before or just after a checkpoint, and swap a checkpoint chunk with its successor.
 For each detected attack we record whether it was caught before the stream ended and how many chunks
-the client had displayed with no verified signature covering them at that moment. Rates carry exact
-(Clopper--Pearson) 95\% intervals.
+the client had displayed with no verified signature covering them at that moment. Trials on the same
+stream differ only in attack position and are not independent, so for confidence bounds we take the
+captured stream as the unit (60 distinct streams per pooled entry: ten per configuration) and report
+exact (Clopper--Pearson) 95\% intervals over streams.
 
 \paragraph*{Key substitution} Against a live server with the authenticated variant enabled, an
 in-process adversary sits between the client's messages and the server: it substitutes its own key
@@ -663,8 +665,10 @@ small: at most 23\,ms of signing per 200-token stream that takes 5--6\,s to gene
 \subsection{Stream Integrity Under Attack}\label{sec:res-campaign}
 Table~\ref{tab:campaign} reports the campaign: 144,000 attacked trials and 300 unmodified streams,
 plus the 450 streams of the streaming sweeps. No unmodified stream was rejected (0/750; 95\% upper bound
-0.4\%). Every static attack was detected in every trial and cell (3,000/3,000 each; 95\% lower bound
-99.88\%). Per-chunk signing catches drop, reorder, duplication, and replay at the affected chunk, so no
+0.4\%). Every static attack was detected in every trial and cell (3,000/3,000 each). Because trials on one
+stream are correlated, the defensible statement is per stream: in each entry the attack was detected at
+every sampled position on all 60 streams, a 95\% lower bound of 94.0\% of streams. Treating the 3,000 trials as
+independent would give 99.88\%, which the position-sampling design does not support. Per-chunk signing catches drop, reorder, duplication, and replay at the affected chunk, so no
 unverified text is shown; the exception is dropping the final chunk (5\% of drops), which only the end
 record reveals. A replayed chunk or session fails AEAD decryption under this session's key at once.
 
@@ -755,19 +759,21 @@ in the handshake, where the server generates a fresh RSA-2048 key pair (Fig.~\re
 
 At 1,000 connections, which on a single host is a stress test of client and server contention, the
 non-RSA protected configurations take 18.9--20.5\,s against 9.4\,s for the control---but Control-2RT takes
-21.3\,s, so the doubling comes from the second HTTP request, not the cryptography; against Control-2RT
-the protected configurations are $0.8$--$2.4$\,s \emph{faster}, an artifact of contention rather than a
-cryptographic effect. Hybrid ($-1.7\%$ [$-3.7$, $+0.4$]) and Full PQC ($-0.4\%$ [$-1.9$, $+1.0$]) are equivalent
-to Classical-ECDHE; Hybrid-KEX ($+2.6\%$ [$-1.2$, $+8.2$]) is not shown equivalent, and Hybrid-KEX-PQ is
-faster ($-5.4\%$ [$-8.5$, $-0.8$]). Classical-RSA reaches 30.7\,s.
+21.3\,s, so the doubling comes from the second HTTP request, not the cryptography. Measured against
+Control-2RT, the protected configurations come out $0.8$--$2.4$\,s \emph{faster}. A negative cryptographic
+overhead has no physical meaning: it shows that under this contention the subtraction no longer isolates
+cryptography, so the matched-protocol decomposition is valid only at low concurrency. We therefore draw
+no equivalence or difference verdicts among the non-RSA configurations at 1,000 connections; their
+medians are indistinguishable under contention (within $-5.4$ to $+2.6\%$ of Classical-ECDHE), and only
+Classical-RSA (30.7\,s) is clearly separated.
 
 \paragraph*{Failed requests} At 1,000 connections 1.2--1.6\% of protected requests failed, against 0.2\%
 for Control-2RT and none for the control (Table~\ref{tab:failures}). Every failure was a connection reset
 (httpx \texttt{ReadError}); none was a timeout or an HTTP error, so the excluded requests were not slow
 requests that timed out. Control-2RT's failures all occurred on its first request, those of the protected
 configurations on both requests. Re-counting every failed request at the 30\,s client timeout changed
-each cryptographic overhead by at most 0.17\,s and changed no equivalence verdict, so excluding failures does
-not bias the conclusions. Below 1,000 connections at most 0.2\% of requests failed.
+each median by at most 0.19\,s and each difference from Classical-ECDHE by at most 1.5 percentage
+points, so excluding failures does not change the comparisons. Below 1,000 connections at most 0.2\% of requests failed.
 
 \paragraph*{100 connections} Here the per-repetition medians of the protected configurations are
 bimodal---each repetition settles near either $\approx$1,000\,ms or $\approx$1,550\,ms (e.g.\ Classical-ECDHE
@@ -860,7 +866,8 @@ requests. Classical-RSA's +101.2\% at $N{=}1$ disappears at $N{=}10$ ($-1.1\pm1.
 configurations the overhead falls from +4.0--7.0\% at $N{=}1$ to between $-0.2$ and $+2.1$\% at
 $N{=}100$; one intermediate point (Full PQC at $N{=}10$, $+9.0\pm8.4$\%) reflects a single outlying
 repetition. For deployments that reuse sessions, post-quantum key establishment cost at most about 2\%
-end-to-end in this workload.
+end-to-end in this workload. This was measured on the non-streaming endpoint; our streaming path uses one
+handshake per response and does not resume sessions (Section~\ref{sec:limitations}).
 
 \begin{figure*}[t]
 \centering
@@ -936,11 +943,11 @@ the axes, the preferred configuration lies in that non-dominated set.
 
 \input{tables/tab_dominance}
 
-The result is sharper than a ranking. Classical-RSA is dominated (by Classical-ECDHE, and for per-chunk
-streaming also by Hybrid-KEX): it is slower and no more secure. No other configuration dominates another.
-Latency does not separate them---at 10 connections every non-RSA configuration is within the
-equivalence margin of the others or within a few milliseconds of them, and at 1,000 connections the
-differences are contention noise---so every step up in security is paid for in \emph{bytes}, not time:
+The result is sharper than a ranking. Classical-RSA is dominated by Classical-ECDHE in both workloads: it
+is slower and no more secure. No other configuration dominates another. Latency, compared at 10
+connections where it can be interpreted, does not separate them---every non-RSA configuration is within
+the equivalence margin of the others or within a few milliseconds of them---so every step up in security
+is paid for in \emph{bytes}, not time:
 ML-KEM adds about 1\,kB to the handshake, ML-DSA-65 about 3.2\,kB per signature, and with per-chunk
 streaming about 133\,kB per 200-token response. Which non-dominated configuration to choose therefore
 depends on which security properties a deployment needs and on how many signatures it sends, not on
@@ -949,8 +956,8 @@ that Full PQC maximizes against a latency term that barely varies.
 
 \paragraph*{Hypotheses} \textbf{H1} (bounded post-quantum overhead) is supported at 10 connections, where
 all four ML-KEM configurations are equivalent to Classical-ECDHE within $\pm5\%$ and their cryptographic
-overhead over the matched protocol is 1.3--5.4\,ms; at 1,000 connections, a single-host stress test, Hybrid
-and Full PQC are again equivalent, and at 100 connections queueing bimodality prevents a conclusion.
+overhead over the matched protocol is 1.3--5.4\,ms. At 100 and 1,000 connections the single host prevents a
+conclusion (bimodality and contention, respectively).
 \textbf{H2} (Hybrid captures Full PQC's HNDL benefit at lower cost) is supported on HNDL, where both have
 zero decryptable bytes under the modeled attack; on cost it holds only for signature bytes, which matter
 when many signatures are sent. \textbf{H3} (categorically different decryptability) is demonstrated:
@@ -1011,7 +1018,7 @@ Single responses & ECDSA P-256 or ML-DSA-65 by required security; latency does n
 Streaming, display-only & Hash-chain, large $k$; mark text unverified until covered \\
 Streaming, actionable output & Hash-chain with small $k$ (e.g.\ $k=5$: 25-token exposure) \\
 Any streaming & Bind session context; signed end record; enforce the checkpoint schedule \\
-Quantum-resistant authenticity & ML-DSA-65 (Full PQC or Hybrid-KEX-PQ) \\
+Quantum-resistant authenticity & ML-DSA-65 (Full PQC; or Hybrid-KEX-PQ, less measured) \\
 Metadata-sensitive streaming & Buffer-and-sign \\
 Legacy RSA key transport & Migrate away \\
 \bottomrule
@@ -1028,9 +1035,10 @@ Legacy RSA key transport & Migrate away \\
   generator and the server share the CPU. This matters most at high concurrency: at 1,000 connections
   both the protected configurations and Control-2RT are dominated by contention, and at 100 connections
   the protected configurations switch between two latency regimes across repetitions while both controls
-  do not. We therefore rank configurations only at 10 and 1,000 connections, treat 1,000 connections as a
-  single-host stress test, and regard the 10-connection results as the most reliable. A separate
-  load-generator host would remove this confound; we did not have one.
+  do not. At 1,000 connections the protected configurations even come out faster than the no-crypto
+  Control-2RT, so the matched-protocol decomposition holds only at low concurrency. We therefore draw
+  equivalence and ranking conclusions only at 10 connections and treat 100 and 1,000 connections as
+  single-host stress tests. A separate load-generator host would remove this confound; we did not have one.
   \item \textbf{Failed requests.} At 1,000 connections 0.2--1.6\% of requests failed, all as connection
   resets. Excluding them could bias latency toward configurations that fail more; the sensitivity
   analysis in Section~\ref{sec:res-concurrency} counts each failure at the client timeout instead.
@@ -1060,7 +1068,9 @@ Legacy RSA key transport & Migrate away \\
   depends on chunk size and tokenizer. Response length leaks without a CRQC~\cite{weiss2024keylogging}.
   \item \textbf{Attack trials sample positions.} Campaign trials replay attacks on captured streams at
   random positions; they cover the attack space but are not independent network events, and they test the
-  attacks listed, not every possible adversary.
+  attacks listed, not every possible adversary. With the stream as the unit, each entry rests on 60
+  streams, so the detection bounds (94.0\% of streams at 95\% confidence) are much wider than the trial
+  counts suggest.
   \item \textbf{Classical-RSA is a worst case.} Per-handshake RSA-2048 key generation does not reflect
   production practice; Classical-ECDHE is the realistic classical baseline.
 \end{itemize}
@@ -1074,9 +1084,20 @@ Legacy RSA key transport & Migrate away \\
   \texttt{image\_cnn} profile is an untrained fixed-weight network and the \texttt{embedding} and
   \texttt{llm\_completion} profiles are synthetic. They probe payload shape and size, not model
   behaviour, so the absolute overheads should be read against the inference time of the target workload.
-  \item \textbf{Coverage of C$'$.} Hybrid-KEX-PQ was added in revision and is absent from the payload,
-  network, and session-reuse sweeps; Hybrid-KEX's concurrency data come from a supplementary run on the
-  same host and day.
+  \item \textbf{Coverage of C$'$.} Hybrid-KEX-PQ was added in revision. It is absent from the payload,
+  network, and session-reuse sweeps, and its concurrency data come from a separate run about seven hours
+  after the main sweep (same host, same day; Hybrid-KEX's likewise come from a supplementary run). The
+  configuration with the strongest security properties is therefore the least measured; where we
+  recommend it, the recommendation rests on its construction and on the concurrency, streaming,
+  checkpoint, threat, and authentication experiments in which it was measured.
+  \item \textbf{No session resumption on the streaming path.} Each stream has its own handshake: the
+  session context in every signed message is derived from the handshake identifier, one stream per
+  handshake. The session-reuse result (Section~\ref{sec:res-amortization}) was measured on the
+  non-streaming endpoint and does not carry over: a streaming deployment as designed pays one key
+  exchange per response. With a $\approx$8\,ms handshake leg against 5--6\,s of generation this is small, but
+  it also means no amortization and one recorded handshake per response for an HNDL adversary. Resuming a
+  session across streams would require a per-stream context (for example, a stream counter bound into
+  $\mathit{ctx}$), which we neither implemented nor measured.
   \item \textbf{Side channels.} We did not evaluate constant-time behaviour or cache-timing leakage of the
   bindings or the streaming verification path.
 \end{itemize}
@@ -1116,7 +1137,8 @@ signatures at $\approx$2.9\,kB instead of 136\,kB per 200 tokens, at the price o
 
 \paragraph*{What the answer depends on} \emph{Streaming:} the number of signatures, through $k$, sets the
 post-quantum cost and the exposure. \emph{Session reuse:} one key exchange per 100 requests reduced every
-non-RSA configuration's overhead to 0--2\%. \emph{Threat model:} HNDL confidentiality needs ML-KEM; active
+non-RSA configuration's overhead to 0--2\% on the non-streaming endpoint; our streaming path pays one key
+exchange per response. \emph{Threat model:} HNDL confidentiality needs ML-KEM; active
 attacks need an authenticated handshake; quantum-resistant authenticity needs ML-DSA-65; hedging against an
 ML-KEM break needs the X25519MLKEM768 hybrid. \emph{Network:} slow links add a few milliseconds of
 handshake time for ML-KEM, more under packet loss than our byte-level emulation shows.
