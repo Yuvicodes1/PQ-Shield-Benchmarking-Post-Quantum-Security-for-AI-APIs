@@ -26,16 +26,24 @@ STREAMING_DIR = os.path.join(REPO_ROOT, "results", "streaming")
 STREAMING_MITM_DIR = os.path.join(REPO_ROOT, "results", "streaming", "mitm")
 STREAMING_HNDL_DIR = os.path.join(REPO_ROOT, "results", "hndl", "streaming")
 
-CONFIG_ORDER = ["control", "control_2rt", "classical", "classical_ecdhe", "hybrid", "hybrid_kex", "full_pqc"]
+CONFIG_ORDER = ["control", "control_2rt", "classical", "classical_ecdhe", "hybrid", "hybrid_kex", "full_pqc",
+                "hybrid_kex_pq"]
 CONFIG_LABELS = {
     "control": "Control",
     "control_2rt": "Control-2RT (no crypto, 2 requests)",
     "classical": "A: Classical-RSA",
-    "classical_ecdhe": "A': Classical-ECDHE",
-    "hybrid_kex": "B': Hybrid-KEX",
+    "classical_ecdhe": "A′: Classical-ECDHE",
+    "hybrid_kex": "B′: Hybrid-KEX",
     "hybrid": "B: Hybrid",
     "full_pqc": "C: Full PQC",
+    "hybrid_kex_pq": "C′: Hybrid-KEX-PQ",
 }
+# bench/ and results/sweep_summaries use hyphenated keys
+HYPHEN_TO_CRYPTO = {"control": "control", "control-2rt": "control_2rt", "classical": "classical",
+                    "classical-ecdhe": "classical_ecdhe", "hybrid": "hybrid", "hybrid-kex": "hybrid_kex",
+                    "full-pqc": "full_pqc", "hybrid-kex-pq": "hybrid_kex_pq"}
+VALIDATION_DIR = os.path.join(REPO_ROOT, "results", "validation")
+MANIFEST_PATH = os.path.join(REPO_ROOT, "results", "paper_runs.json")
 
 
 def load_raw_df() -> pd.DataFrame | None:
@@ -464,3 +472,38 @@ def load_resource_summaries(run_type: str, run_id: str | None = None) -> pd.Data
     else:
         df["run_type"] = df["run_type"].fillna("concurrency")
     return df[df["run_type"] == run_type].reset_index(drop=True)
+
+
+# ---------------------------------------------------------------------------
+# Second-review-round results (attack campaign, key substitution, signing
+# diagnostic, the paper-run manifest). Each returns None when absent so pages
+# can show an empty state instead of failing.
+# ---------------------------------------------------------------------------
+
+def _load_json(path: str):
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return None
+
+
+def load_manifest() -> dict:
+    return _load_json(MANIFEST_PATH) or {}
+
+
+def load_campaign() -> dict | None:
+    return _load_json(os.path.join(STREAMING_MITM_DIR, "campaign.json"))
+
+
+def load_key_substitution() -> list[dict] | None:
+    return _load_json(os.path.join(MITM_DIR, "key_substitution.json"))
+
+
+def load_contention_check() -> pd.DataFrame | None:
+    path = os.path.join(VALIDATION_DIR, "contention_check.csv")
+    return pd.read_csv(path) if os.path.isfile(path) else None
+
+
+def load_primitive_bench() -> dict | None:
+    return _load_json(os.path.join(VALIDATION_DIR, "primitive_bench.json"))

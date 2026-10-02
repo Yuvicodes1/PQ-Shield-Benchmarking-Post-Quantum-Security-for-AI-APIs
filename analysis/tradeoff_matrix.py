@@ -69,6 +69,7 @@ SECURITY_SCORES = {
     "hybrid": 0.8,
     "hybrid_kex": 0.8,  # same axes as hybrid: PQ-safe key exchange, classical signature
     "full_pqc": 1.0,
+    "hybrid_kex_pq": 1.0,  # PQ on both axes and hedged; the paper no longer uses this score (dominance table)
 }
 
 # Default split for streaming_security_score() below: how much of the

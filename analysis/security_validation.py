@@ -86,11 +86,10 @@ def validate_authenticity_near_term(mitm_summaries: list[dict]) -> dict:
     rates = [r for r in per_config.values() if r is not None]
     all_high = bool(rates) and min(rates) >= NEAR_100PCT_THRESHOLD
     note = (
-        "Uniformly high near-term detection across configs -- this is what justifies scoring "
-        "authenticity as a categorical future-quantum-forgery property (SECURITY_SCORES) rather than "
-        "a near-term detection-rate differentiator. ECDSA and ML-DSA-65 both catch a tampered byte "
-        "today; the real difference this score captures is whether a forged signature could be "
-        "produced *at all* once a CRQC exists, which a detection-rate number cannot measure."
+        "Tampered signatures are rejected in every configuration today, so near-term detection does "
+        "not separate ECDSA from ML-DSA-65. The difference between them is whether a signature could "
+        "be forged at all once a quantum computer exists -- a property of the scheme, which a "
+        "detection rate cannot measure."
         if all_high else
         "WARNING: near-term signature-tamper detection is NOT uniformly high (>=99%) across every "
         "config with data -- this contradicts the assumption behind scoring authenticity as a purely "

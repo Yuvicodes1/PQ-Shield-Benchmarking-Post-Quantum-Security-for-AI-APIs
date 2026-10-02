@@ -362,49 +362,44 @@ pip install -r requirements.txt   # includes streamlit + plotly
 bash scripts/run_webapp.sh        # http://localhost:8501
 ```
 
-Five pages:
+Seven pages in three groups (`app.py` routes to `views/`; theme in
+`.streamlit/config.toml`, light and dark; shared styling in `webapp/ui.py`):
 
-- **Live Streamer** — pick a configuration and a test digit, click "Send
-  request," and watch a real handshake → establish → AEAD-encrypt → POST →
-  AEAD-decrypt → verify transaction run against an actual server the page
-  starts on demand (ports 8100–8103, separate from the CLI's default 8000
-  so the two never collide). Includes a live tamper toggle (corrupt
-  ciphertext or signature) that demonstrates detection in real time —
-  corrupting the ciphertext is caught independently at both the AEAD layer
-  and the signature layer, since the tampered envelope no longer matches
-  what was signed.
-- **Benchmark Runner** — runs a scoped `bench.orchestrator` sweep, or a
-  `bench.streaming_runner` streaming sweep, directly from the browser
-  (small concurrency/repetition values recommended for an interactive
-  session; use the CLI for the full paper-scale matrix).
-- **Results Dashboard** — one chronologically-sorted "Data source" selector
-  covering *every* concurrency-sweep and streaming-sweep run ever collected
-  (interleaved, not two separate pickers), with shared panel structure
-  (chart type, layout) across both experiment types — only the underlying
-  metric, x-axis, and baseline change. Covers RTT/TTFT vs. scale, overhead
-  decomposition, wire bytes, server CPU%/RSS, aggregate stats + Mann-Whitney
-  significance (`vs. Control` for the concurrency sweep, `vs. Classical` for
-  streaming — it has no unprotected leg), and a security/performance
-  trade-off matrix with sliders for the security/performance weighting and
-  — for streaming runs — how much of the security score comes from the
-  *measured* sequence-integrity exposure window of the selected signing
-  strategy. Every chart has an on-demand "Explain this chart" button
-  (`webapp/chart_explainer.py`) alongside the page-level AI summary button.
-  See `docs/RESULTS_DASHBOARD.md` for the full section-by-section reference.
-- **Threat Scenarios** — HNDL storage-growth and MITM detection results
-  from disk, plus a streaming sequence-integrity-attack tab and a
-  **streaming HNDL exposure** tab (exposure-vs-response-length chart,
-  strategy-independence check), each with a button to run the experiment
-  on demand against a live server and save the result. See
-  `docs/THREAT_SCENARIOS.md` for the full reference.
-- **Cryptographic Validation** — ground-truth checks independent of any run
-  selector: the NIST ACVP KAT check and the streaming signature-cost model
-  validation, plus a security-score assumption check
-  (`analysis/security_validation.py`) that cross-checks the trade-off
-  matrix's categorical security mapping against real HNDL/MITM results
-  rather than asserting it once and never re-verifying it.
+**Overview**
+- **Home** — headline results computed from the result files, the seven
+  configurations with their security properties, and an environment check.
+- **Key findings** — the paper's results from its own runs
+  (`results/paper_runs.json`), via the same code that builds the paper's
+  tables: an interactive signature-schedule dial (bytes vs. exposure for any
+  checkpoint interval), the signing-cost diagnostic, the stream-attack
+  campaign, key substitution and the cost of handshake authentication,
+  key establishment against the matched protocol control, and a no-weights
+  decision explorer (pick the security properties you need and the workload).
 
-All five pages import directly from `crypto/`, `api/`, `bench/`,
+**Interactive**
+- **Live demo** — stream a real Llama response through any configuration
+  and watch each chunk get decrypted and verified: text appears muted until
+  a verified signature covers it. Choose the signing strategy and checkpoint
+  interval, and simulate an on-path attacker (bit flips, drop, reorder,
+  duplicate, truncate, strip checkpoints). Also a single-request demo with
+  tampering. Demo servers run on ports 8100–8106 with handshake
+  authentication enabled.
+- **Benchmark runner** — scoped concurrency sweeps (optionally with the
+  authenticated handshake) and streaming sweeps (with checkpoint intervals)
+  from the browser.
+
+**Evidence**
+- **Results explorer** — any concurrency or streaming run on disk, plus a
+  "Paper runs" source that combines the paper's runs exactly as the paper
+  does (latest run per configuration). Repetition-level comparisons with
+  bootstrap CIs; per-signature CPU time for streaming runs.
+- **Threat lab** — harvest-now-decrypt-later exposure, tampering, stream
+  sequence attacks (with checkpoints), and key substitution, each with saved
+  results and a live run.
+- **Validation** — all 130 NIST ACVP vectors, signature counts vs. the
+  analytic model, and threat-model assumptions vs. the experiments.
+
+All pages import directly from `crypto/`, `api/`, `bench/`,
 `threats/`, and `analysis/` — there is no separate "demo" implementation of
 the protocol or the statistics; the dashboard is a thin interactive layer
 over the same code the CLI and the paper's results are built from.
@@ -472,9 +467,9 @@ pq-shield/
 │   ├── colors.py                      # single source for config/strategy chart colors
 │   ├── chart_explainer.py              # per-chart "Explain this chart" button
 │   └── ai_summary.py                    # on-demand Claude-generated dashboard/threat/chart summaries
-├── pages/                        # Streamlit multipage app: Live Streamer, Benchmark Runner,
-│                                    Results Dashboard, Threat Scenarios, Cryptographic Validation
-├── app.py                        # Streamlit entrypoint (Home page)
+├── views/                        # Streamlit pages: home, key_findings, live_demo, benchmark_runner,
+│                                    results_explorer, threat_lab, validation
+├── app.py                        # Streamlit entrypoint: grouped navigation over views/
 ├── tests/                        # 106 passed + 4 pre-existing legacy failures (see Setup)
 │   ├── test_crypto_roundtrip.py    # core protocol round-trips + tamper detection
 │   ├── test_streaming_signing.py    # crypto/streaming.py's three signing strategies

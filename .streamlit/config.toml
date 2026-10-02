@@ -1,0 +1,49 @@
+# PQ-Shield dashboard theme. Light and dark variants share one structure;
+# chart colours follow the configuration palette in webapp/colors.py.
+
+[server]
+runOnSave = false
+
+[client]
+toolbarMode = "minimal"
+showSidebarNavigation = true
+
+[theme]
+font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+headingFont = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+codeFont = "JetBrains Mono:https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
+baseRadius = "0.65rem"
+buttonRadius = "0.55rem"
+baseFontSize = 15
+headingFontWeights = [700, 650, 600, 600, 600, 600]
+showWidgetBorder = true
+showSidebarBorder = true
+chartCategoricalColors = ["#2471a3", "#e67e22", "#16a085", "#ad1457", "#6c3fa0", "#c0392b", "#888888", "#4d4d4d"]
+
+[theme.light]
+primaryColor = "#4f46e5"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f4f6fb"
+textColor = "#141824"
+borderColor = "#e3e7ef"
+linkColor = "#4338ca"
+codeBackgroundColor = "#f1f3f9"
+dataframeHeaderBackgroundColor = "#f4f6fb"
+
+[theme.light.sidebar]
+backgroundColor = "#f7f8fc"
+secondaryBackgroundColor = "#eef1f8"
+
+[theme.dark]
+primaryColor = "#818cf8"
+backgroundColor = "#0c1018"
+secondaryBackgroundColor = "#161c28"
+textColor = "#e7eaf1"
+borderColor = "#262e3d"
+linkColor = "#a5b4fc"
+codeBackgroundColor = "#161c28"
+dataframeHeaderBackgroundColor = "#161c28"
+
+[theme.dark.sidebar]
+backgroundColor = "#0f141e"
+secondaryBackgroundColor = "#1a2130"

@@ -15,7 +15,8 @@ outputs/*.png
 *.egg-info/
 .env
 .DS_Store
-.streamlit/
+.streamlit/*
+!.streamlit/config.toml
 .agents/
 .claude/
 work/

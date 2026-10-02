@@ -1,6 +1,8 @@
 # Results Dashboard — current layout
 
-Describes what `pages/3_📊_Results_Dashboard.py` actually shows today, top to
+> **Note (October 2026):** the dashboard was reorganised into `views/` with grouped navigation; the weighted trade-off matrix was replaced by the no-weights decision explorer on the *Key findings* page, and new views cover the attack campaign, key substitution and signing cost. See the README's "Interactive dashboard" section for the current layout; the section-by-section detail below describes the earlier version.
+
+Describes what `views/results_explorer.py` actually shows today, top to
 bottom, as one long scrolling page (not tabs). Every number on the page comes
 from `webapp/data_loader.py`, which wraps `analysis/aggregate.py`,
 `analysis/tradeoff_matrix.py`, and `analysis/streaming_analysis.py` so
@@ -164,7 +166,7 @@ against `bench.orchestrator`/`bench.streaming_runner`'s shared hyphenated
 
 Cryptographic Validation (NIST ACVP known-answer tests, streaming
 signature-cost model validation) is no longer a section of this page — it
-lives on its own page, `pages/5_🔬_Cryptographic_Validation.py`, since it
+lives on its own page, `views/validation.py`, since it
 validates the *measurement instrument* itself rather than any one sweep's
 results, and having it inside a run-selector-scoped page implied a
 dependency on that selector it never actually had. The dashboard page

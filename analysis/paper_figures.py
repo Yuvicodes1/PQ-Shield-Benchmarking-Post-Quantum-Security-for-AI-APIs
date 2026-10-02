@@ -1458,7 +1458,7 @@ SEC_AXES = [
 ]
 
 
-def table_dominance(out: Out, df: pd.DataFrame, sdf: pd.DataFrame | None, results_dir: str) -> None:
+def dominance_frame(df: pd.DataFrame, sdf: pd.DataFrame | None, results_dir: str) -> dict:
     """Replaces the weighted composite score. A configuration is dominated if
     another is at least as secure on every stated property and no worse on
     every cost -- latency 'no worse' meaning the 90% CI of the difference lies
@@ -1510,6 +1510,15 @@ def table_dominance(out: Out, df: pd.DataFrame, sdf: pd.DataFrame | None, result
     workloads = {"API / hash-chain": hs_bytes, "Per-chunk streaming": pc_bytes}
     dominated_by = {w: {c: [o for o in present if o != c and dominates(o, c, bm)] for c in present}
                     for w, bm in workloads.items()}
+    return {"present": present, "levels": levels, "overhead": ov, "pairwise": pw, "hs_bytes": hs_bytes,
+            "pc_bytes": pc_bytes, "workloads": workloads, "dominated_by": dominated_by}
+
+
+def table_dominance(out: Out, df: pd.DataFrame, sdf: pd.DataFrame | None, results_dir: str) -> None:
+    """LaTeX rendering of dominance_frame (the weight-free decision summary)."""
+    d = dominance_frame(df, sdf, results_dir)
+    present, levels, ov = d["present"], d["levels"], d["overhead"]
+    hs_bytes, pc_bytes, workloads, dominated_by = d["hs_bytes"], d["pc_bytes"], d["workloads"], d["dominated_by"]
     lines = [r"\begin{table*}[t]", r"\centering",
              r"\caption{Decision summary without weights. Security columns are properties of the construction "
              r"(\checkmark = holds): key establishment resists a CRQC (KEX-Q); key establishment survives a break of "

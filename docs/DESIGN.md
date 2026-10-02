@@ -178,7 +178,7 @@ the score would erase that categorical distinction (Full PQC resists
 *future* quantum forgery; Hybrid does not) behind a near-term rate that
 doesn't differentiate the configs at all. See
 `analysis/security_validation.py` and the "Security-Score Assumption
-Validation" section of `pages/5_🔬_Cryptographic_Validation.py`, which
+Validation" section of `views/validation.py`, which
 re-runs both checks (confidentiality *and* authenticity) against whatever
 Threat Scenarios data is on disk, rather than asserting either axis once
 and never re-checking it.
