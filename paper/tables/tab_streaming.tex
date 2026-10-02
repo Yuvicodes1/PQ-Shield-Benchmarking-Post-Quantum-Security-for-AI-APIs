@@ -1,0 +1,53 @@
+\begin{table*}[t]
+\centering
+\caption{Streaming signature strategies on a real Llama-3.2-3B-Instruct backend (10 repetitions per cell; median, with interquartile range for TTFT). Signing and verification times are summed over the whole stream.}
+\label{tab:streaming}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}rllrrrrrr@{}}
+\toprule
+Tokens & Config. & Strategy & TTFT (ms) & Total (ms) & Sigs & Sig. bytes & Sign (ms) & Verify (ms) \\
+\midrule
+50 & Classical-RSA & Buffer-and-sign & 1,229.2 [1,229--1,232] & 1,230 & 1 & 71 & 0.07 & 0.07 \\
+ &  & Per-chunk & 127.9 [126--133] & 1,233 & 10 & 710 & 0.38 & 0.66 \\
+ &  & Hash-chain & 125.9 [126--126] & 1,230 & 1 & 71 & 0.08 & 0.07 \\
+\addlinespace[1pt]
+ & Classical-ECDHE & Buffer-and-sign & 1,240.1 [1,237--1,244] & 1,240 & 1 & 71 & 0.07 & 0.07 \\
+ &  & Per-chunk & 131.4 [131--132] & 1,314 & 10 & 711 & 2.15 & 4.30 \\
+ &  & Hash-chain & 124.7 [124--125] & 1,235 & 1 & 71 & 0.07 & 0.07 \\
+\addlinespace[1pt]
+ & Hybrid & Buffer-and-sign & 1,231.1 [1,229--1,232] & 1,231 & 1 & 71 & 0.07 & 0.07 \\
+ &  & Per-chunk & 133.3 [132--135] & 1,327 & 10 & 710 & 2.24 & 4.36 \\
+ &  & Hash-chain & 131.0 [131--132] & 1,313 & 1 & 71 & 0.35 & 0.43 \\
+\addlinespace[1pt]
+ & Hybrid-KEX & Buffer-and-sign & 1,315.3 [1,313--1,318] & 1,317 & 1 & 71 & 0.35 & 0.40 \\
+ &  & Per-chunk & 131.7 [131--132] & 1,315 & 10 & 710 & 2.10 & 4.20 \\
+ &  & Hash-chain & 132.1 [132--133] & 1,320 & 1 & 71 & 0.35 & 0.44 \\
+\addlinespace[1pt]
+ & Full PQC & Buffer-and-sign & 1,319.0 [1,318--1,320] & 1,320 & 1 & 3,309 & 0.60 & 0.25 \\
+ &  & Per-chunk & 124.7 [124--125] & 1,238 & 10 & 33,090 & 0.99 & 0.49 \\
+ &  & Hash-chain & 125.9 [126--126] & 1,252 & 1 & 3,309 & 0.09 & 0.05 \\
+\addlinespace[1pt]
+\midrule
+200 & Classical-RSA & Buffer-and-sign & 4,926.9 [4,923--4,938] & 4,927 & 1 & 72 & 0.07 & 0.09 \\
+ &  & Per-chunk & 130.6 [126--136] & 4,933 & 40 & 2,841 & 1.45 & 2.51 \\
+ &  & Hash-chain & 126.5 [126--135] & 4,921 & 1 & 71 & 0.07 & 0.07 \\
+\addlinespace[1pt]
+ & Classical-ECDHE & Buffer-and-sign & 5,300.7 [5,297--5,305] & 5,302 & 1 & 70 & 0.26 & 0.27 \\
+ &  & Per-chunk & 124.5 [124--125] & 4,933 & 40 & 2,840 & 1.43 & 2.50 \\
+ &  & Hash-chain & 125.4 [125--126] & 4,971 & 1 & 72 & 0.08 & 0.07 \\
+\addlinespace[1pt]
+ & Hybrid & Buffer-and-sign & 5,309.6 [5,302--5,349] & 5,311 & 1 & 71 & 0.25 & 0.27 \\
+ &  & Per-chunk & 127.9 [125--131] & 5,199 & 40 & 2,840 & 6.89 & 10.58 \\
+ &  & Hash-chain & 131.3 [131--132] & 5,345 & 1 & 71 & 0.26 & 0.26 \\
+\addlinespace[1pt]
+ & Hybrid-KEX & Buffer-and-sign & 5,292.8 [4,980--5,326] & 5,294 & 1 & 71 & 0.25 & 0.28 \\
+ &  & Per-chunk & 132.2 [132--133] & 5,367 & 40 & 2,839 & 10.08 & 15.99 \\
+ &  & Hash-chain & 131.8 [132--132] & 5,353 & 1 & 70 & 0.33 & 0.27 \\
+\addlinespace[1pt]
+ & Full PQC & Buffer-and-sign & 5,017.9 [5,017--5,020] & 5,018 & 1 & 3,309 & 0.13 & 0.09 \\
+ &  & Per-chunk & 133.4 [133--134] & 5,394 & 40 & 132,360 & 24.32 & 10.74 \\
+ &  & Hash-chain & 125.7 [125--126] & 5,004 & 1 & 3,309 & 0.11 & 0.05 \\
+\addlinespace[1pt]
+\bottomrule
+\end{tabular}
+\end{table*}

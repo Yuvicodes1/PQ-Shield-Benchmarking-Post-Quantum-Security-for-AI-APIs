@@ -1,0 +1,190 @@
+% =============================================================================
+% PQ-Shield journal: drop-in text for the revision.
+% Citation keys refer to paper/references.bib. \NUM{...} marks a number to copy
+% from paper/key_numbers.md after the clean re-run -- never type numbers by hand.
+% =============================================================================
+\providecommand{\NUM}[1]{\textbf{[#1]}}
+
+% -----------------------------------------------------------------------------
+% §I  Contributions -- replace the streaming bullet so it is positioned against
+%     prior art instead of reading as a new construction.
+% -----------------------------------------------------------------------------
+Fourth, we adapt amortized stream signing~\cite{gennaro1997streams,wong1999flows,perrig2000tesla}
+to token-by-token LLM responses, where a post-quantum signature's size (3,309\,B for ML-DSA-65
+versus $\approx$71\,B for ECDSA P-256) makes per-chunk signing roughly forty times costlier in bytes.
+We compare buffer-and-sign, per-chunk, and hash-chained signing on a real
+Llama-3.2-3B-Instruct backend, show that a naive per-chunk design admits an undetected
+reordering attack, and close it by binding the chunk index into the signed bytes.
+
+Fifth, we treat per-chunk and hash-chained signing as the two endpoints of one design space:
+a hash chain checkpointed every $k$ chunks. We define \emph{exposure} -- the number of tokens a
+client displays before any signature covers them -- and measure signature bytes against exposure
+and against mid-stream detection of drop and reorder attacks for $k\in\{1,2,5,10,20,\infty\}$,
+with an analytic model ($\lfloor n/k\rfloor+1$ signatures, exposure $\le k$ chunks) that the
+measurements follow. This gives operators a direct rule for choosing $k$ under an integrity
+budget, which matters most for post-quantum signatures: at $k=1$ ML-DSA-65 costs 135,669\,B per
+200-token response; at $k=\infty$ only 3,309\,B, but the whole response stays unverified until it ends.
+
+Sixth, we quantify how session resumption amortizes post-quantum key establishment, reporting
+end-to-end overhead versus an unprotected control at 1, 10, and 100 requests per key exchange.
+
+% -----------------------------------------------------------------------------
+% §II-B  Related work -- three new paragraphs (place after Table I).
+% -----------------------------------------------------------------------------
+\paragraph*{Post-quantum TLS under network conditions}
+Paquin \emph{et al.}~\cite{paquin2020benchmarking} benchmarked post-quantum key exchange and
+signatures inside TLS 1.3 using emulated network links (Linux \texttt{netem}), showing that on
+lossy or low-bandwidth paths message size, not computation, dominates handshake latency.
+Sikeridis \emph{et al.}~\cite{sikeridis2020authentication} reached a similar conclusion for
+post-quantum authentication. Montenegro \emph{et al.}~\cite{montenegro2026framework} and
+G\'omez-Cambronero \emph{et al.}~\cite{gomezcambronero2026layered} extend this to layered TLS and
+application-level load. These works measure the TLS handshake with generic payloads. PQ-Shield
+instead measures an application-layer protocol around AI inference payloads, including streaming
+responses, and adds controlled adversarial experiments. Our network-emulation experiment
+(Section~\ref{sec:netem}) is deliberately coarser than theirs: it shapes the byte stream rather
+than packets. We use it to bound, not replace, their packet-level results.
+
+\paragraph*{Stream authentication}
+Signing a stream that is not available in full when transmission starts is a classical problem.
+Gennaro and Rohatgi~\cite{gennaro1997streams} chain per-block hashes so that a single signature
+authenticates an entire stream. Wong and Lam~\cite{wong1999flows} amortize one signature over a
+flow with hash trees. TESLA and EMSS~\cite{perrig2000tesla} trade immediate verification for low
+per-packet overhead. Our hash-chain strategy is an instance of this family, not a new construction,
+and it inherits the same trade-off: integrity is confirmed only when the terminal signature arrives.
+What is new here is the setting. LLM token streams have a small, latency-critical first chunk and,
+with post-quantum signatures, a per-signature cost large enough that the choice of amortization
+strategy decides whether streaming is affordable at all.
+
+\paragraph*{Side channels in encrypted LLM streams}
+Weiss \emph{et al.}~\cite{weiss2024keylogging} recovered the content of encrypted AI-assistant
+responses from the sizes of streamed packets (the token-length side channel). Their attack is
+orthogonal to the choice of key exchange: it applies equally to all four protected configurations
+here. It does sharpen one of our qualifications. Per-chunk and hash-chained signing both emit one
+record per chunk and therefore expose chunk count and timing, which only buffer-and-sign hides.
+
+% -----------------------------------------------------------------------------
+% §IV  System design -- configuration table (replace the three-configuration
+%      description) and the naming note.
+% -----------------------------------------------------------------------------
+\begin{table}[t]
+\centering
+\caption{Configurations. All protected configurations share AES-256-GCM with an HKDF-SHA256 session key.}
+\label{tab:configs}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llll@{}}
+\toprule
+ID & Key establishment & Signature & PQ KEX \\
+\midrule
+Control & none & none & -- \\
+A (Classical-RSA) & RSA-2048 OAEP, fresh key per handshake & ECDSA P-256 & no \\
+A$'$ (Classical-ECDHE) & ephemeral X25519 & ECDSA P-256 & no \\
+B (Hybrid) & ML-KEM-768 & ECDSA P-256 & yes \\
+B$'$ (Hybrid-KEX) & X25519MLKEM768 & ECDSA P-256 & yes \\
+C (Full PQC) & ML-KEM-768 & ML-DSA-65 & yes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Configuration A$'$ is the production classical baseline. TLS 1.3 removed RSA key
+transport~\cite{rfc8446}, and ephemeral X25519 is the classical half of the X25519MLKEM768 group
+now negotiated by major browsers and CDNs~\cite{ietf-ecdhe-mlkem}. A$'$ and B have identical
+signature code, so the A$'\!\rightarrow$B comparison isolates exactly one change: X25519 to
+ML-KEM-768. Configuration A generates a fresh RSA-2048 key pair per handshake. No production
+system does this, so we report A as a legacy worst case that exposes the cost of RSA key generation
+under load, not as \emph{the} classical baseline.
+
+Configuration B pairs a post-quantum key exchange (ML-KEM-768 alone) with a classical signature.
+Configuration B$'$ instead combines X25519 and ML-KEM-768 \emph{within} the key exchange, following
+the X25519MLKEM768 construction of~\cite{ietf-ecdhe-mlkem}. The server's share is the ML-KEM
+encapsulation key followed by an X25519 public key (1,216\,B). The client's share is the ML-KEM
+ciphertext followed by its X25519 public key (1,120\,B). The session key is HKDF-SHA256 over both
+shared secrets concatenated, so it stays secret unless \emph{both} algorithms are broken. Signature
+code is identical, so A$'\!\rightarrow$B$'$ is the migration step deployed on the web today, and
+B$\rightarrow$B$'$ is the price of hedging against an ML-KEM break.
+
+% -----------------------------------------------------------------------------
+% §IV/§V  Workload split -- one sentence, wherever workloads are introduced.
+% -----------------------------------------------------------------------------
+Streaming experiments use a real Llama-3.2-3B-Instruct model (Q4\_K\_M, llama.cpp with Metal).
+The concurrency, payload-shape, network, HNDL, and MITM experiments use the non-streaming endpoint
+with the RandomForest classifier (or the selected payload profile). One locally hosted LLM produces
+$\approx$40 tokens per second for a single stream, so a 1,000-connection LLM sweep would
+measure the model's queue rather than the cryptography.
+
+% -----------------------------------------------------------------------------
+% §V-H  NEW methodology subsection: network emulation.
+% -----------------------------------------------------------------------------
+\subsection{Network Emulation}\label{sec:netem}
+All other experiments run over loopback, where moving an extra 1,088-byte ML-KEM ciphertext or a
+3,309-byte ML-DSA signature costs almost nothing. To expose the cost of message size, we place a
+TCP proxy between load generator and server that adds a one-way propagation delay of RTT/2 in each
+direction and a per-direction bottleneck bandwidth shared by all connections. Bytes are released
+in order, so HTTP semantics are unchanged. We evaluate four paths: loopback, \emph{metro}
+(10\,ms RTT, 100\,Mbit/s), \emph{WAN} (50\,ms, 20\,Mbit/s), and \emph{mobile} (100\,ms, 5\,Mbit/s),
+each with all five configurations at 10 concurrent connections and five repetitions. The proxy
+shapes the byte stream above TCP. It does not model slow start, the initial congestion window,
+loss, or fragmentation, all of which penalize large handshakes further~\cite{paquin2020benchmarking}.
+The measured PQC network cost is therefore a lower bound.
+
+% -----------------------------------------------------------------------------
+% §V-I  NEW methodology subsection: checkpointed hash chain and exposure.
+% -----------------------------------------------------------------------------
+\subsection{Checkpointed Hash Chains and Exposure}\label{sec:checkpoint}
+The hash-chain strategy can additionally sign the running chain hash $h_i$ every $k$ chunks.
+The client verifies each checkpoint signature against its \emph{own} recomputed $h_i$, so any
+dropped, reordered, or altered chunk before a checkpoint makes that checkpoint fail mid-stream.
+For an $n$-chunk response this costs $\lfloor n/k\rfloor + 1$ signatures (checkpoints plus the
+terminal one), and a decrypted chunk waits at most $k$ chunks for coverage. We record two exposure
+measures per transaction: the largest number of chunks displayed but not yet covered by a verified
+signature (\emph{max unverified chunks}), and the longest time any chunk waited for coverage
+(\emph{verification lag}). Per-chunk signing is the $k=1$ endpoint (exposure one chunk) and plain
+hash-chain the $k=\infty$ endpoint (exposure the whole response). We sweep
+$k\in\{1,2,5,10,20,\infty\}$ for Hybrid (71\,B signatures) and Full PQC (3,309\,B) on 200-token
+Llama responses in 5-token chunks. At each $k$ we repeat the drop and reorder attacks and record
+how much of the stream is delivered before detection.
+
+% -----------------------------------------------------------------------------
+% §V-J  NEW methodology subsection: session resumption.
+% -----------------------------------------------------------------------------
+\subsection{Session Resumption}\label{sec:sessions}
+By default every transaction performs a fresh key exchange, the worst case. To measure the
+amortized case, a client may set \texttt{keep\_session}. The server then caches the derived session
+key under the handshake identifier, later requests carry no key-establishment blob and reuse it,
+and the last request of the session ends it. Each of 10 concurrent clients reuses one key exchange
+for $N\in\{1,10,100\}$ requests (1,000 requests per cell, five repetitions), and we report
+end-to-end overhead against Control.
+
+% -----------------------------------------------------------------------------
+% §X  Limitations -- replacement list.
+% -----------------------------------------------------------------------------
+\section{Limitations}
+\begin{itemize}
+  \item \textbf{Single host.} All measurements come from one machine
+  (Apple M3 MacBook Air, 8 cores, 16\,GB, macOS). The load generator and server share its CPU,
+  which matters most at 1,000 connections. Relative comparisons between configurations are the
+  intended result; absolute latencies are host-specific.
+  \item \textbf{Application-layer protocol, not TLS.} PQ-Shield's handshake is a purpose-built
+  protocol. Its default fresh key exchange per transaction isolates the asymmetric primitive and is
+  a worst case. Section~\ref{sec:sessions} measures the amortized case, but not TLS's own
+  resumption mechanisms (PSK, 0-RTT). Server keys are not certificate-authenticated, so it is not a
+  substitute for authenticated TLS.
+  \item \textbf{Hybrid-KEX measured separately.} Configuration B$'$ was added after the main
+  concurrency sweep. Its concurrency and network results come from a supplementary run on the same
+  host and day. Its streaming behaviour is not re-measured, because its signature path is identical
+  to Configuration B's.
+  \item \textbf{Network emulation is byte-level.} The proxy models propagation delay and bandwidth
+  but not TCP congestion control, loss, or MTU fragmentation (Section~\ref{sec:netem}). Results are
+  a lower bound on post-quantum network cost; packet-level studies~\cite{paquin2020benchmarking,
+  sikeridis2020authentication} remain the reference for lossy links.
+  \item \textbf{Classical-RSA is a worst case.} Configuration A's per-handshake RSA-2048 key
+  generation does not reflect production practice; its availability failure under load should be
+  read as a property of that design, contrasted with the realistic Classical-ECDHE baseline.
+  \item \textbf{Workloads.} The \texttt{image\_cnn} profile uses an untrained fixed-weight network
+  and the \texttt{embedding}/\texttt{llm\_completion} profiles are synthetic. They probe payload
+  shape and size, not model behaviour. Streaming uses one quantized 3B-parameter model; the model
+  may end a stream before the requested length, so streaming HNDL results are reported against
+  tokens actually generated.
+  \item \textbf{Timing-validation residual.} A 3--9$\times$ gap between analytically predicted and
+  measured streaming \emph{signing time} for some strategy/configuration pairs remains only
+  partially explained. Signature-\emph{byte} predictions match exactly and are unaffected.
+\end{itemize}

@@ -1,0 +1,218 @@
+% =============================================================================
+% PQ-Shield journal: replacement Abstract, Results, Discussion, Recommendations,
+% and Conclusion, written from the clean 2026-10-02 re-run.
+% Every number below is copied from paper/key_numbers.md (regenerate with
+% `python -m analysis.paper_figures`). Figure/table files are in paper/figures
+% and paper/tables; labels match the \label{} used there or suggested here.
+% =============================================================================
+
+% -----------------------------------------------------------------------------
+% ABSTRACT (replaces the Review-2 abstract)
+% -----------------------------------------------------------------------------
+\begin{abstract}
+AI inference APIs are protected almost entirely by classical key exchange and signatures, which a
+cryptographically relevant quantum computer (CRQC) would break retroactively: traffic harvested
+today can be decrypted later. We present PQ-Shield, a benchmarking framework that wraps a real
+FastAPI inference service in six configurations --- an unprotected control, legacy RSA key transport,
+production-style X25519, ML-KEM-768, the deployed X25519MLKEM768 hybrid, and ML-KEM-768 with
+ML-DSA-65 signatures --- and measures them under concurrency (10--1,000 connections), four payload
+shapes, emulated network paths, session reuse, and active and passive attacks, with streaming
+responses from a real Llama-3.2-3B model. Against the realistic X25519 baseline, post-quantum key
+establishment adds no measurable latency at low load (+3.3--7.8\% versus control for every
+non-RSA configuration, including X25519 itself), costs about 5\,ms on a 5\,Mbit/s link, and its
+residual overhead falls to 0--2\% when one key exchange serves 100 requests. Per-handshake RSA-2048 key
+generation, by contrast, consumes 4.8 CPU cores at 10 connections and nearly doubles latency. For
+token-streaming responses we show that per-chunk and hash-chained signing are the endpoints of one
+design space --- a hash chain checkpointed every $k$ chunks --- and measure its trade-off between
+signature bytes and \emph{exposure}, the tokens shown before verification: with ML-DSA-65 a 200-token
+response costs 135,669\,B of signatures at $k{=}1$ and 3,309\,B at $k{=}\infty$, while checkpoints
+move detection of dropped or reordered chunks from the end of the stream to the next checkpoint.
+Streaming also compounds harvest-now-decrypt-later exposure: under classical key exchange a future
+CRQC could decrypt 11.4 bytes per generated token ($R^2{=}0.9997$); under ML-KEM, none. All
+post-quantum primitives are validated against NIST ACVP known-answer tests (75/75).
+\end{abstract}
+
+% -----------------------------------------------------------------------------
+% §VI  RESULTS (replaces §VI A--E)
+% -----------------------------------------------------------------------------
+\section{Results}\label{sec:results}
+
+All results come from one host (Apple M3, 8 cores, 16\,GB) on a single day, with every configuration
+measured in isolation. Latency is end-to-end (\texttt{total\_ms}: handshake round trip plus protected
+request), the only quantity directly comparable to the control's single request. Unless stated
+otherwise, each cell has five repetitions.
+
+\subsection{Cost of protection under concurrency}\label{sec:res-concurrency}
+Table~\ref{tab:concurrency} and Fig.~\ref{fig:concurrency} summarize the sweep. At 10 connections
+every configuration except Classical-RSA sits within a few milliseconds of the control (median
+91\,ms): Classical-ECDHE +4.9\%, Hybrid +4.4\%, Full PQC +3.3\%, and Hybrid-KEX +7.8\% (all
+$p<10^{-3}$, Mann--Whitney $U$). Replacing X25519 with ML-KEM-768 therefore costs nothing measurable;
+the remaining few percent are the extra handshake round trip, common to all protected
+configurations. Classical-RSA is the outlier at +86.5\% (median 169\,ms), and the latency
+decomposition (Fig.~\ref{fig:decomposition}) places almost all of it in the handshake, where the
+server generates a fresh RSA-2048 key pair.
+
+At 100 connections the per-repetition medians of the non-RSA protected configurations are
+\emph{bimodal} --- each repetition settles near either $\approx$1,000\,ms or $\approx$1,550\,ms
+(e.g.\ Classical-ECDHE 1,014--1,701\,ms, Full PQC 988--1,604\,ms) --- a server-queueing regime effect
+that dwarfs any cryptographic difference. We therefore do not rank these configurations at 100
+connections; only Classical-RSA (+152.6\%) is separated. At 1,000 connections the four non-RSA
+protected configurations are indistinguishable (medians 19.7--20.5\,s, +108.6--117.6\% versus
+control), Classical-RSA reaches 30.7\,s (+225.9\%), and failures stay at 1.2--1.6\%. That the
+non-RSA configurations cost about twice the control regardless of algorithm points to the second
+HTTP request per transaction, not to the cryptography; Section~\ref{sec:res-amortization} confirms
+that removing the per-request handshake removes the cost.
+
+\paragraph*{Revisiting the RSA availability failure} In the Review-2 draft, Classical-RSA failed
+100\% of requests at 1,000 connections on a single-core host. On the 8-core host it failed only
+1.5\%, while consuming 3.5--4.8 cores of server CPU (Table~\ref{tab:resources}) versus
+0.6--0.9 for every other protected configuration. Per-handshake RSA key generation is therefore
+CPU-bound: it collapses when cores run out and survives when they do not, at several times the
+compute of any alternative. The primitive benchmark explains why: RSA-2048 key generation runs at
+16 operations/s (median 62.7\,ms over 200 samples) against 98,357/s for ML-KEM-768 --- a
+6,167$\times$ gap (Table~\ref{tab:primitives}).
+
+\subsection{Server resources}\label{sec:res-resources}
+Except for Classical-RSA, CPU and memory are flat across configurations: at 10 connections every
+non-RSA configuration, including the control, uses 0.92--0.94 cores and 231--241\,MB RSS
+(Table~\ref{tab:resources}). The 1,088--1,120\,B ML-KEM ciphertexts and 3,309\,B ML-DSA signatures
+do not add a measurable memory footprint at this scale.
+
+\subsection{Payload shape}\label{sec:res-payload}
+Across the four payload profiles (163\,B--8\,kB) the cryptographic overhead is roughly constant in
+absolute terms (Fig.~\ref{fig:payload}, Table~\ref{tab:payload}): +4.0--9.4\,ms for every
+non-RSA configuration and +71.6--110.2\,ms for Classical-RSA. In relative terms it ranges from
++4.5\% for the 89\,ms RandomForest to up to +240\% for millisecond-scale synthetic profiles. The cost of
+protection is thus an additive term independent of payload size; whether it matters depends on the
+inference time it is added to. Configurations using X25519 (Classical-ECDHE, Hybrid-KEX) are
+consistently 1.6--3.5\,ms slower than those using ML-KEM alone, matching the primitive costs:
+server-side handshake work is 217.9\,\textmu s for X25519 keygen plus exchange against 23.3\,\textmu s
+for ML-KEM keygen plus decapsulation in our implementation.
+
+\subsection{Network conditions}\label{sec:res-network}
+On emulated paths (Fig.~\ref{fig:network}) the handshake leg isolates the cost of key-exchange size.
+Relative to Classical-ECDHE, the ML-KEM configurations add $+4.6\pm0.5$\,ms (Hybrid),
+$+4.7\pm0.3$\,ms (Full PQC), and $+5.7\pm1.3$\,ms (Hybrid-KEX) on the mobile path (100\,ms RTT,
+5\,Mbit/s), and at most $1.0$\,ms on the metro and WAN paths. End-to-end, these differences are smaller
+than the between-repetition variability of server queueing (SD 15--26\,ms on WAN and mobile), so
+they are not resolvable at the application level. Classical-RSA's handshake is 61--81\,ms slower
+than Classical-ECDHE's on every path because of key generation, not bytes. Because the proxy does
+not model TCP slow start or loss, these are lower bounds (Section~\ref{sec:netem}).
+
+\subsection{Session reuse}\label{sec:res-amortization}
+Fig.~\ref{fig:amortization} reports overhead versus control as one key exchange serves $N$
+requests. Classical-RSA's +101.2\% at $N{=}1$ disappears at $N{=}10$ ($-1.1\pm1.0$\%). For the
+other configurations the overhead falls from +4.0--7.0\% at $N{=}1$ to $-0.2$ to $+2.1$\% at
+$N{=}100$. One intermediate point (Full PQC at $N{=}10$, $+9.0\pm8.4$\%) has a single outlying
+repetition. For any deployment that reuses sessions, post-quantum key establishment costs nothing
+measurable.
+
+\subsection{Streaming signature strategies}\label{sec:res-streaming}
+With the real Llama-3.2-3B backend ($\approx$40 tokens/s; Fig.~\ref{fig:streaming},
+Table~\ref{tab:streaming}), buffer-and-sign delays the first token to the end of generation: about
+5\,s for a 200-token response in every configuration (4,927--5,311\,ms). Per-chunk and hash-chain
+signing both deliver the first token in 125--133\,ms, a 39--42$\times$ improvement that is
+independent of the key exchange. The strategies differ in signature bytes: for Full PQC a
+200-token response carries 132,360\,B of ML-DSA-65 signatures under per-chunk signing versus
+3,309\,B under hash-chain, a 40$\times$ difference; with ECDSA the corresponding figures are
+2,840\,B and 71\,B. The cold-start artifact in the Review-2 data (13\,s for the first measured cell)
+is gone after adding a discarded warm-up generation: Classical-RSA's buffer-and-sign TTFT is now
+4,927\,ms, in line with the other configurations.
+
+\subsection{Bounded exposure with checkpointed hash chains}\label{sec:res-checkpoint}
+Fig.~\ref{fig:checkpoint} and Table~\ref{tab:checkpoint} sweep the checkpoint interval $k$ for
+200-token responses (5-token chunks). Signature bytes follow the analytic model
+$(\lfloor n/k\rfloor+1)\cdot|\sigma|$ exactly: for Full PQC 135,669\,B (41 signatures) at $k{=}1$,
+29,781\,B at $k{=}5$, 9,927\,B at $k{=}20$, and 3,309\,B at $k{=}\infty$; for Hybrid 2,910\,B to
+70\,B. Exposure grows as bytes fall: the client displays at most 5, 25, 100, and 200 tokens
+before a signature covers them, with maximum verification lags of 0\,ms, about 0.5\,s, 2.4\,s, and 4.9\,s.
+The attack experiments show the security effect directly. Without checkpoints, hash-chain detects
+every mid-stream drop and reorder (100\%) but only at the end of the stream (0\% mid-stream). With
+checkpoints every attack is caught mid-stream (100\%), after 50--51\% of the stream at $k\le2$
+(the attack position itself), 59--60\% at $k{=}5$, 72\% at $k{=}10$, and 97--98\% at $k{=}20$.
+Detection depends only on checkpoint placement, so Hybrid and Full PQC give identical curves.
+
+\subsection{Harvest-now-decrypt-later exposure}\label{sec:res-hndl}
+A passive adversary captures 209--433\,B per classical transaction and 1,265--4,503\,B per
+post-quantum transaction (Fig.~\ref{fig:wirebytes}). Only the classical captures --- RSA-OAEP and
+X25519 alike --- become decryptable once a CRQC exists. Under streaming
+(Fig.~\ref{fig:streaminghndl}) the decryptable volume grows linearly with response length for both
+classical key exchanges, at 11.4 bytes per generated token ($R^2{=}0.9997$, 50--585 tokens, the model
+ending longer requests early), while all three ML-KEM configurations remain at zero decryptable bytes
+at every length. Every streamed token under classical key exchange adds to a future adversary's
+take; under ML-KEM, none does.
+
+\subsection{Active tampering}\label{sec:res-mitm}
+Every tampered response was rejected in every configuration (Table~\ref{tab:threats}). A flipped
+ciphertext bit is caught by the AES-GCM tag in 0.007--0.008\,ms (median), before the signature is
+examined; a flipped signature bit is caught by verification in 0.059\,ms (ML-DSA-65) to
+0.083\,ms (ECDSA P-256). Per-chunk signing with the chunk index bound into the signed bytes detects
+drops and reorders at the affected chunk (100\% mid-stream).
+
+% -----------------------------------------------------------------------------
+% §VIII  Hypotheses (replaces the H1--H4 paragraph)
+% -----------------------------------------------------------------------------
+\paragraph*{Hypotheses} \textbf{H1} (bounded PQC overhead) is supported: against Classical-ECDHE,
+moving to ML-KEM-768 adds no measurable latency at 10 or 1,000 connections and $\le$5.7\,ms of
+handshake time on the slowest emulated link; at 100 connections queueing bimodality prevents
+ranking. \textbf{H2} (Hybrid captures Full PQC's HNDL benefit at lower cost) is supported on HNDL
+--- both have zero decryptable bytes --- but the ``lower cost'' part is not: Full PQC is no slower
+than Hybrid in any non-streaming experiment, and it costs more only in per-chunk signature bytes.
+\textbf{H3} (categorically different decryptability) is demonstrated: classical exposure grows
+linearly with streamed tokens, post-quantum exposure stays at zero. \textbf{H4} (ML-DSA-65
+verification not slower than ECDSA P-256) is confirmed: 28,202 versus 21,602 verifications/s
+(1.31$\times$).
+
+% -----------------------------------------------------------------------------
+% §IX  Recommendations (replaces §IX A--B and Table IV)
+% -----------------------------------------------------------------------------
+\section{Recommendations}
+\paragraph*{Key establishment} Migrate from X25519 to a post-quantum key exchange now: it closes the
+harvest-now-decrypt-later exposure at no measurable latency cost, a few milliseconds on slow
+links, and nothing once sessions are reused. Where hedging against an ML-KEM weakness matters,
+the deployed X25519MLKEM768 hybrid costs about 3\,ms more than ML-KEM alone at 10 connections in our
+implementation. Do not generate RSA keys per handshake: it costs 4--5 CPU cores at modest load and
+fails outright when cores run out.
+
+\paragraph*{Signatures} ML-DSA-65 verification is faster than ECDSA P-256, so Full PQC costs no
+latency for single-shot responses. Its 3,309\,B signature matters only where many signatures are
+sent, which in practice means streaming.
+
+\paragraph*{Streaming} Use hash-chained signing with checkpoints and choose $k$ from the exposure
+the application can tolerate: $k=\infty$ (one signature, whole response unverified until it ends)
+for low-risk display, small $k$ where a user must not act on unverified text. With ML-DSA-65,
+$k{=}5$ bounds exposure to 25 tokens for 29,781\,B per 200-token response, against 132,360\,B for
+per-chunk signing. Buffer-and-sign is justified only when chunk-count and timing metadata must be
+hidden~\cite{weiss2024keylogging}, at a 39--42$\times$ time-to-first-token penalty.
+
+\begin{table}[t]
+\centering
+\caption{Recommendation summary.}
+\label{tab:recommendations}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Scenario & Key exchange & Signing \\
+\midrule
+Non-streaming inference API & ML-KEM-768 or X25519MLKEM768 & ECDSA or ML-DSA-65 \\
+Streaming, display-only & same & hash-chain, $k=\infty$ \\
+Streaming, actionable output & same & hash-chain, small $k$ \\
+Long-term non-repudiation & same & ML-DSA-65 (Full PQC) \\
+Metadata-sensitive streaming & same & buffer-and-sign \\
+Legacy RSA key transport & migrate away & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% -----------------------------------------------------------------------------
+% §XI  Conclusion (replaces the first two paragraphs)
+% -----------------------------------------------------------------------------
+\section{Conclusion}
+Measured on a real inference service rather than a generic web server, post-quantum migration is
+cheap where it is most urgent. Replacing X25519 with ML-KEM-768 closes harvest-now-decrypt-later
+exposure at no measurable latency, a few milliseconds of handshake time on slow links, and no cost at
+all once sessions are reused. The expensive cases are elsewhere: per-handshake RSA key generation,
+which is CPU-bound and fails when cores run out, and per-chunk post-quantum signatures on streamed
+responses, which multiply signature bytes by the number of chunks. For streaming, checkpointed hash
+chains turn that cost into an explicit dial between signature bytes and the amount of text a client
+shows before verifying it.

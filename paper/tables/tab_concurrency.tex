@@ -1,0 +1,32 @@
+\begin{table*}[t]
+\centering
+\caption{End-to-end latency (handshake + protected request) by configuration and concurrency. Statistics over successful requests after 5\% warm-up trimming; ``Rep.\ range'' is the spread of the five per-repetition medians. Overhead and $p$ are versus Control at the same concurrency (two-sided Mann--Whitney $U$).}
+\label{tab:concurrency}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}rlrrrrrrrrr@{}}
+\toprule
+Conc. & Configuration & Reps & OK / attempted & Fail & Median (ms) & Rep.\ range (ms) & p95 (ms) & p99 (ms) & Overhead & $p$ \\
+\midrule
+10 & Control & 5 & 475 / 475 & 0\% & 90.7 & 89.1--92.3 & 117.0 & 129.9 & ref. & -- \\
+ & Classical-RSA & 5 & 475 / 475 & 0\% & 169.2 & 158.2--185.7 & 299.3 & 364.5 & +87\% & $<10^{-135}$ \\
+ & Classical-ECDHE & 5 & 475 / 475 & 0\% & 95.2 & 93.7--96.8 & 121.6 & 135.4 & +5\% & $<10^{-6}$ \\
+ & Hybrid & 5 & 475 / 475 & 0\% & 94.7 & 93.3--96.2 & 117.5 & 134.1 & +4\% & $<10^{-5}$ \\
+ & Hybrid-KEX & 5 & 475 / 475 & 0\% & 97.8 & 96.7--99.8 & 123.4 & 131.8 & +8\% & $<10^{-12}$ \\
+ & Full PQC & 5 & 475 / 475 & 0\% & 93.7 & 93.0--94.2 & 120.6 & 140.4 & +3\% & $<10^{-3}$ \\
+\addlinespace
+100 & Control & 5 & 4,750 / 4,750 & 0\% & 942.9 & 922.8--976.1 & 1,084.1 & 1,175.0 & ref. & -- \\
+ & Classical-RSA & 5 & 4,745 / 4,750 & 0\% & 2,381.4 & 2,066.9--2,592.8 & 5,935.1 & 7,242.4 & +153\% & $<10^{-299}$ \\
+ & Classical-ECDHE & 5 & 4,746 / 4,750 & 0\% & 1,396.2 & 1,014.0--1,701.4 & 4,081.1 & 5,527.6 & +48\% & $<10^{-299}$ \\
+ & Hybrid & 5 & 4,748 / 4,750 & 0\% & 1,043.7 & 983.5--1,590.4 & 3,719.4 & 5,082.7 & +11\% & $<10^{-236}$ \\
+ & Hybrid-KEX & 5 & 4,742 / 4,750 & 0\% & 1,361.7 & 1,115.1--1,638.5 & 4,179.9 & 5,510.9 & +44\% & $<10^{-299}$ \\
+ & Full PQC & 5 & 4,745 / 4,750 & 0\% & 1,331.9 & 987.8--1,604.3 & 4,139.3 & 5,498.3 & +41\% & $<10^{-299}$ \\
+\addlinespace
+1,000 & Control & 5 & 47,500 / 47,500 & 0\% & 9,428.0 & 9,402.4--9,586.0 & 12.27\,s & 14.27\,s & ref. & -- \\
+ & Classical-RSA & 5 & 46,793 / 47,500 & 1\% & 30.73\,s & 29.94\,s--31.23\,s & 46.42\,s & 61.57\,s & +226\% & $<10^{-299}$ \\
+ & Classical-ECDHE & 5 & 46,805 / 47,500 & 1\% & 20.00\,s & 19.57\,s--20.37\,s & 36.62\,s & 46.73\,s & +112\% & $<10^{-299}$ \\
+ & Hybrid & 5 & 46,796 / 47,500 & 1\% & 19.66\,s & 19.09\,s--20.10\,s & 34.23\,s & 41.96\,s & +109\% & $<10^{-299}$ \\
+ & Hybrid-KEX & 5 & 46,907 / 47,500 & 1\% & 20.52\,s & 19.41\,s--22.53\,s & 35.41\,s & 45.11\,s & +118\% & $<10^{-299}$ \\
+ & Full PQC & 5 & 46,740 / 47,500 & 2\% & 19.92\,s & 19.68\,s--20.23\,s & 33.88\,s & 41.73\,s & +111\% & $<10^{-299}$ \\
+\bottomrule
+\end{tabular}
+\end{table*}

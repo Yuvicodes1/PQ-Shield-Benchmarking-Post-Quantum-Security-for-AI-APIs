@@ -1,0 +1,51 @@
+\begin{table*}[t]
+\centering
+\caption{Active tampering. (a) One flipped bit per response; detection time is the rejecting check alone. (b) Mid-stream sequence attacks on 60-token streams: share of trials detected at all, and before the stream completed (buffer-and-sign has no intermediate chunks to attack).}
+\label{tab:threats}
+\setlength{\tabcolsep}{4pt}
+\footnotesize
+\begin{tabular}[t]{@{}llrrl@{}}
+\toprule
+\multicolumn{5}{@{}l}{\textit{(a) Single-response tampering}} \\
+Config. & Target & $n$ & Detected & Median detection (ms) \\
+\midrule
+Classical-RSA & ciphertext & 100 & 100\% & 0.007 \\
+Classical-RSA & signature & 100 & 100\% & 0.063 \\
+Classical-ECDHE & ciphertext & 100 & 100\% & 0.008 \\
+Classical-ECDHE & signature & 100 & 100\% & 0.083 \\
+Hybrid & ciphertext & 100 & 100\% & 0.008 \\
+Hybrid & signature & 100 & 100\% & 0.083 \\
+Hybrid-KEX & ciphertext & 100 & 100\% & 0.008 \\
+Hybrid-KEX & signature & 100 & 100\% & 0.082 \\
+Full PQC & ciphertext & 100 & 100\% & 0.008 \\
+Full PQC & signature & 100 & 100\% & 0.059 \\
+\bottomrule
+\end{tabular}\hfill
+\begin{tabular}[t]{@{}llrrr@{}}
+\toprule
+\multicolumn{5}{@{}l}{\textit{(b) Streaming sequence attacks}} \\
+Config. & Strategy / attack & $n$ & Detected & Mid-stream \\
+\midrule
+Classical-RSA & Per-chunk / drop & 10 & 100\% & 100\% \\
+Classical-RSA & Per-chunk / reorder & 10 & 100\% & 100\% \\
+Classical-RSA & Hash-chain / drop & 10 & 100\% & 0\% \\
+Classical-RSA & Hash-chain / reorder & 10 & 100\% & 0\% \\
+Classical-ECDHE & Per-chunk / drop & 10 & 100\% & 100\% \\
+Classical-ECDHE & Per-chunk / reorder & 10 & 100\% & 100\% \\
+Classical-ECDHE & Hash-chain / drop & 10 & 100\% & 0\% \\
+Classical-ECDHE & Hash-chain / reorder & 10 & 100\% & 0\% \\
+Hybrid & Per-chunk / drop & 10 & 100\% & 100\% \\
+Hybrid & Per-chunk / reorder & 10 & 100\% & 100\% \\
+Hybrid & Hash-chain / drop & 10 & 100\% & 0\% \\
+Hybrid & Hash-chain / reorder & 10 & 100\% & 0\% \\
+Hybrid-KEX & Per-chunk / drop & 10 & 100\% & 100\% \\
+Hybrid-KEX & Per-chunk / reorder & 10 & 100\% & 100\% \\
+Hybrid-KEX & Hash-chain / drop & 10 & 100\% & 0\% \\
+Hybrid-KEX & Hash-chain / reorder & 10 & 100\% & 0\% \\
+Full PQC & Per-chunk / drop & 10 & 100\% & 100\% \\
+Full PQC & Per-chunk / reorder & 10 & 100\% & 100\% \\
+Full PQC & Hash-chain / drop & 10 & 100\% & 0\% \\
+Full PQC & Hash-chain / reorder & 10 & 100\% & 0\% \\
+\bottomrule
+\end{tabular}
+\end{table*}
