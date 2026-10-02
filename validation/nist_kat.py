@@ -69,25 +69,24 @@ WHAT IS AND ISN'T ACHIEVABLE THROUGH liboqs's PUBLIC API
                         exactly signatureInterface == "external" and
                         preHash == "pure" -- see kat_vectors.py.
 
-  ML-DSA-65 keyGen      NOT ACHIEVABLE.  liboqs does not export an
-  ML-DSA-65 sigGen      OQS_SIG_ml_dsa_65_keypair_derand (or any
-                        deterministic-input keygen), and its
-                        OQS_SIG_ml_dsa_65_sign is randomized (hedged) by
-                        default with no derandomized variant exposed either.
-                        There is therefore no way to reproduce NIST's exact
-                        published (pk, sk) or signature bytes for keyGen or
-                        sigGen through liboqs's public API -- only sigVer,
-                        which takes an externally supplied signature and
-                        only needs to reach the same accept/reject verdict,
-                        is achievable. This is a real, structural limitation
-                        of what liboqs exposes, not a shortcut taken here.
-                        Round-tripping PQ-Shield's own sign() output through
-                        its own verify() (as spec_conformance.py already
-                        does) is a correctness sanity check, not a KAT --
-                        it can't catch a bug that's consistent between sign
-                        and verify, which is exactly the failure mode a KAT
-                        exists to catch. This module does not attempt to
-                        pass that off as sigGen/keyGen coverage.
+  ML-DSA-65 keyGen      ACHIEVABLE, through the RNG.  liboqs exports no
+  ML-DSA-65 sigGen      derandomized ML-DSA keygen or signing, but all the
+                        randomness its ML-DSA code consumes comes from
+                        OQS_randombytes, which liboqs lets a caller replace
+                        (OQS_randombytes_custom_algorithm -- how liboqs runs
+                        its own KATs). FIPS 204 keygen (Algorithm 1) draws
+                        exactly the 32-byte seed xi and signing (Algorithm
+                        2) exactly the 32-byte rnd (all zeros for
+                        deterministic signing), so returning the vector's
+                        bytes reproduces NIST's inputs through the SAME
+                        OQS_SIG_ml_dsa_65_keypair / _sign_with_ctx_str
+                        entry points the live configurations call.
+                        crypto/oqs_adapter.fixed_randomness also checks that
+                        liboqs drew exactly the bytes supplied, so a
+                        comparison can't silently pass on extra hidden
+                        randomness. Byte-exact for pk, sk, and signature.
+                        (An earlier version of this module listed these as
+                        not achievable; that was wrong.)
 
 Run:
     python -m validation.nist_kat
@@ -101,8 +100,10 @@ import argparse
 import json
 import os
 
-from crypto.oqs_adapter import MLDSA65, MLKEM768
+from crypto.oqs_adapter import MLDSA65, MLKEM768, fixed_randomness
 from validation.kat_vectors import (
+    load_ml_dsa_65_keygen_vectors,
+    load_ml_dsa_65_siggen_vectors,
     load_ml_dsa_65_sigver_vectors,
     load_ml_kem_768_encap_decap_vectors,
     load_ml_kem_768_keygen_vectors,
@@ -188,30 +189,59 @@ def run_ml_dsa_65_sigver() -> dict:
     }
 
 
+def run_ml_dsa_65_keygen() -> dict:
+    vectors, meta = load_ml_dsa_65_keygen_vectors()
+    results = []
+    for v in vectors:
+        with fixed_randomness(v.seed):
+            kp = MLDSA65.keypair()
+        results.append({"tcId": v.tc_id, "pk_match": kp.public_key == v.pk, "sk_match": kp.secret_key == v.sk,
+                        "passed": kp.public_key == v.pk and kp.secret_key == v.sk})
+    return {"provenance": meta, "results": results,
+            "passed": sum(r["passed"] for r in results), "total": len(results)}
+
+
+def run_ml_dsa_65_siggen() -> dict:
+    vectors, meta = load_ml_dsa_65_siggen_vectors()
+    results = []
+    for v in vectors:
+        with fixed_randomness(v.rnd):
+            sig = MLDSA65.sign_with_context(v.message, v.context, v.sk)
+        results.append({"tcId": v.tc_id, "deterministic": v.deterministic,
+                        "context_bytes": len(v.context), "passed": sig == v.signature})
+    return {"provenance": meta, "results": results,
+            "deterministic_passed": sum(r["passed"] for r in results if r["deterministic"]),
+            "hedged_passed": sum(r["passed"] for r in results if not r["deterministic"]),
+            "passed": sum(r["passed"] for r in results), "total": len(results)}
+
+
 def run_all() -> dict:
     keygen = run_ml_kem_768_keygen()
     encap_decap = run_ml_kem_768_encap_decap()
     sigver = run_ml_dsa_65_sigver()
+    dsa_keygen = run_ml_dsa_65_keygen()
+    siggen = run_ml_dsa_65_siggen()
 
     total_passed = (
         keygen["passed"]
         + encap_decap["encapsulation"]["passed"] + encap_decap["decapsulation"]["passed"]
-        + sigver["passed"]
+        + sigver["passed"] + dsa_keygen["passed"] + siggen["passed"]
     )
     total = (
         keygen["total"]
         + encap_decap["encapsulation"]["total"] + encap_decap["decapsulation"]["total"]
-        + sigver["total"]
+        + sigver["total"] + dsa_keygen["total"] + siggen["total"]
     )
 
     return {
         "ml_kem_768_keygen": keygen,
         "ml_kem_768_encap_decap": encap_decap,
         "ml_dsa_65_sigver": sigver,
+        "ml_dsa_65_keygen": dsa_keygen,
+        "ml_dsa_65_siggen": siggen,
         "not_achievable": {
             "ml_kem_768_key_checks": "liboqs exposes no isolated key-validation entrypoint -- see module docstring",
-            "ml_dsa_65_keygen": "liboqs exports no OQS_SIG_ml_dsa_65_keypair_derand -- see module docstring",
-            "ml_dsa_65_siggen": "OQS_SIG_ml_dsa_65_sign is randomized/hedged with no derandomized variant -- see module docstring",
+            "ml_dsa_65_internal_interface": "liboqs implements only the external/pure ML-DSA interface -- see module docstring",
         },
         "summary": {
             "total_checks": total,
@@ -261,6 +291,15 @@ def main():
     n_empty_ctx = sum(1 for r in sv["results"] if r["context_bytes"] == 0)
     print(f"  ({n_empty_ctx}/{sv['total']} vectors use an empty context string; "
           f"the other {sv['total'] - n_empty_ctx} required verify_with_context())")
+
+    dk = results["ml_dsa_65_keygen"]
+    print(f"\nML-DSA-65 keyGen (seed via OQS_randombytes, FIPS 204 Algorithm 1)")
+    print(f"  {dk['passed']}/{dk['total']} byte-exact (pk and sk)")
+
+    sg = results["ml_dsa_65_siggen"]
+    print(f"\nML-DSA-65 sigGen (external/pure, rnd via OQS_randombytes, FIPS 204 Algorithm 2)")
+    print(f"  {sg['deterministic_passed']} deterministic + {sg['hedged_passed']} hedged = "
+          f"{sg['passed']}/{sg['total']} byte-exact")
 
     print("\nNot achievable through liboqs's public API (documented, not silently skipped)")
     print("-" * 78)

@@ -61,7 +61,8 @@ DEFAULT_PROMPT = (
 )
 
 CONFIG_TO_CRYPTO_NAME = {"classical": "classical", "classical-ecdhe": "classical_ecdhe",
-                         "hybrid": "hybrid", "hybrid-kex": "hybrid_kex", "full-pqc": "full_pqc"}
+                         "hybrid": "hybrid", "hybrid-kex": "hybrid_kex", "full-pqc": "full_pqc",
+                         "hybrid-kex-pq": "hybrid_kex_pq"}
 ATTACKABLE_STRATEGIES = ["per_chunk", "hash_chain"]  # buffer_and_sign has no intermediate chunks
 
 
@@ -125,6 +126,61 @@ def _mutate(chunks: list[dict], final: dict | None, attack: str, foreign: list[d
     return mutated, final
 
 
+def replay_through_client(cap: dict, mutated: list[dict], final: dict | None, strategy: str,
+                          checkpoint_interval: int | None = None, enforce_schedule: bool = True,
+                          details: bool = False):
+    """Feeds a (possibly mutated) captured stream through the client's
+    incremental verification, exactly as api/secure_streaming_client.py does.
+    Returns the position in `mutated` where the client first rejects,
+    len(mutated) if only the terminal record (or its absence) reveals the
+    attack, or None if the stream is accepted as fully verified.
+
+    With `details=True`, returns (position, covered): `covered` is how many
+    chunks a verified signature had covered before the rejection, so
+    position - covered chunks were displayed unverified at that moment.
+
+    `enforce_schedule=False` is the v2 client, which did not check that the
+    checkpoints it requested actually arrived."""
+    hid, key, pk, cc = cap["handshake_id"], cap["session_key"], cap["sig_public_key"], cap["client_crypto"]
+
+    def done(pos, covered):
+        return (pos, covered) if details else pos
+
+    if strategy == "per_chunk":
+        expected_index = 0
+        for pos, data in enumerate(mutated):
+            chunk = {"index": data["index"], "nonce": _b64d(data["nonce"]),
+                     "ciphertext": _b64d(data["ciphertext"]), "signature": _b64d(data["signature"])}
+            r = verify_per_chunk(chunk, expected_index, key, pk, cc, hid)
+            expected_index += 1
+            if not r["in_order"] or not r["signature_valid"] or not bool(r["aead_ok"]):
+                return done(pos, pos)
+        ok = final is not None and verify_per_chunk_final(
+            {"n_chunks": final["n_chunks"], "signature": _b64d(final["signature"])},
+            expected_index, pk, cc, hid)["stream_fully_verified"]
+        return done(None if ok else len(mutated), len(mutated))
+
+    if strategy == "hash_chain":
+        chain_state = HashChainClientState(hid, checkpoint_interval=checkpoint_interval if enforce_schedule else None)
+        covered = 0
+        for pos, data in enumerate(mutated):
+            chunk = {"index": data["index"], "nonce": _b64d(data["nonce"]),
+                     "ciphertext": _b64d(data["ciphertext"]), "chain_hash": _b64d(data["chain_hash"]),
+                     "signature": _b64d(data["signature"]) if data.get("signature") else None}
+            r = verify_hash_chain_chunk(chunk, chain_state, key, pk, cc)
+            if (not bool(r["aead_ok"]) or r["checkpoint_missing"]
+                    or (r["checkpoint"] and not r["checkpoint_valid"])):
+                return done(pos, covered)
+            if r["checkpoint"]:
+                covered = pos + 1
+        ok = final is not None and verify_hash_chain_final(
+            {"final_chain_hash": _b64d(final["final_chain_hash"]), "n_chunks": final["n_chunks"],
+             "signature": _b64d(final["signature"])}, chain_state, pk, cc)["stream_fully_verified"]
+        return done(None if ok else len(mutated), len(mutated) if ok else covered)
+
+    raise ValueError(f"no intermediate chunks to replay for strategy {strategy!r}")
+
+
 async def run_trial(
     client: httpx.AsyncClient,
     base_url: str,
@@ -169,38 +225,7 @@ async def run_trial(
             return result
 
         mutated, final = _mutate(cap["chunks"], cap["final"], attack, foreign_chunks)
-        hid, key, pk, cc = cap["handshake_id"], cap["session_key"], cap["sig_public_key"], cap["client_crypto"]
-        detected_at = None  # position in `mutated` where first flagged; len(mutated) = at the end
-
-        if strategy == "per_chunk":
-            expected_index = 0
-            for pos, data in enumerate(mutated):
-                chunk = {"index": data["index"], "nonce": _b64d(data["nonce"]),
-                         "ciphertext": _b64d(data["ciphertext"]), "signature": _b64d(data["signature"])}
-                r = verify_per_chunk(chunk, expected_index, key, pk, cc, hid)
-                expected_index += 1
-                if detected_at is None and (not r["in_order"] or not r["signature_valid"] or not bool(r["aead_ok"])):
-                    detected_at = pos
-            if detected_at is None:
-                ok = final is not None and verify_per_chunk_final(
-                    {"n_chunks": final["n_chunks"], "signature": _b64d(final["signature"])},
-                    expected_index, pk, cc, hid)["stream_fully_verified"]
-                detected_at = None if ok else len(mutated)
-
-        elif strategy == "hash_chain":
-            chain_state = HashChainClientState(hid)
-            for pos, data in enumerate(mutated):
-                chunk = {"index": data["index"], "nonce": _b64d(data["nonce"]),
-                         "ciphertext": _b64d(data["ciphertext"]), "chain_hash": _b64d(data["chain_hash"]),
-                         "signature": _b64d(data["signature"]) if data.get("signature") else None}
-                r = verify_hash_chain_chunk(chunk, chain_state, key, pk, cc)
-                if detected_at is None and (not bool(r["aead_ok"]) or (r["checkpoint"] and not r["checkpoint_valid"])):
-                    detected_at = pos
-            if detected_at is None:
-                ok = final is not None and verify_hash_chain_final(
-                    {"final_chain_hash": _b64d(final["final_chain_hash"]), "n_chunks": final["n_chunks"],
-                     "signature": _b64d(final["signature"])}, chain_state, pk, cc)["stream_fully_verified"]
-                detected_at = None if ok else len(mutated)
+        detected_at = replay_through_client(cap, mutated, final, strategy, checkpoint_interval)
 
         result["detected"] = detected_at is not None
         result["detected_mid_stream"] = detected_at is not None and detected_at < len(mutated)

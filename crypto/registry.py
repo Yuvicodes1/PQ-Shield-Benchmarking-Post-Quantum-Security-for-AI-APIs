@@ -12,6 +12,7 @@ from .classical_ecdhe import ClassicalECDHEClientCrypto, ClassicalECDHEServerCry
 from .full_pqc import FullPQCClientCrypto, FullPQCServerCrypto
 from .hybrid import HybridClientCrypto, HybridServerCrypto
 from .hybrid_kex import HybridKEXClientCrypto, HybridKEXServerCrypto
+from .hybrid_kex_pq import HybridKEXPQClientCrypto, HybridKEXPQServerCrypto
 
 CONFIGS = {
     "classical": (ClassicalServerCrypto, ClassicalClientCrypto),
@@ -19,6 +20,7 @@ CONFIGS = {
     "hybrid": (HybridServerCrypto, HybridClientCrypto),
     "hybrid_kex": (HybridKEXServerCrypto, HybridKEXClientCrypto),
     "full_pqc": (FullPQCServerCrypto, FullPQCClientCrypto),
+    "hybrid_kex_pq": (HybridKEXPQServerCrypto, HybridKEXPQClientCrypto),
 }
 
 CONFIG_NAMES = list(CONFIGS.keys())

@@ -38,6 +38,7 @@ SERVER_MODULES = {
     "classical-ecdhe": "api.server_config_ecdhe:app",
     "hybrid": "api.server_config_b:app",
     "hybrid-kex": "api.server_config_hybridkex:app",
+    "hybrid-kex-pq": "api.server_config_hybridkexpq:app",
     "full-pqc": "api.server_config_c:app",
 }
 
@@ -116,6 +117,7 @@ def run_full_sweep(
     payload_profile: str = "tabular_small",
     network_profile: str = "localhost",
     requests_per_handshake: int = 1,
+    auth_handshake: bool = False,
 ) -> list[dict]:
     os.makedirs(raw_dir, exist_ok=True)
     os.makedirs(log_dir, exist_ok=True)
@@ -132,6 +134,8 @@ def run_full_sweep(
     print(f"run_id={run_id} network_profile={network_profile}", flush=True)
 
     extra_env = {"PQ_SHIELD_PAYLOAD_PROFILE": payload_profile}
+    if auth_handshake:
+        extra_env["PQ_SHIELD_AUTH_HANDSHAKE"] = "1"
     # Also set it in *this* process's environment: run_sweep_cell's client-side
     # request generation (model.profiles.registry.get_profile()) runs in-process
     # here, not in the server subprocess, so both must agree on the profile.
@@ -166,6 +170,7 @@ def run_full_sweep(
                     # mix of unrelated runs that analysis.aggregate then pooled.
                     net_tag = "" if network_profile == "localhost" else f"-net_{network_profile}"
                     rph_tag = "" if requests_per_handshake == 1 else f"-rph{requests_per_handshake}"
+                    rph_tag += "-auth" if auth_handshake else ""
                     fname = (f"{config_key}-{payload_profile}{net_tag}{rph_tag}"
                              f"-c{concurrency}-r{repetition}-{run_id}.csv")
                     out_path = os.path.join(raw_dir, fname)
@@ -181,6 +186,7 @@ def run_full_sweep(
                         run_sweep_cell(
                             base_url, _crypto_name(config_key), concurrency, n_requests, repetition,
                             run_id=run_id, requests_per_handshake=requests_per_handshake,
+                            auth_handshake=auth_handshake,
                         )
                     )
                     wall_s = time.perf_counter() - t0
@@ -197,6 +203,7 @@ def run_full_sweep(
                         "payload_profile": payload_profile,
                         "network_profile": network_profile,
                         "requests_per_handshake": requests_per_handshake,
+                        "auth_handshake": auth_handshake,
                         **({f"net_{k}": v for k, v in netem.items()} if netem else {}),
                         "concurrency": concurrency,
                         "repetition": repetition,
@@ -235,7 +242,8 @@ def run_full_sweep(
 def _crypto_name(config_key: str) -> str:
     return {"control": "control", "control-2rt": "control_2rt", "classical": "classical",
             "classical-ecdhe": "classical_ecdhe",
-            "hybrid": "hybrid", "hybrid-kex": "hybrid_kex", "full-pqc": "full_pqc"}[
+            "hybrid": "hybrid", "hybrid-kex": "hybrid_kex", "full-pqc": "full_pqc",
+            "hybrid-kex-pq": "hybrid_kex_pq"}[
         config_key
     ]
 

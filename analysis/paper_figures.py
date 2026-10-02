@@ -47,10 +47,10 @@ from webapp.colors import CONFIG_COLORS, STRATEGY_COLORS
 
 COL_W, DBL_W = 3.5, 7.16  # IEEE column widths (inches)
 
-CONFIGS = ["control", "control_2rt", "classical", "classical_ecdhe", "hybrid", "hybrid_kex", "full_pqc"]
-PROTECTED = ["classical", "classical_ecdhe", "hybrid", "hybrid_kex", "full_pqc"]
+CONFIGS = ["control", "control_2rt", "classical", "classical_ecdhe", "hybrid", "hybrid_kex", "full_pqc", "hybrid_kex_pq"]
+PROTECTED = ["classical", "classical_ecdhe", "hybrid", "hybrid_kex", "full_pqc", "hybrid_kex_pq"]
 LABEL = {"control": "Control", "control_2rt": "Control-2RT", "classical": "Classical-RSA", "classical_ecdhe": "Classical-ECDHE",
-         "hybrid": "Hybrid", "hybrid_kex": "Hybrid-KEX", "full_pqc": "Full PQC"}
+         "hybrid": "Hybrid", "hybrid_kex": "Hybrid-KEX", "full_pqc": "Full PQC", "hybrid_kex_pq": "Hybrid-KEX-PQ"}
 LABEL_LONG = {
     "control": "Control (no crypto)",
     "control_2rt": "Control-2RT (no crypto, two requests)",
@@ -59,13 +59,14 @@ LABEL_LONG = {
     "hybrid_kex": "Hybrid-KEX (X25519MLKEM768 + ECDSA P-256)",
     "hybrid": "Hybrid (ML-KEM-768 + ECDSA P-256)",
     "full_pqc": "Full PQC (ML-KEM-768 + ML-DSA-65)",
+    "hybrid_kex_pq": "Hybrid-KEX-PQ (X25519MLKEM768 + ML-DSA-65)",
 }
 HATCH = {"control": "", "control_2rt": "", "classical": "", "classical_ecdhe": "....", "hybrid": "////", "hybrid_kex": "\\\\\\\\",
-         "full_pqc": "xxxx"}
+         "full_pqc": "xxxx", "hybrid_kex_pq": "++++"}
 MARKER = {"control": "o", "control_2rt": "h", "classical": "s", "classical_ecdhe": "v", "hybrid": "^", "hybrid_kex": "P",
-          "full_pqc": "D"}
+          "full_pqc": "D", "hybrid_kex_pq": "X"}
 LINESTYLE = {"control": ":", "control_2rt": (0, (1, 2)), "classical": "-", "classical_ecdhe": (0, (5, 1.5, 1, 1.5, 1, 1.5)),
-             "hybrid": "--", "hybrid_kex": (0, (1, 1)), "full_pqc": "-."}
+             "hybrid": "--", "hybrid_kex": (0, (1, 1)), "full_pqc": "-.", "hybrid_kex_pq": (0, (3, 1, 1, 1, 1, 1))}
 STRATS = ["buffer_and_sign", "per_chunk", "hash_chain"]
 STRAT_LABEL = {"buffer_and_sign": "Buffer-and-sign", "per_chunk": "Per-chunk", "hash_chain": "Hash-chain"}
 
@@ -306,7 +307,9 @@ def fig_concurrency(out: Out, st: pd.DataFrame, provisional: bool, res: pd.DataF
             for rect, v in zip(rects, vals):
                 if not np.isnan(v) and v >= 1.5:
                     _bar_label(axe, rect, f"{v:.1f}", fontsize=5.5)
-        axe.set_ylim(0, np.nanmax(cpu.values) * 1.6)  # headroom so the legend clears the bars
+        top = np.nanmax(cpu.values)
+        axe.set_ylim(0, top * 1.75)  # headroom so the legend clears the bars
+        axe.set_yticks(np.arange(0, top + 0.5, 1))  # no ticks under the legend
         axe.set_ylabel("Mean server CPU (cores)")
         axe.set_title("(b) Server CPU use", loc="left")
     else:
@@ -320,7 +323,8 @@ def fig_concurrency(out: Out, st: pd.DataFrame, provisional: bool, res: pd.DataF
     axe.set_xticklabels([f"{c:,}" for c in levels])
     axe.set_xlabel("Concurrent connections")
     axe.grid(axis="x", visible=False)
-    axe.legend(loc="upper center", ncol=3, fontsize=6)
+    axe.legend(loc="upper center", bbox_to_anchor=(0.53, 1.0), ncol=4, fontsize=5.5, handlelength=1.2,
+               columnspacing=0.6)
     fig.tight_layout(w_pad=1.5)
     out.fig(fig, "fig_concurrency_latency", provisional)
 
@@ -515,7 +519,8 @@ def table_equivalence(out: Out, cmp: pd.DataFrame) -> None:
              fr"\caption{{Equivalence of ML-KEM-based key establishment to the X25519 baseline (Classical-ECDHE): "
              fr"median end-to-end difference with its 90\% two-stage bootstrap CI, as a percentage of the "
              fr"Classical-ECDHE median. ``Equiv.'': the CI lies within $\pm${EQUIV_MARGIN_PCT:.0f}\% "
-             fr"(two one-sided tests at $\alpha=0.05$).}}",
+             fr"(two one-sided tests at $\alpha=0.05$); ``faster''/``slower'': not equivalent, and the CI excludes "
+             fr"zero. Rows at 100 connections are shown for completeness only (bimodal; not interpreted).}}",
              r"\label{tab:equivalence}", r"\setlength{\tabcolsep}{3pt}", r"\footnotesize",
              r"\begin{tabular}{@{}rlrl@{}}", r"\toprule",
              r"Conc. & Configuration & $\Delta$ (\%) [90\% CI] & Equiv. \\", r"\midrule"]
@@ -524,8 +529,9 @@ def table_equivalence(out: Out, cmp: pd.DataFrame) -> None:
         for _, r in eq[eq["concurrency"] == conc].iterrows():
             lo, hi = 100 * r["ci90_lo"] / r["ref_median"], 100 * r["ci90_hi"] / r["ref_median"]
             ok_ = -EQUIV_MARGIN_PCT < lo and hi < EQUIV_MARGIN_PCT
+            verdict = "yes" if ok_ else ("no (faster)" if hi < 0 else "no (slower)" if lo > 0 else "no")
             lines.append(f"{f'{conc:,}' if first else ''} & {LABEL[r['config']]} & "
-                         f"{r['diff_pct']:+.1f} [{lo:+.1f}, {hi:+.1f}] & {'yes' if ok_ else 'no'} \\\\")
+                         f"{r['diff_pct']:+.1f} [{lo:+.1f}, {hi:+.1f}] & {verdict} \\\\")
             out.num("Equivalence vs Classical-ECDHE (90% CI, +/-5% margin)",
                     f"{LABEL[r['config']]} @ {conc:,}",
                     f"{r['diff_pct']:+.1f}% [{lo:+.1f}, {hi:+.1f}] -> {'equivalent' if ok_ else 'not shown equivalent'}")
@@ -730,7 +736,7 @@ def fig_streaming_hndl(out: Out, results_dir: str) -> None:
                 label="Full PQC: bytes harvested")
     ax.set_xlabel("Tokens generated in the stream")
     ax.set_ylabel("Bytes a future CRQC could decrypt")
-    ax.text(0.97, 0.11, "Hybrid, Hybrid-KEX, Full PQC: 0 B", transform=ax.transAxes, ha="right",
+    ax.text(0.97, 0.11, "All ML-KEM configurations: 0 B", transform=ax.transAxes, ha="right",
             va="bottom", fontsize=6, color=INK_2)
     ax.legend(loc="upper left", fontsize=6)
     if (df["n_chunks"] * df["chunk_size_tokens"] < df["max_tokens"]).any():
@@ -740,42 +746,22 @@ def fig_streaming_hndl(out: Out, results_dir: str) -> None:
 
 
 def table_threats(out: Out, results_dir: str) -> None:
+    """Single-response tampering. Streaming sequence attacks are in the
+    campaign table (table_attack_campaign), which supersedes the earlier
+    10-trial streaming summaries."""
     mitm = _read_json_glob(os.path.join(results_dir, "mitm", "*-mitm-*-summary.json"))
-    seq = _read_json_glob(os.path.join(results_dir, "streaming", "mitm", "*-summary.json"))
-    lines = [r"\begin{table*}[t]", r"\centering",
-             r"\caption{Active tampering. (a) One flipped bit per response; detection time is the rejecting "
-             r"check alone. (b) Mid-stream sequence attacks on 60-token streams: share of trials detected at "
-             r"all, and before the stream completed (buffer-and-sign has no intermediate chunks to attack).}",
+    lines = [r"\begin{table}[t]", r"\centering",
+             r"\caption{Tampering with single responses: one flipped bit per response, in the AEAD ciphertext or in "
+             r"the signature. Detection time is the rejecting check alone (median).}",
              r"\label{tab:threats}", r"\setlength{\tabcolsep}{4pt}", r"\footnotesize",
-             r"\begin{tabular}[t]{@{}llrrl@{}}", r"\toprule",
-             r"\multicolumn{5}{@{}l}{\textit{(a) Single-response tampering}} \\",
-             r"Config. & Target & $n$ & Detected & Median detection (ms) \\", r"\midrule"]
+             r"\begin{tabular}{@{}llrrr@{}}", r"\toprule",
+             r"Config. & Target & $n$ & Detected & Detection (ms) \\", r"\midrule"]
     for d in sorted(mitm, key=lambda d: (CONFIGS.index(d["config"]), d["tamper_target"])):
         t = d.get("detection_ms_median", d.get("detection_ms_mean"))
-        tag = "" if "detection_ms_median" in d else "$^\\dagger$"
         lines.append(f"{LABEL[d['config']]} & {d['tamper_target']} & {d['n_requests']} & "
-                     f"{d['detection_rate'] * 100:.0f}\\% & {t:.3f}{tag} \\\\")
-    lines += [r"\bottomrule", r"\end{tabular}\hfill", r"\begin{tabular}[t]{@{}llrrr@{}}", r"\toprule",
-              r"\multicolumn{5}{@{}l}{\textit{(b) Streaming sequence attacks}} \\",
-              r"Config. & Strategy / attack & $n$ & Detected & Mid-stream \\", r"\midrule"]
-    for d in sorted(seq, key=lambda d: (CONFIGS.index(d["config"]), STRATS.index(d["strategy"]), d["attack"])):
-        if d["detection_rate"] is None:
-            continue  # buffer-and-sign: no intermediate chunks to drop or reorder (stated in the caption)
-        lines.append(f"{LABEL[d['config']]} & {STRAT_LABEL[d['strategy']]} / {d['attack']} & {d['n_valid_trials']} & "
-                     f"{_pct(d['detection_rate'])} & {_pct(d['mid_stream_detection_rate'])} \\\\")
-    lines += [r"\bottomrule", r"\end{tabular}"]
-    if any("detection_ms_median" not in d for d in mitm):
-        lines.append(r"\\[2pt]{\footnotesize $^\dagger$Pre-fix data: AEAD-layer time includes the HTTP round trip; "
-                     r"re-run \texttt{threats/mitm\_experiment.py}.}")
-        out.notes.append("MITM summaries on disk predate the timing fix (ciphertext 'detection time' = full HTTP "
-                         "round trip, signature = verify call only). Re-run the MITM experiments before citing times. "
-                         "Classical signature-tamper summary is also missing.")
-    lines += [r"\end{table*}", ""]
+                     f"{d['detection_rate'] * 100:.0f}\\% & {t:.3f} \\\\")
+    lines += [r"\bottomrule", r"\end{tabular}", r"\end{table}", ""]
     out.table("tab_threats", "\n".join(lines))
-    for d in seq:
-        if d["strategy"] == "hash_chain" and d["detection_rate"] is not None:
-            out.num("Streaming sequence attacks", f"{LABEL[d['config']]} hash-chain {d['attack']}",
-                    f"detected {d['detection_rate']:.0%}, mid-stream {d['mid_stream_detection_rate']:.0%}")
 
 
 # --------------------------------------------------------------------------- streaming
@@ -866,10 +852,14 @@ def table_streaming(out: Out, df: pd.DataFrame, run_id: str) -> None:
     lines = [r"\begin{table*}[t]", r"\centering",
              r"\caption{Streaming signature strategies on a real Llama-3.2-3B-Instruct backend "
              fr"({reps} repetitions per cell; median, with interquartile range for TTFT). "
-             r"Signing and verification times are summed over the whole stream.}",
-             r"\label{tab:streaming}", r"\setlength{\tabcolsep}{4pt}",
+             r"Signing and verification times are summed over the whole stream and given as wall-clock / "
+             r"thread-CPU time; Section~\ref{sec:timing} explains why per-signature cost in a stream exceeds "
+             r"the back-to-back microbenchmark. Generation slowed over the sweep (thermal), so compare "
+             r"times within a configuration, not across.}",
+             r"\label{tab:streaming}", r"\setlength{\tabcolsep}{2.4pt}", r"\footnotesize",
              r"\begin{tabular}{@{}rllrrrrrr@{}}", r"\toprule",
-             r"Tokens & Config. & Strategy & TTFT (ms) & Total (ms) & Sigs & Sig. bytes & Sign (ms) & Verify (ms) \\",
+             r"Tokens & Config. & Strategy & TTFT (ms) & Total (ms) & Sigs & Sig. bytes & Sign wall/CPU (ms) "
+             r"& Verify wall/CPU (ms) \\",
              r"\midrule"]
     for n_tok in lengths:
         first_len = True
@@ -879,12 +869,16 @@ def table_streaming(out: Out, df: pd.DataFrame, run_id: str) -> None:
                 v = df[(df["max_tokens"] == n_tok) & (df["config"] == cfg) & (df["strategy"] == s)]
                 if v.empty:
                     continue
-                n_sigs = {"buffer_and_sign": 1, "hash_chain": 1}.get(s, int(v["n_chunks"].median()))
+                n_sigs = int(v["n_signatures"].median()) if "n_signatures" in v else \
+                    {"buffer_and_sign": 1, "hash_chain": 1}.get(s, int(v["n_chunks"].median()))
+                cpu = "total_signing_cpu_ms" in v and v["total_signing_cpu_ms"].notna().any()
+                sign = f"{v['total_signing_ms'].median():.2f}" + (f" / {v['total_signing_cpu_ms'].median():.2f}" if cpu else "")
+                ver = f"{v['total_verify_ms'].median():.2f}" + (f" / {v['total_verify_cpu_ms'].median():.2f}" if cpu else "")
                 lines.append(
                     f"{n_tok if first_len else ''} & {LABEL[cfg] if first_cfg else ''} & {STRAT_LABEL[s]} & "
                     f"{v['ttft_ms'].median():,.1f} [{v['ttft_ms'].quantile(.25):,.0f}--{v['ttft_ms'].quantile(.75):,.0f}] & "
                     f"{v['total_ms'].median():,.0f} & {n_sigs} & {v['total_signature_bytes'].median():,.0f} & "
-                    f"{v['total_signing_ms'].median():.2f} & {v['total_verify_ms'].median():.2f} \\\\")
+                    f"{sign} & {ver} \\\\")
                 first_len = first_cfg = False
             lines.append(r"\addlinespace[1pt]")
         lines.append(r"\midrule")
@@ -1205,38 +1199,40 @@ def fig_checkpoint_frontier(out: Out, df: pd.DataFrame, run_id: str, attacks: li
     ax.set_ylabel("Signature bytes per response")
     ax.plot([], [], color=INK_2, lw=0.8, ls=":", label="Analytic model")
     ax.set_title("(a) Signature bytes vs. exposure", loc="left")
-    ax.legend(fontsize=6, loc="upper right")
+    ax.legend(fontsize=6, loc="lower left")
 
-    rows = [a for a in attacks if a.get("checkpoint_interval") and a.get("fraction_delivered_before_detection_mean") is not None]
-    if rows:
-        at = pd.DataFrame(rows)
-        # Detection depends only on where the checkpoints fall, not on the
-        # signature scheme -- Hybrid and Full PQC give identical curves -- so
-        # plot one line per attack (mean over configurations).
-        styles = {"drop": ("-", "o", INK), "reorder": ("--", "s", "white"), "replay": (":", "^", INK_2),
-                  "duplicate": ("-.", "D", "white")}
-        names = {"drop": "Drop one chunk", "reorder": "Reorder two chunks", "replay": "Cross-session replay",
-                 "duplicate": "Duplicate one chunk"}
-        for attack in [a for a in styles if a in set(at["attack"])]:
-            ls, mk, mfc = styles[attack]
-            g = at[at["attack"] == attack].groupby("checkpoint_interval")["fraction_delivered_before_detection_mean"].mean()
-            axd.plot(g.index, g.values * 100, color=INK, marker=mk, ls=ls, mfc=mfc, label=names[attack])
-        axd.axhline(50, color=INK_2, lw=0.6, ls=":")
-        axd.text(1, 47, "attack position (mid-stream)", fontsize=5.5, color=INK_2, va="top")
-        for cfg in [c for c in PROTECTED if c in set(at["config"])]:
-            for attack in sorted(set(at["attack"])):
-                g = at[(at["config"] == cfg) & (at["attack"] == attack)].sort_values("checkpoint_interval")
-                for _, r in g.iterrows():
-                    out.num("Checkpoint sequence attacks", f"{LABEL[cfg]} {attack} k={int(r['checkpoint_interval'])}",
-                            f"detected mid-stream {r['mid_stream_detection_rate']:.0%}, "
-                            f"{r['fraction_delivered_before_detection_mean']:.0%} of stream delivered first")
+    camp = pd.DataFrame(attacks)
+    if not camp.empty and "unverified_at_detection_mean" in camp:
+        # Detection depends on where checkpoints fall, not on the signature
+        # scheme, so pool configurations: one line per attack.
+        camp = camp[camp["strategy"] == "hash_chain"].copy()
+        camp["k"] = camp["checkpoint_interval"].fillna(0).astype(int)
+        n_chunks = camp["n_chunks_mean"].median()
+        inf_x = 2 * camp.loc[camp["k"] > 0, "k"].max()  # where k = infinity is drawn
+        camp["x"] = np.where(camp["k"] == 0, inf_x, camp["k"])
+        styles = {"drop": ("-", "o", INK, "Drop one chunk"), "reorder": ("--", "s", "white", "Reorder two chunks"),
+                  "duplicate": ("-.", "D", "white", "Duplicate a chunk"),
+                  "drop_after_ckpt": ((0, (1, 1)), "v", INK, "Drop just after a checkpoint"),
+                  "truncate": (":", "^", INK_2, "Truncate (terminal record lost)")}
+        for attack, (ls, mk, mfc, name) in styles.items():
+            g = camp[camp["attack"] == attack]
+            if g.empty:
+                continue
+            g = g.assign(w=g["unverified_at_detection_mean"] * g["n"]).groupby("x")[["w", "n"]].sum()
+            axd.plot(g.index, g["w"] / g["n"] * chunk, color=INK, marker=mk, ls=ls, mfc=mfc, label=name)
+        axd.axhline(n_chunks * chunk, color=INK_2, lw=0.6, ls=":")
+        axd.text(ticks_min := camp.loc[camp["k"] > 0, "k"].min(), n_chunks * chunk * 1.015,
+                 f"whole {n_chunks * chunk:.0f}-token stream", fontsize=5.5, color=INK_2, va="bottom")
         axd.set_xscale("log")
-        axd.xaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g}"))
+        ticks = sorted(camp["x"].unique())
+        axd.set_xticks(ticks)
+        axd.set_xticklabels(["∞" if t == inf_x else f"{t:g}" for t in ticks])
+        axd.xaxis.set_minor_formatter(NullFormatter())
         axd.set_xlabel("Checkpoint interval k (chunks)")
-        axd.set_ylabel("Stream delivered before detection (%)")
-        axd.set_ylim(0, 105)
-        axd.set_title("(b) When an attack is caught (Hybrid = Full PQC)", loc="left")
-        axd.legend(fontsize=6, loc="upper left")
+        axd.set_ylabel("Unverified tokens shown at rejection")
+        axd.set_ylim(0, n_chunks * chunk * 1.15)
+        axd.set_title("(b) Exposure when an attack is caught", loc="left")
+        axd.legend(fontsize=5.5, loc="center left", bbox_to_anchor=(0.0, 0.55))
     else:
         axd.axis("off")
     fig.tight_layout(w_pad=2)
@@ -1252,10 +1248,11 @@ def table_checkpoint(out: Out, df: pd.DataFrame) -> None:
     lines = [r"\begin{table}[t]", r"\centering",
              r"\caption{Checkpointed hash-chain signing on Llama-3.2-3B (200-token responses, "
              fr"{chunk}-token chunks): a signature every $k$ chunks plus the terminal one. Exposure = most "
-             r"tokens a client displays before a signature covers them (median over repetitions).}",
-             r"\label{tab:checkpoint}", r"\setlength{\tabcolsep}{2.5pt}", r"\footnotesize",
+             r"tokens a client displays before a signature covers them; lag = longest wait for that coverage. "
+             r"Signing time summed over the stream, wall-clock / thread-CPU (median over repetitions).}",
+             r"\label{tab:checkpoint}", r"\setlength{\tabcolsep}{1.8pt}", r"\footnotesize",
              r"\begin{tabular}{@{}llrrrrr@{}}", r"\toprule",
-             r"Config. & $k$ & Sigs & Bytes & Exp.\ (tok) & Lag (ms) & Sign+ver.\ (ms) \\", r"\midrule"]
+             r"Config. & $k$ & Sigs & Bytes & Exp.\ (tok) & Lag (ms) & Sign (ms) \\", r"\midrule"]
     for cfg in [c for c in PROTECTED if c in set(hc["config"])]:
         g = hc[hc["config"] == cfg]
         first = True
@@ -1265,7 +1262,9 @@ def table_checkpoint(out: Out, df: pd.DataFrame) -> None:
                          f"{v['n_signatures'].median():.0f} & {v['total_signature_bytes'].median():,.0f} & "
                          f"{v['max_unverified_chunks'].median() * chunk:.0f} & "
                          f"{v['max_verification_lag_ms'].median():,.0f} & "
-                         f"{(v['total_signing_ms'] + v['total_verify_ms']).median():.2f} \\\\")
+                         f"{v['total_signing_ms'].median():.1f}"
+                         + (f"/{v['total_signing_cpu_ms'].median():.1f}" if "total_signing_cpu_ms" in v
+                            and v["total_signing_cpu_ms"].notna().any() else "") + r" \\")
             first = False
         lines.append(r"\addlinespace")
     lines[-1] = r"\bottomrule"
@@ -1349,6 +1348,409 @@ def table_environment(out: Out, env_path: str) -> None:
 
 # --------------------------------------------------------------------------- main
 
+# --------------------------------------------------------------------------- second review round
+
+CLIENT_TIMEOUT_MS = 30_000  # bench.runner's httpx timeout; no failed request can have been faster to fail than this
+
+
+def _err_kind(e) -> str:
+    e = str(e)
+    for key, kind in (("Timeout", "timeout"), ("ReadError", "reset"), ("RemoteProtocolError", "reset"),
+                      ("ConnectError", "refused"), ("HTTP 5", "HTTP 5xx"), ("HTTP 4", "HTTP 4xx")):
+        if key in e:
+            return kind
+    return "other"
+
+
+def _equiv(r, margin: float = EQUIV_MARGIN_PCT) -> bool:
+    lo, hi = 100 * r["ci90_lo"] / r["ref_median"], 100 * r["ci90_hi"] / r["ref_median"]
+    return -margin < lo and hi < margin
+
+
+def table_failures(out: Out, df: pd.DataFrame, cmp: pd.DataFrame) -> None:
+    """Where requests failed: by stage and cause, and whether excluding them
+    changes any conclusion. The sensitivity re-analysis counts every failed
+    request at the client timeout (30 s) -- slower than any successful
+    request -- and recomputes the crypto overhead (vs Control-2RT) and the
+    equivalence verdicts (vs Classical-ECDHE)."""
+    is_err = df["error"].notna() & (df["error"] != "")
+    rate = is_err.groupby([df["config"], df["concurrency"]]).mean()
+    # only levels where some configuration lost a non-trivial share (>= 0.5%) of requests
+    levels = sorted({c for (_, c), r in rate.items() if r >= 0.005})
+    if not levels:
+        return
+    imp = df[df["concurrency"].isin(levels)].copy()
+    e = imp["error"].notna() & (imp["error"] != "")
+    imp.loc[e, "total_ms"] = CLIENT_TIMEOUT_MS
+    imp.loc[e, "error"] = np.nan
+    present = set(imp["config"])
+    pairs = [(c, "control_2rt") for c in PROTECTED if c in present] if "control_2rt" in present else []
+    pairs += [(c, "classical_ecdhe") for c in ("hybrid", "hybrid_kex", "full_pqc", "hybrid_kex_pq") if c in present]
+    cmp_imp = comparison_stats(imp, pairs, seed=11)
+
+    def get(c, cfg, ref, conc):
+        r = c[(c["config"] == cfg) & (c["reference"] == ref) & (c["concurrency"] == conc)]
+        return None if r.empty else r.iloc[0]
+
+    lines = [r"\begin{table*}[t]", r"\centering",
+             r"\caption{Failed requests and their effect on the conclusions. All failures were connection resets "
+             r"(httpx \texttt{ReadError}): no timeouts and no HTTP errors. ``At handshake'': the first request of the "
+             r"transaction failed. Sensitivity: every failed request re-counted at the 30\,s client timeout (slower than "
+             r"any successful request) and the statistics recomputed. $\Delta_{2RT}$: cryptographic overhead versus "
+             r"Control-2RT with 95\% CI. Equiv.: within $\pm5$\% of Classical-ECDHE (90\% CI).}",
+             r"\label{tab:failures}", r"\setlength{\tabcolsep}{3pt}", r"\footnotesize",
+             r"\begin{tabular}{@{}rlrrrrrll@{}}", r"\toprule",
+             r" & & & \multicolumn{2}{c}{Failed at} & \multicolumn{2}{c}{$\Delta_{2RT}$ (s)} & \multicolumn{2}{c}{Equiv.} \\",
+             r"\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}",
+             r"Conc. & Configuration & Failed & handshake & request & successful only & failures at 30\,s & succ. & 30\,s \\",
+             r"\midrule"]
+    for conc in levels:
+        first = True
+        for cfg in CONFIGS:
+            g = df[(df["config"] == cfg) & (df["concurrency"] == conc)]
+            if g.empty:
+                continue
+            ge = g[g["error"].notna() & (g["error"] != "")]
+            n_hs = int(ge["handshake_ms"].isna().sum()) if cfg != "control" else 0
+            kinds = ge["error"].map(_err_kind).value_counts().to_dict()
+            d0, d1 = get(cmp, cfg, "control_2rt", conc), get(cmp_imp, cfg, "control_2rt", conc)
+            q0, q1 = get(cmp, cfg, "classical_ecdhe", conc), get(cmp_imp, cfg, "classical_ecdhe", conc)
+            f = lambda r: "--" if r is None else _fmt_ci(r["diff_ms"], r["ci95_lo"], r["ci95_hi"]).replace(r"\,s", "")
+            eq = lambda r: "--" if r is None else ("yes" if _equiv(r) else "no")
+            lines.append(f"{f'{conc:,}' if first else ''} & {LABEL[cfg]} & {len(ge) / len(g):.1%} & "
+                         f"{n_hs if cfg != 'control' else '--'} & {len(ge) - n_hs} & {f(d0)} & {f(d1)} & "
+                         f"{eq(q0)} & {eq(q1)} \\\\".replace("%", r"\%"))
+            out.num(f"Failures at {conc:,} connections (stage, cause, sensitivity)", LABEL[cfg],
+                    f"{len(ge)}/{len(g)} failed ({len(ge) / len(g):.2%}); at handshake {n_hs}, at request "
+                    f"{len(ge) - n_hs}; causes {kinds}; "
+                    + (f"Delta_2RT {d0['diff_ms']:+.0f} ms -> {d1['diff_ms']:+.0f} ms with failures at 30 s; "
+                       if d0 is not None and d1 is not None else "")
+                    + (f"equiv. vs ECDHE {_equiv(q0)} -> {_equiv(q1)}" if q0 is not None and q1 is not None else ""))
+            first = False
+        lines.append(r"\addlinespace")
+    lines[-1] = r"\bottomrule"
+    lines += [r"\end{tabular}", r"\end{table*}", ""]
+    out.table("tab_failures", "\n".join(lines))
+
+
+# Security properties, stated rather than scored. Each is a yes/no fact about
+# the construction (Section III); none is weighted against latency.
+CODE = {"classical": "A", "classical_ecdhe": "A$'$", "hybrid": "B", "hybrid_kex": "B$'$", "full_pqc": "C",
+        "hybrid_kex_pq": "C$'$"}
+SEC_AXES = [
+    ("KEX vs.\\ CRQC", {"classical": 0, "classical_ecdhe": 0, "hybrid": 1, "hybrid_kex": 1, "full_pqc": 1, "hybrid_kex_pq": 1}),
+    ("KEX if ML-KEM breaks", {"classical": 1, "classical_ecdhe": 1, "hybrid": 0, "hybrid_kex": 1, "full_pqc": 0, "hybrid_kex_pq": 1}),
+    ("Sig.\\ vs.\\ CRQC", {"classical": 0, "classical_ecdhe": 0, "hybrid": 0, "hybrid_kex": 0, "full_pqc": 1, "hybrid_kex_pq": 1}),
+]
+
+
+def table_dominance(out: Out, df: pd.DataFrame, sdf: pd.DataFrame | None, results_dir: str) -> None:
+    """Replaces the weighted composite score. A configuration is dominated if
+    another is at least as secure on every stated property and no worse on
+    every cost -- latency 'no worse' meaning the 90% CI of the difference lies
+    below +5% (the equivalence margin) -- and strictly better somewhere. The
+    non-dominated set is what any weighting of these axes could select, so no
+    weights are needed. Only the 10- and 1,000-connection levels are used: the
+    100-connection level is bimodal (Section VI-A) and is not ranked."""
+    present = [c for c in PROTECTED if c in set(df["config"])]
+    levels = [c for c in (10, 1000) if c in set(df["concurrency"])]
+    pairs = [(a, b) for i, a in enumerate(present) for b in present[i + 1:]]
+    pw = comparison_stats(df[df["concurrency"].isin(levels)], pairs, seed=13)
+    ov = comparison_stats(df[df["concurrency"].isin(levels)], [(c, "control_2rt") for c in present], seed=17) \
+        if "control_2rt" in set(df["config"]) else pd.DataFrame()
+
+    def lat_not_worse(a, b, conc):  # is a no worse than b?
+        r = pw[(pw["concurrency"] == conc) & (((pw["config"] == a) & (pw["reference"] == b)) |
+                                              ((pw["config"] == b) & (pw["reference"] == a)))]
+        if r.empty:
+            return True, False
+        r = r.iloc[0]
+        if r["config"] == a:  # diff = a - b, relative to b
+            hi, lo, ref = r["ci90_hi"], r["ci90_lo"], r["ref_median"]
+        else:  # diff = b - a; flip
+            hi, lo, ref = -r["ci90_lo"], -r["ci90_hi"], r["ref_median"] + r["diff_ms"]
+        return 100 * hi / ref < EQUIV_MARGIN_PCT, 100 * hi / ref < -EQUIV_MARGIN_PCT
+
+    hndl = {d["config"]: d for d in _read_json_glob(os.path.join(results_dir, "hndl", "*-hndl-summary.json"))}
+    hs_bytes = {c: hndl[c]["kex_bytes_per_request"] + hndl[c]["signature_bytes_per_request"] for c in present if c in hndl}
+    pc_bytes = {}
+    if sdf is not None and not sdf.empty:
+        n_max = sdf["max_tokens"].max()
+        for c in present:
+            v = sdf[(sdf["config"] == c) & (sdf["strategy"] == "per_chunk") & (sdf["max_tokens"] == n_max)]
+            if not v.empty:
+                pc_bytes[c] = v["total_signature_bytes"].median()
+
+    def dominates(a, b, byte_map):
+        sec_ge = all(ax[a] >= ax[b] for _, ax in SEC_AXES)
+        sec_gt = any(ax[a] > ax[b] for _, ax in SEC_AXES)
+        lat = [lat_not_worse(a, b, c) for c in levels]
+        lat_ok, lat_better = all(x[0] for x in lat), any(x[1] for x in lat)
+        by_ok = a not in byte_map or b not in byte_map or byte_map[a] <= byte_map[b]
+        by_better = a in byte_map and b in byte_map and byte_map[a] < byte_map[b]
+        return sec_ge and lat_ok and by_ok and (sec_gt or lat_better or by_better)
+
+    workloads = {"API / hash-chain": hs_bytes, "Per-chunk streaming": pc_bytes}
+    dominated_by = {w: {c: [o for o in present if o != c and dominates(o, c, bm)] for c in present}
+                    for w, bm in workloads.items()}
+    lines = [r"\begin{table*}[t]", r"\centering",
+             r"\caption{Decision summary without weights. Security columns are properties of the construction "
+             r"(\checkmark = holds): key establishment resists a CRQC (KEX-Q); key establishment survives a break of "
+             r"ML-KEM (KEX-H); signatures resist a CRQC (Sig-Q). $\Delta_{2RT}$: cryptographic overhead versus "
+             r"Control-2RT (median, 95\% CI). Bytes: key-establishment blob + one signature per transaction (API), "
+             r"and signatures on a 200-token per-chunk stream. A configuration is \emph{dominated} if another is at "
+             r"least as secure on every property, no worse on latency at 10 and 1,000 connections (90\% CI of the "
+             r"difference below $+5$\%), no larger in the workload's bytes, and strictly better somewhere; the last two "
+             r"columns name the dominating configurations (codes as in Table~\ref{tab:configs}), or ``--'' if none. "
+             r"The 100-connection level is not used (bimodal; Section~\ref{sec:res-concurrency}).}",
+             r"\label{tab:dominance}", r"\setlength{\tabcolsep}{3.5pt}", r"\footnotesize",
+             r"\begin{tabular}{@{}l" + "c" * len(SEC_AXES) + "r" * len(levels) + r"rrcc@{}}", r"\toprule",
+             r" & \multicolumn{3}{c}{Security} & \multicolumn{2}{c}{$\Delta_{2RT}$} & \multicolumn{2}{c}{Bytes} "
+             r"& \multicolumn{2}{c}{Dominated by} \\",
+             r"\cmidrule(lr){2-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}\cmidrule(lr){9-10}",
+             "Configuration & KEX-Q & KEX-H & Sig-Q & "
+             + " & ".join(f"@{c:,} ({'s' if c >= 1000 else 'ms'})" for c in levels)
+             + r" & API & Per-chunk & API & Per-chunk \\", r"\midrule"]
+    for c in present:
+        cells = [r"\checkmark" if ax[c] else "--" for _, ax in SEC_AXES]
+        for conc in levels:
+            r = ov[(ov["config"] == c) & (ov["concurrency"] == conc)] if not ov.empty else ov
+            if r.empty:
+                cells.append("--")
+                continue
+            r = r.iloc[0]
+            k = 1000 if conc >= 1000 else 1
+            cells.append(f"{r['diff_ms'] / k:+.{2 if k > 1 else 1}f} [{r['ci95_lo'] / k:+.{2 if k > 1 else 1}f}, "
+                         f"{r['ci95_hi'] / k:+.{2 if k > 1 else 1}f}]")
+        cells.append(f"{hs_bytes[c]:,.0f}" if c in hs_bytes else "--")
+        cells.append(f"{pc_bytes[c]:,.0f}" if c in pc_bytes else "--")
+        for w in workloads:
+            d = dominated_by[w][c]
+            cells.append(", ".join(CODE[o] for o in d) if d else "--")
+        lines.append(f"{CODE[c]}: {LABEL[c]} & " + " & ".join(cells) + r" \\")
+        for w in workloads:
+            out.num("Decision summary (non-dominated configurations)", f"{LABEL[c]} -- {w}",
+                    "Pareto-optimal" if not dominated_by[w][c] else
+                    "dominated by " + ", ".join(LABEL[o] for o in dominated_by[w][c]))
+    lines += [r"\bottomrule", r"\end{tabular}", r"\end{table*}", ""]
+    out.table("tab_dominance", "\n".join(lines))
+
+
+def table_timing(out: Out, results_dir: str, sdf: pd.DataFrame | None, cdf: pd.DataFrame | None) -> None:
+    """Reconciles per-signature cost in streams with the microbenchmark:
+    validation.contention_check measures sign/verify back-to-back and spaced
+    one chunk interval apart (idle, and while Llama generates), in wall and
+    thread-CPU time; the streaming runs give per-signature cost in situ."""
+    path = os.path.join(results_dir, "validation", "contention_check.csv")
+    if not os.path.isfile(path):
+        out.notes.append("No signing-cost diagnostic (results/validation/contention_check.csv); run validation.contention_check.")
+        return
+    cc = pd.read_csv(path)
+    scheme = {"hybrid": "ECDSA P-256", "full_pqc": "ML-DSA-65"}
+    phases = [("idle", "Back-to-back, idle"), ("llama_generating", "Back-to-back, during generation"),
+              ("ecores", "Back-to-back, efficiency cores"),
+              ("idle_spaced", "One per 125\\,ms, idle"), ("busy_spaced", "One per 125\\,ms, core kept busy"),
+              ("llama_spaced", "One per 125\\,ms, during generation")]
+    lines = [r"\begin{table}[t]", r"\centering",
+             r"\caption{Per-call signing and verification cost ($\mu$s, median; wall-clock / thread-CPU) by calling "
+             r"pattern, and per signature inside real Llama streams (CPU time; range of per-cell medians over all "
+             r"streaming and checkpoint cells). CPU time rises with wall time, so the extra cost after an idle gap "
+             r"is executed work (the core has clocked down), not waiting.}",
+             r"\label{tab:timing}", r"\setlength{\tabcolsep}{2.5pt}", r"\footnotesize",
+             r"\begin{tabular}{@{}L{2.9cm}rrrr@{}}", r"\toprule",
+             r" & \multicolumn{2}{c}{Sign} & \multicolumn{2}{c}{Verify} \\", r"\cmidrule(lr){2-3}\cmidrule(lr){4-5}",
+             r"Pattern & ECDSA & ML-DSA & ECDSA & ML-DSA \\", r"\midrule"]
+
+    def cell(sel, op):
+        return f"{sel[f'{op}_wall_ms'].median() * 1000:,.0f}/{sel[f'{op}_cpu_ms'].median() * 1000:,.0f}"
+
+    for ph, name in phases:
+        cells = []
+        for op in ("sign", "verify"):
+            for cfg in ("hybrid", "full_pqc"):
+                sel = cc[(cc["phase"] == ph) & (cc["config"] == cfg)]
+                cells.append("--" if sel.empty else cell(sel, op))
+                if not sel.empty:
+                    out.num("Signing-cost diagnostic (us, median wall/CPU)", f"{scheme[cfg]} {op}, {name.replace(chr(92) + ',', ' ')}",
+                            f"{sel[f'{op}_wall_ms'].median() * 1000:,.1f} / {sel[f'{op}_cpu_ms'].median() * 1000:,.1f} "
+                            f"(mean wall {sel[f'{op}_wall_ms'].mean() * 1000:,.1f}, n={len(sel)})")
+        lines.append(f"{name} & " + " & ".join(cells) + r" \\")
+    # In situ: per-signature cost in every streaming and checkpoint cell (median over
+    # repetitions), as a range per scheme, checked against the back-to-back (lower)
+    # and spaced-idle (upper) bounds measured above.
+    frames = [d for d in (sdf, cdf) if d is not None and "total_signing_cpu_ms" in d]
+    if frames:
+        allc = pd.concat(frames, ignore_index=True)
+        allc = allc[allc["n_signatures"] > 0].assign(
+            scheme=lambda d: np.where(d["config"].isin(["full_pqc", "hybrid_kex_pq"]), "full_pqc", "hybrid"),
+            k=lambda d: d["checkpoint_interval"].fillna(0) if "checkpoint_interval" in d else 0)
+        cells = []
+        for op, col in (("sign", "total_signing"), ("verify", "total_verify")):
+            for cfg in ("hybrid", "full_pqc"):
+                v = allc[allc["scheme"] == cfg]
+                per = v.assign(c=v[f"{col}_cpu_ms"] / v["n_signatures"] * 1000).groupby(
+                    ["config", "strategy", "max_tokens", "k"])["c"].median()
+                lo_b = cc[(cc["phase"] == "idle") & (cc["config"] == cfg)][f"{op}_cpu_ms"].median() * 1000
+                hi_b = cc[(cc["phase"] == "idle_spaced") & (cc["config"] == cfg)][f"{op}_cpu_ms"].median() * 1000
+                inside = ((per >= 0.8 * lo_b) & (per <= 1.2 * hi_b)).mean()
+                cells.append(f"{per.min():,.0f}--{per.max():,.0f}")
+                out.num("Signing-cost diagnostic (us, median wall/CPU)", f"{scheme[cfg]} {op} CPU per signature in streams",
+                        f"{per.min():,.1f}-{per.max():,.1f} over {len(per)} cells; {inside:.0%} of cells within "
+                        f"[back-to-back {lo_b:,.1f}, spaced {hi_b:,.1f}] (+/-20%)")
+        lines.append(r"In streams (CPU, range of cells) & " + " & ".join(cells) + r" \\")
+    lines += [r"\bottomrule", r"\end{tabular}", r"\end{table}", ""]
+    out.table("tab_timing", "\n".join(lines))
+
+
+CAMPAIGN_CELLS = [("per_chunk", None, "Per-chunk"), ("hash_chain", None, "Chain $k{=}\\infty$"),
+                  ("hash_chain", 10, "$k{=}10$"), ("hash_chain", 5, "$k{=}5$"), ("hash_chain", 2, "$k{=}2$")]
+CAMPAIGN_ATTACKS = [("drop", "Drop one chunk"), ("reorder", "Reorder two chunks"), ("duplicate", "Duplicate a chunk"),
+                    ("replay", "Replay a foreign chunk"), ("session_replay", "Replay a whole session"),
+                    ("truncate", "Truncate"), ("checkpoint_strip", "Strip all checkpoints"),
+                    ("checkpoint_strip_v2client", "\\quad v2 client (no schedule check)"),
+                    ("checkpoint_move", "Move a checkpoint"), ("drop_before_ckpt", "Drop chunk before checkpoint"),
+                    ("drop_after_ckpt", "Drop chunk after checkpoint"), ("reorder_across", "Reorder across checkpoint")]
+
+
+def table_attack_campaign(out: Out, results_dir: str) -> None:
+    path = os.path.join(results_dir, "streaming", "mitm", "campaign.json")
+    if not os.path.isfile(path):
+        return
+    with open(path) as f:
+        doc = json.load(f)
+    df = pd.DataFrame(doc["rows"])
+    df["k"] = df["checkpoint_interval"].fillna(0).astype(int)
+    configs = [c for c in PROTECTED if c in set(df["config"])]
+    chunk = 5
+    lines = [r"\begin{table*}[t]", r"\centering",
+             fr"\caption{{Stream-integrity campaign on real Llama streams ({doc['max_tokens']} tokens, {chunk}-token chunks), "
+             fr"pooled over {len(configs)} configurations: {doc['trials']} trials per configuration and cell, each on a random "
+             fr"one of {doc['pool']} captured streams at a random position (3,000 trials per entry). Each entry: \% "
+             r"detected / \% detected before the stream ended / mean chunks shown with no verified signature covering "
+             r"them when the client rejected. 100\% detected means 3,000/3,000 (exact 95\% lower bound 99.88\%); 0\% "
+             r"means 0/3,000 (upper bound 0.12\%). Benign: unmodified streams rejected (false rejections).}",
+             r"\label{tab:campaign}", r"\setlength{\tabcolsep}{2.5pt}", r"\scriptsize",
+             r"\begin{tabular}{@{}l" + "r" * len(CAMPAIGN_CELLS) + r"@{}}", r"\toprule",
+             "Attack & " + " & ".join(n for _, _, n in CAMPAIGN_CELLS) + r" \\", r"\midrule"]
+    benign = []
+    for s, k, _ in CAMPAIGN_CELLS:
+        g = df[(df["strategy"] == s) & (df["k"] == (k or 0)) & (df["attack"] == "benign")]
+        n, d = int(g["n"].sum()), int(g["detected"].sum())
+        hi = 1 - 0.05 ** (1 / n) if d == 0 and n else np.nan  # exact one-sided-ish bound for 0 events
+        benign.append(f"{d}/{n}" + (f" ($<${hi:.1%})".replace("%", r"\%") if d == 0 and n else ""))
+    lines.append(r"Benign (false rejections) & " + " & ".join(benign) + r" \\")
+    lines.append(r"\midrule")
+    for a, name in CAMPAIGN_ATTACKS:
+        cells, any_row = [], False
+        for s, k, _ in CAMPAIGN_CELLS:
+            g = df[(df["strategy"] == s) & (df["k"] == (k or 0)) & (df["attack"] == a)]
+            if g.empty or g["n"].sum() == 0:
+                cells.append("--")
+                continue
+            any_row = True
+            n, d, mid = int(g["n"].sum()), int(g["detected"].sum()), int(g["mid_stream"].fillna(0).sum())
+            unv = (g["unverified_at_detection_mean"] * g["n"]).sum() / n if g["unverified_at_detection_mean"].notna().any() else np.nan
+            cells.append(f"{100 * d / n:.0f} / {100 * mid / n:.0f} / {unv:.1f}")
+            lo, hi = clopper_pearson_ci(d, n)
+            out.num("Stream attack campaign (pooled over configurations)",
+                    f"{name.replace(chr(92) + 'quad ', '').strip()} -- {s} k={k or 'inf'}",
+                    f"detected {d}/{n} (95% CI {lo:.4f}-{hi:.4f}), mid-stream {mid / n:.1%}, mean unverified chunks "
+                    f"at rejection {unv:.2f}, mean attacker-influenced chunks shown "
+                    f"{(g['exposure_chunks_mean'] * g['n']).sum() / n if g['exposure_chunks_mean'].notna().any() else float('nan'):.2f}")
+        if any_row:
+            lines.append(f"{name} & " + " & ".join(cells) + r" \\")
+    lines += [r"\bottomrule", r"\end{tabular}", r"\end{table*}", ""]
+    out.table("tab_campaign", "\n".join(lines))
+    per_cfg = df[df["attack"] != "benign"].groupby("config").apply(
+        lambda g: f"{int(g['detected'].sum())}/{int(g['n'].sum())}", include_groups=False)
+    for c, v in per_cfg.items():
+        out.num("Stream attack campaign (per configuration, all attacks and cells)", LABEL[c], v)
+
+
+def clopper_pearson_ci(k: int, n: int, alpha: float = 0.05) -> tuple[float, float]:
+    lo = 0.0 if k == 0 else stats.beta.ppf(alpha / 2, k, n - k + 1)
+    hi = 1.0 if k == n else stats.beta.ppf(1 - alpha / 2, k + 1, n - k)
+    return float(lo), float(hi)
+
+
+def table_key_substitution(out: Out, results_dir: str) -> None:
+    path = os.path.join(results_dir, "mitm", "key_substitution.json")
+    if not os.path.isfile(path):
+        return
+    with open(path) as f:
+        rows = pd.DataFrame(json.load(f))
+    configs = [c for c in PROTECTED if c in set(rows["config"])]
+    names = {"benign": "None", "substitute": "Substitute", "substitute_resign": "Subst.\\ + re-sign",
+             "relay_tamper": "Relay + bit flip"}
+    lines = [r"\begin{table}[t]", r"\centering",
+             fr"\caption{{Full man-in-the-middle (key substitution) against a live server, pooled over {len(configs)} "
+             r"configurations (results were identical in each). Accepted: the client accepted the response; Read: the "
+             r"attacker decrypted the request; Forged: the client accepted an attacker-chosen prediction. Pinned: the "
+             r"client checks the handshake transcript signature under a pinned server identity key "
+             r"(Section~\ref{sec:auth}). Counts out of 1,800 trials per row (300 per configuration).}",
+             r"\label{tab:keysub}", r"\setlength{\tabcolsep}{1.6pt}", r"\footnotesize",
+             r"\begin{tabular}{@{}llrrrl@{}}", r"\toprule",
+             r"Client & Attack & Accepted & Read & Forged & Rejected \\", r"\midrule"]
+    for mode in ("unauthenticated", "pinned"):
+        first = True
+        for v in ("benign", "substitute", "substitute_resign", "relay_tamper"):
+            g = rows[(rows["mode"] == mode) & (rows["variant"] == v)]
+            if g.empty:
+                continue
+            n = int(g["n_valid"].sum())
+            acc, rd, fg = int(g["accepted"].sum()), int(g["attacker_read_request"].sum()), int(g["forged_response_accepted"].sum())
+            rej = {}
+            for d in g["rejected_at"]:
+                for k2, c2 in (d or {}).items():
+                    rej[k2] = rej.get(k2, 0) + c2
+            rej_s = ", ".join((k2.upper() if k2 == 'aead' else k2) + ('' if c2 == n else f' ({c2:,})') for k2, c2 in rej.items()) or "--"
+            lines.append(f"{('Unauth.' if mode == 'unauthenticated' else 'Pinned') if first else ''} & "
+                         f"{names[v]} & {acc:,} & {rd:,} & {fg:,} & {rej_s} \\\\")
+            out.num("Key substitution (full MITM), pooled", f"{mode}: {names[v]}",
+                    f"accepted {acc}/{n}, attacker read request {rd}/{n}, forged response accepted {fg}/{n}, rejected at {rej}")
+            first = False
+        lines.append(r"\addlinespace")
+    lines[-1] = r"\bottomrule"
+    lines += [r"\end{tabular}", r"\end{table}", ""]
+    out.table("tab_keysub", "\n".join(lines))
+
+
+def table_auth_cost(out: Out, results_dir: str, entries: list[dict], warmup: float) -> None:
+    """Cost of authenticating the handshake: each config with and without a
+    transcript signature under a pinned identity key, run back to back."""
+    if not entries:
+        return
+    raw = load_raw(os.path.join(results_dir, "raw"))
+    ids = {e["run_id"] for e in entries}
+    df = discard_warmup(raw[raw["run_id"].astype(str).isin(ids)].reset_index(drop=True), warmup)
+    auth = df["auth_handshake"].fillna(False).astype(str).str.lower().isin(["true", "1"])
+    df = df.assign(config=np.where(auth, df["config"] + "+auth", df["config"]))
+    present = [c for c in PROTECTED if c in set(df["config"]) and f"{c}+auth" in set(df["config"])]
+    cmp = comparison_stats(df, [(f"{c}+auth", c) for c in present], seed=19)
+    ok = _ok(df)
+    lines = [r"\begin{table}[t]", r"\centering",
+             r"\caption{Cost of authenticating the handshake (10 connections, 5 repetitions each, run back to back "
+             r"with the unauthenticated configuration). The identity key uses the configuration's signature scheme "
+             r"(ML-DSA-65 for Full PQC and Hybrid-KEX-PQ, ECDSA P-256 otherwise). +B: bytes added per handshake; "
+             r"verify: client transcript check; $\Delta$: end-to-end median difference with 95\% CI.}",
+             r"\label{tab:authcost}", r"\setlength{\tabcolsep}{3pt}", r"\footnotesize",
+             r"\begin{tabular}{@{}lrrr@{}}", r"\toprule",
+             r"Configuration & +B & Verify ($\mu$s) & $\Delta$ (ms) \\", r"\midrule"]
+    for c in present:
+        r = cmp[(cmp["config"] == f"{c}+auth") & (cmp["concurrency"] == 10)]
+        v = ok[ok["config"] == f"{c}+auth"]["handshake_auth_verify_ms"].median() * 1000
+        ident = "ML-DSA-65" if c in ("full_pqc", "hybrid_kex_pq") else "ECDSA P-256"
+        extra = 3309 if ident == "ML-DSA-65" else 71
+        d = "--" if r.empty else _fmt_ci(r.iloc[0]["diff_ms"], r.iloc[0]["ci95_lo"], r.iloc[0]["ci95_hi"])
+        lines.append(f"{LABEL[c]} & {extra:,} & {v:,.0f} & {d} \\\\")
+        if not r.empty:
+            out.num("Authenticated handshake cost (c=10)", LABEL[c],
+                    f"Delta {r.iloc[0]['diff_ms']:+.2f} ms [{r.iloc[0]['ci95_lo']:+.2f}, {r.iloc[0]['ci95_hi']:+.2f}] "
+                    f"({r.iloc[0]['diff_pct']:+.1f}%), client transcript verify {v:,.0f} us, +{extra} B")
+    lines += [r"\bottomrule", r"\end{tabular}", r"\end{table}", ""]
+    out.table("tab_authcost", "\n".join(lines))
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="PQ-Shield paper figures / tables / key numbers")
     ap.add_argument("--results-dir", default="results")
@@ -1370,12 +1772,14 @@ def main() -> None:
     args = ap.parse_args()
 
     manifest_path = args.manifest or os.path.join(args.results_dir, "paper_runs.json")
+    manifest = None
     if os.path.isfile(manifest_path):
         with open(manifest_path) as f:
             manifest = json.load(f)
         args.concurrency_run_id = args.concurrency_run_id or (
             [r for r in (manifest.get("concurrency"), manifest.get("concurrency_supplement"),
-                         manifest.get("concurrency_control_2rt")) if r] or None)
+                         manifest.get("concurrency_control_2rt"), manifest.get("concurrency_hybrid_kex_pq")) if r]
+            or None)
         args.payload_run_id = args.payload_run_id or manifest.get("payload") or None
         args.network_run_id = args.network_run_id or (
             (manifest.get("network") or []) + (manifest.get("network_supplement") or []) or None)
@@ -1397,14 +1801,15 @@ def main() -> None:
     if "control_2rt" in present_cfgs:
         pairs += [(c, "control_2rt") for c in PROTECTED if c in present_cfgs]
     if "classical_ecdhe" in present_cfgs:
-        pairs += [(c, "classical_ecdhe") for c in ("hybrid", "hybrid_kex", "full_pqc") if c in present_cfgs]
+        pairs += [(c, "classical_ecdhe") for c in ("hybrid", "hybrid_kex", "full_pqc", "hybrid_kex_pq")
+                  if c in present_cfgs]
     cmp = comparison_stats(conc_df, pairs)
     fig_concurrency(out, st, provisional,
                     _resource_cells(args.results_dir, args.concurrency_run_id) if args.concurrency_run_id else None)
     fig_decomposition(out, conc_df, provisional, args.decomposition_concurrency)
     table_concurrency(out, st, cmp, provisional)
     table_equivalence(out, cmp)
-    table_tradeoff(out, conc_df, provisional)
+    table_failures(out, conc_df, cmp)
     missing = [c for c in CONFIGS if c not in set(st["config"])]
     if missing:
         out.notes.append(f"Concurrency data has no rows for: {', '.join(LABEL[c] for c in missing)}.")
@@ -1435,6 +1840,10 @@ def main() -> None:
         sdf = sdf[sdf["checkpoint_interval"].isna()]  # plain strategies only; checkpoints have their own figure
     fig_streaming(out, sdf, args.streaming_run_id)
     table_streaming(out, sdf, args.streaming_run_id)
+    table_dominance(out, conc_df, sdf, args.results_dir)
+    table_attack_campaign(out, args.results_dir)
+    table_key_substitution(out, args.results_dir)
+    table_auth_cost(out, args.results_dir, manifest.get("auth_cost", []) if manifest else [], args.warmup_fraction)
 
     if args.concurrency_run_id:
         table_resources(out, args.results_dir, args.concurrency_run_id, provisional)
@@ -1448,9 +1857,11 @@ def main() -> None:
         out.notes.append("No payload-profile sweep given (--payload-run-id); Table II in the draft is n=1 per profile.")
     if args.checkpoint_run_id:
         cdf = load_streaming(args.results_dir, args.checkpoint_run_id)
-        attacks = _read_json_glob(os.path.join(args.results_dir, "streaming", "mitm", "checkpoints", "*-summary.json"))
+        camp_path = os.path.join(args.results_dir, "streaming", "mitm", "campaign.json")
+        attacks = json.load(open(camp_path))["rows"] if os.path.isfile(camp_path) else []
         fig_checkpoint_frontier(out, cdf, args.checkpoint_run_id, attacks)
         table_checkpoint(out, cdf)
+    table_timing(out, args.results_dir, sdf, cdf if args.checkpoint_run_id else None)
     if args.amortization_run_id:
         fig_amortization(out, _load_runs(args.results_dir, args.amortization_run_id, args.warmup_fraction))
     if args.network_run_id:

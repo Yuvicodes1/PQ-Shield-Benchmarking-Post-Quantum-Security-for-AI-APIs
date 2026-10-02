@@ -31,6 +31,8 @@ echo "Downloading full upstream ACVP vector files into $OUT_DIR/ ..."
 curl -sL "$BASE/ML-KEM-keyGen-FIPS203/internalProjection.json"     -o "$OUT_DIR/ML-KEM-keyGen-FIPS203.json"
 curl -sL "$BASE/ML-KEM-encapDecap-FIPS203/internalProjection.json" -o "$OUT_DIR/ML-KEM-encapDecap-FIPS203.json"
 curl -sL "$BASE/ML-DSA-sigVer-FIPS204/internalProjection.json"     -o "$OUT_DIR/ML-DSA-sigVer-FIPS204.json"
+curl -sL "$BASE/ML-DSA-keyGen-FIPS204/internalProjection.json"     -o "$OUT_DIR/ML-DSA-keyGen-FIPS204.json"
+curl -sL "$BASE/ML-DSA-sigGen-FIPS204/internalProjection.json"     -o "$OUT_DIR/ML-DSA-sigGen-FIPS204.json"
 
 for f in "$OUT_DIR"/*.json; do
     python3 -c "import json,sys; json.load(open(sys.argv[1])); print('OK:', sys.argv[1])" "$f"

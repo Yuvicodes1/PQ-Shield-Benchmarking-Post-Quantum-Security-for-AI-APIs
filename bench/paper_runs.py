@@ -19,6 +19,17 @@ the manifest is rewritten after every step so a partial run is still usable):
  12. concurrency supplement              Control (re-run after endpoint fix) + Hybrid-KEX, same settings as step 2
  13. matched-protocol control            Control-2RT (two no-crypto requests), same settings as step 2
 
+Second review round (each supersedes the step noted, or adds a new result):
+ 14. signing-cost diagnostic (Llama)      sign/verify idle vs spaced vs under generation (validation.contention_check)
+ 15. concurrency: Hybrid-KEX-PQ           X25519MLKEM768 + ML-DSA-65, same settings as step 2
+ 16. streaming strategies, CPU time       step 6 with 6 configs, recording thread-CPU time per signature
+ 17. checkpoint frontier, CPU time        step 9 with Hybrid, Full PQC, Hybrid-KEX-PQ
+ 18. stream attack campaign (Llama)       static + adaptive attacks, 500 trials/cell, false-rejection baseline
+                                          (supersedes steps 8 and 10)
+ 19. key substitution (full MITM)         unauthenticated vs pinned-identity handshake, 300 trials/cell
+ 20. authenticated-handshake cost         c=10, each protected config with and without handshake auth, interleaved
+ 21. single-transaction + streaming HNDL  for Hybrid-KEX-PQ (steps 5 and 7 for the added config)
+
 Nothing else should run on the machine meanwhile -- every step measures time.
 Existing threat/validation result files are copied to
 results/archive/pre_rerun_<timestamp>/ before being overwritten.
@@ -45,8 +56,10 @@ RESULTS = os.path.join(REPO_ROOT, "results")
 MANIFEST = os.path.join(RESULTS, "paper_runs.json")
 ALL_CONFIGS = ["control", "control-2rt", "classical", "classical-ecdhe", "hybrid", "hybrid-kex", "full-pqc"]
 PROTECTED = ["classical", "classical-ecdhe", "hybrid", "hybrid-kex", "full-pqc"]
+# Added in the second review round; steps 15-21 include it, steps 1-13 predate it.
+PROTECTED_V2 = PROTECTED + ["hybrid-kex-pq"]
 CRYPTO = {"classical": "classical", "classical-ecdhe": "classical_ecdhe", "hybrid": "hybrid",
-          "hybrid-kex": "hybrid_kex", "full-pqc": "full_pqc"}
+          "hybrid-kex": "hybrid_kex", "full-pqc": "full_pqc", "hybrid-kex-pq": "hybrid_kex_pq"}
 CHECKPOINT_KS = [None, 1, 2, 5, 10, 20]
 PROFILES = ["tabular_small", "image_cnn", "embedding", "llm_completion"]
 NETWORKS = ["localhost", "metro", "wan", "mobile"]
@@ -168,8 +181,8 @@ def step_streaming(m: dict) -> None:
     m["streaming_backend"] = "llama_cpp"
 
 
-def step_streaming_hndl(m: dict) -> None:
-    _run([PYTHON_BIN, "-m", "threats.streaming_hndl_experiment", "--configs", ",".join(PROTECTED),
+def step_streaming_hndl(m: dict, configs: list[str] | None = None) -> None:
+    _run([PYTHON_BIN, "-m", "threats.streaming_hndl_experiment", "--configs", ",".join(configs or PROTECTED),
           "--port", str(PORT), "--max-tokens", "50,200,500,2000"], env=_llama_env())
     m["streaming_hndl"] = "results/hndl/streaming/ (llama_cpp)"
 
@@ -284,6 +297,70 @@ def step_concurrency_supplement(m: dict) -> None:
                                          repetitions=5, requests_per_concurrency=10, min_requests=50)
 
 
+def step_signing_diagnostic(m: dict) -> None:
+    _run([PYTHON_BIN, "-m", "validation.contention_check", "--n", "300", "--n-spaced", "100",
+          "--out", os.path.join(RESULTS, "validation", "contention_check.csv")], env=_llama_env())
+    m["signing_diagnostic"] = "results/validation/contention_check.csv"
+
+
+def step_concurrency_hkpq(m: dict) -> None:
+    m["concurrency_hybrid_kex_pq"] = _sweep(configs=["hybrid-kex-pq"], concurrency_levels=[10, 100, 1000],
+                                            repetitions=5, requests_per_concurrency=10, min_requests=50)
+
+
+def step_streaming_v2(m: dict) -> None:
+    os.environ.update(_llama_env())
+    from bench.streaming_runner import run_sweep
+    rows = run_sweep(configs=PROTECTED_V2, strategies=["buffer_and_sign", "per_chunk", "hash_chain"],
+                     max_tokens_values=[50, 200], chunk_size_values=[5], repetitions=10, port=PORT,
+                     output_dir=os.path.join(RESULTS, "streaming"),
+                     log_dir=os.path.join(RESULTS, "server_logs"),
+                     warmup_transactions=1, shuffle_seed=3)
+    m["streaming"] = rows[0]["run_id"]
+    m["streaming_backend"] = "llama_cpp"
+
+
+def step_checkpoint_v2(m: dict) -> None:
+    os.environ.update(_llama_env())
+    from bench.streaming_runner import run_sweep
+    rows = run_sweep(configs=["hybrid", "full-pqc", "hybrid-kex-pq"], strategies=["hash_chain"],
+                     max_tokens_values=[200], chunk_size_values=[5], repetitions=5, port=PORT,
+                     output_dir=os.path.join(RESULTS, "streaming"), log_dir=os.path.join(RESULTS, "server_logs"),
+                     warmup_transactions=1, shuffle_seed=4, checkpoint_intervals=CHECKPOINT_KS)
+    m["checkpoint"] = rows[0]["run_id"]
+
+
+def step_attack_campaign(m: dict) -> None:
+    _run([PYTHON_BIN, "-m", "threats.streaming_attack_campaign", "--configs", ",".join(PROTECTED_V2),
+          "--trials", "500", "--pool", "10", "--max-tokens", "100", "--port", str(PORT),
+          "--output", os.path.join(RESULTS, "streaming", "mitm", "campaign.json")], env=_llama_env())
+    m["attack_campaign"] = "results/streaming/mitm/campaign.json"
+
+
+def step_key_substitution(m: dict) -> None:
+    _run([PYTHON_BIN, "-m", "threats.key_substitution", "--configs", ",".join(PROTECTED_V2),
+          "--trials", "300", "--port", str(PORT),
+          "--output", os.path.join(RESULTS, "mitm", "key_substitution.json")])
+    m["key_substitution"] = "results/mitm/key_substitution.json"
+
+
+def step_auth_cost(m: dict) -> None:
+    """Each config with and without handshake authentication, back to back,
+    so the pair shares thermal state; the order within a pair alternates."""
+    m["auth_cost"] = []
+    for i, cfg in enumerate(PROTECTED_V2):
+        for auth in ([False, True] if i % 2 == 0 else [True, False]):
+            run_id = _sweep(configs=[cfg], concurrency_levels=[10], repetitions=5,
+                            requests_per_concurrency=10, min_requests=100, auth_handshake=auth)
+            m["auth_cost"].append({"config": cfg, "auth": auth, "run_id": run_id})
+            _save_manifest(m)
+
+
+def step_hndl_hkpq(m: dict) -> None:
+    step_threats(m, configs=["hybrid-kex-pq"])
+    step_streaming_hndl(m, configs=["hybrid-kex-pq"])
+
+
 STEPS = {
     1: ("primitive micro-benchmark", step_primitives),
     2: ("concurrency matrix", step_concurrency),
@@ -298,6 +375,14 @@ STEPS = {
     11: ("handshake amortization", step_amortization),
     12: ("concurrency supplement: Control re-run + Hybrid-KEX", step_concurrency_supplement),
     13: ("matched-protocol control (Control-2RT)", step_control_2rt),
+    14: ("signing-cost diagnostic (Llama)", step_signing_diagnostic),
+    15: ("concurrency: Hybrid-KEX-PQ", step_concurrency_hkpq),
+    16: ("streaming strategies with CPU time (Llama)", step_streaming_v2),
+    17: ("checkpoint frontier with CPU time (Llama)", step_checkpoint_v2),
+    18: ("stream attack campaign (Llama)", step_attack_campaign),
+    19: ("key substitution (full MITM)", step_key_substitution),
+    20: ("authenticated-handshake cost", step_auth_cost),
+    21: ("HNDL for Hybrid-KEX-PQ", step_hndl_hkpq),
 }
 
 
@@ -316,7 +401,7 @@ def main() -> None:
     m = _load_manifest()
     m.setdefault("started", time.strftime("%Y-%m-%dT%H:%M:%S"))
     m["environment"] = capture_environment()
-    if any(s in steps for s in (1, 5, 7, 8, 10)):
+    if any(s in steps for s in (1, 5, 7, 8, 10, 18, 19, 21)):
         m["archive"] = _archive()
         _log(f"Archived existing threat/validation results to {m['archive']}")
     _save_manifest(m)

@@ -47,7 +47,8 @@ DEFAULT_PROMPT = (
 )
 
 CONFIG_TO_CRYPTO_NAME = {"classical": "classical", "classical-ecdhe": "classical_ecdhe",
-                         "hybrid": "hybrid", "hybrid-kex": "hybrid_kex", "full-pqc": "full_pqc"}
+                         "hybrid": "hybrid", "hybrid-kex": "hybrid_kex", "full-pqc": "full_pqc",
+                         "hybrid-kex-pq": "hybrid_kex_pq"}
 
 
 def _current_backend() -> str:
@@ -63,6 +64,7 @@ CSV_FIELDS = [
     "run_id", "backend", "config", "strategy", "max_tokens", "chunk_size_tokens", "repetition",
     "handshake_ms", "ttft_ms", "total_ms",
     "n_chunks", "total_signature_bytes", "total_signing_ms", "total_verify_ms",
+    "total_signing_cpu_ms", "total_verify_cpu_ms",
     "all_signatures_valid", "all_aead_ok", "all_in_order", "stream_fully_verified",
     "reconstructed_bytes", "checkpoint_interval", "n_signatures",
     "max_unverified_chunks", "max_verification_lag_ms", "protocol_version", "error",

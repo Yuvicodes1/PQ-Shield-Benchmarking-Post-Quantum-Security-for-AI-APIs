@@ -239,6 +239,58 @@ _lib.OQS_SIG_ml_dsa_65_verify_with_ctx_str.argtypes = [
 ]
 _lib.OQS_SIG_ml_dsa_65_verify_with_ctx_str.restype = c_int
 
+_lib.OQS_SIG_ml_dsa_65_sign_with_ctx_str.argtypes = [
+    c_void_p, c_void_p,  # signature, signature_len
+    c_void_p, c_size_t,  # message, message_len
+    c_void_p, c_size_t,  # ctx, ctxlen
+    c_void_p,            # secret_key
+]
+_lib.OQS_SIG_ml_dsa_65_sign_with_ctx_str.restype = c_int
+
+# ---------------------------------------------------------------------------
+# Fixed randomness, for known-answer tests only
+# ---------------------------------------------------------------------------
+# liboqs exports no derandomized ML-DSA keygen or signing, but every random
+# byte its ML-DSA code consumes comes from OQS_randombytes, which liboqs lets
+# a caller replace (the mechanism its own KAT tests use). FIPS 204 keygen
+# draws exactly the 32-byte seed xi, and signing exactly the 32-byte rnd, so
+# substituting a source that returns the vector's bytes reproduces NIST's
+# deterministic inputs. validation/nist_kat.py uses this; nothing else must.
+_RANDOMBYTES_FN = ctypes.CFUNCTYPE(None, ctypes.POINTER(c_uint8), c_size_t)
+_lib.OQS_randombytes_custom_algorithm.argtypes = [_RANDOMBYTES_FN]
+_lib.OQS_randombytes_custom_algorithm.restype = None
+_lib.OQS_randombytes_switch_algorithm.argtypes = [ctypes.c_char_p]
+_lib.OQS_randombytes_switch_algorithm.restype = c_int
+
+
+class fixed_randomness:
+    """Context manager: OQS_randombytes returns exactly `data`, then the
+    system RNG is restored. Raises if liboqs asks for a different number of
+    bytes than supplied -- that would mean the algorithm draws randomness
+    the vector does not specify, and the comparison would be meaningless."""
+
+    def __init__(self, data: bytes):
+        self._data = data
+        self.requested: list[int] = []
+
+    def _cb(self, buf, n):
+        self.requested.append(n)
+        chunk = self._data[sum(self.requested[:-1]):sum(self.requested)]
+        if len(chunk) != n:
+            chunk = chunk.ljust(n, b"\x00")  # recorded in self.requested; checked on exit
+        ctypes.memmove(buf, chunk, n)
+
+    def __enter__(self):
+        self._fn = _RANDOMBYTES_FN(self._cb)  # keep a reference while installed
+        _lib.OQS_randombytes_custom_algorithm(self._fn)
+        return self
+
+    def __exit__(self, *exc):
+        _lib.OQS_randombytes_switch_algorithm(b"system")
+        if exc[0] is None and sum(self.requested) != len(self._data):
+            raise OQSAdapterError(f"liboqs drew {self.requested} random bytes, vector supplies {len(self._data)}")
+        return False
+
 
 @dataclass
 class SigKeypair:
@@ -289,6 +341,24 @@ class MLDSA65:
             msg_buf, c_size_t(len(message)), byref(sig_buf), c_size_t(len(signature)), byref(pk_buf)
         )
         return rc == OQS_SUCCESS
+
+    @staticmethod
+    def sign_with_context(message: bytes, context: bytes, secret_key: bytes) -> bytes:
+        """FIPS 204 external ML-DSA.Sign with an explicit context string, for
+        validation/nist_kat.py's sigGen vectors (see fixed_randomness)."""
+        if len(secret_key) != ML_DSA_65_SECRET_KEY_BYTES:
+            raise OQSAdapterError("ML-DSA-65 secret key has unexpected length")
+        sig_buf = (c_uint8 * ML_DSA_65_SIGNATURE_MAX_BYTES)()
+        sig_len = c_size_t(0)
+        msg_buf = (c_uint8 * len(message)).from_buffer_copy(message) if message else None
+        ctx_buf = (c_uint8 * len(context)).from_buffer_copy(context) if context else None
+        sk_buf = (c_uint8 * len(secret_key)).from_buffer_copy(secret_key)
+        rc = _lib.OQS_SIG_ml_dsa_65_sign_with_ctx_str(
+            byref(sig_buf), byref(sig_len), msg_buf, c_size_t(len(message)),
+            ctx_buf, c_size_t(len(context)), byref(sk_buf))
+        if rc != OQS_SUCCESS:
+            raise OQSAdapterError("OQS_SIG_ml_dsa_65_sign_with_ctx_str failed")
+        return bytes(sig_buf)[: sig_len.value]
 
     @staticmethod
     def verify_with_context(message: bytes, signature: bytes, context: bytes, public_key: bytes) -> bool:

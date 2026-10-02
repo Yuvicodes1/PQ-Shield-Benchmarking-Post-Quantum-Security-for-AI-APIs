@@ -23,6 +23,7 @@ import time
 import httpx
 
 from crypto.aead import AEADError, aead_decrypt, aead_encrypt
+from crypto.handshake_auth import verify_handshake
 from crypto.registry import get_client_crypto
 
 
@@ -57,6 +58,16 @@ async def do_handshake(client: httpx.AsyncClient, base_url: str) -> tuple[dict, 
     return resp.json(), handshake_ms
 
 
+async def fetch_identity(client: httpx.AsyncClient, base_url: str) -> dict:
+    """Pins the server's identity key (authenticated-handshake mode). Fetched
+    once, before any measured transaction -- the stand-in for a certificate
+    the client already trusts."""
+    resp = await client.get(f"{base_url}/secure/identity")
+    resp.raise_for_status()
+    j = resp.json()
+    return {"algorithm": j["algorithm"], "public_key": _b64d(j["public_key"])}
+
+
 async def secure_predict_transaction(
     client: httpx.AsyncClient,
     base_url: str,
@@ -65,6 +76,7 @@ async def secure_predict_transaction(
     debug_metrics: bool = False,
     cached_handshake: dict | None = None,
     session: ClientSession | None = None,
+    pinned_identity: dict | None = None,
 ) -> dict:
     """Performs one full protected transaction. Returns a flat result/metrics dict.
 
@@ -92,8 +104,18 @@ async def secure_predict_transaction(
             handshake_ms = 0.0
         else:
             handshake_json, handshake_ms = await do_handshake(client, base_url)
-        row["handshake_ms"] = handshake_ms
         row["resumed"] = resumed
+        if pinned_identity is not None and not resumed:
+            # The handshake leg includes checking the transcript signature,
+            # as a TLS client's handshake includes CertificateVerify.
+            ok, auth_meta = verify_handshake(handshake_json, pinned_identity, _b64d)
+            handshake_ms += auth_meta["verify_ms"]
+            row["handshake_auth_verify_ms"] = auth_meta["verify_ms"]
+            if not ok:
+                row["handshake_ms"] = handshake_ms
+                row["error"] = "handshake authentication failed (transcript signature invalid)"
+                return row
+        row["handshake_ms"] = handshake_ms
 
         sig_public_key = _b64d(handshake_json["sig_public_key"])
         handshake_id = handshake_json["handshake_id"]

@@ -37,7 +37,8 @@ from analysis.tradeoff_matrix import SECURITY_SCORES
 # under a future CRQC; hybrid/full_pqc's (ML-KEM-768) is not. Mirrors the
 # justification already given in tradeoff_matrix.py's module docstring,
 # made checkable against real HNDL capture data.
-EXPECTED_KEX_DECRYPTABLE = {"classical": True, "classical_ecdhe": True, "hybrid": False, "hybrid_kex": False, "full_pqc": False}
+EXPECTED_KEX_DECRYPTABLE = {"classical": True, "classical_ecdhe": True, "hybrid": False, "hybrid_kex": False, "full_pqc": False,
+                            "hybrid_kex_pq": False}
 
 # Below this near-term signature-tamper detection rate, the "authenticity is
 # a categorical property, not a rate" argument stops being obviously true

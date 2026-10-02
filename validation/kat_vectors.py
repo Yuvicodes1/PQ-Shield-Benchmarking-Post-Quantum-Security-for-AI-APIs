@@ -163,3 +163,52 @@ def load_ml_dsa_65_sigver_vectors() -> tuple[list[SigVerVector], dict]:
     ]
     meta = {"source": doc["_source"], "fetched": doc["_fetched"], "note": doc["_note"]}
     return vectors, meta
+
+
+# ---------------------------------------------------------------------------
+# ML-DSA-65 keyGen and sigGen (randomness supplied through
+# crypto.oqs_adapter.fixed_randomness -- see validation/nist_kat.py)
+# ---------------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class DSAKeyGenVector:
+    tc_id: int
+    seed: bytes
+    pk: bytes
+    sk: bytes
+
+
+def load_ml_dsa_65_keygen_vectors() -> tuple[list[DSAKeyGenVector], dict]:
+    doc = _load("ml_dsa_65_keygen.json")
+    group = doc["testGroups"][0]
+    assert group["parameterSet"] == "ML-DSA-65"
+    vectors = [DSAKeyGenVector(t["tcId"], _hx(t["seed"]), _hx(t["pk"]), _hx(t["sk"])) for t in group["tests"]]
+    meta = {"source": doc["_source"], "fetched": doc["_fetched"], "note": doc["_note"]}
+    return vectors, meta
+
+
+@dataclass(frozen=True)
+class SigGenVector:
+    tc_id: int
+    deterministic: bool
+    sk: bytes
+    message: bytes
+    context: bytes
+    rnd: bytes  # 32 zero bytes for deterministic signing (FIPS 204 Algorithm 2)
+    signature: bytes
+
+
+def load_ml_dsa_65_siggen_vectors() -> tuple[list[SigGenVector], dict]:
+    doc = _load("ml_dsa_65_siggen.json")
+    vectors = []
+    for group in doc["testGroups"]:
+        assert group["parameterSet"] == "ML-DSA-65"
+        assert group["signatureInterface"] == "external" and group["preHash"] == "pure"
+        det = bool(group["deterministic"])
+        for t in group["tests"]:
+            vectors.append(SigGenVector(
+                tc_id=t["tcId"], deterministic=det, sk=_hx(t["sk"]), message=_hx(t["message"]),
+                context=_hx(t.get("context", "")), rnd=bytes(32) if det else _hx(t["rnd"]),
+                signature=_hx(t["signature"])))
+    meta = {"source": doc["_source"], "fetched": doc["_fetched"], "note": doc["_note"]}
+    return vectors, meta

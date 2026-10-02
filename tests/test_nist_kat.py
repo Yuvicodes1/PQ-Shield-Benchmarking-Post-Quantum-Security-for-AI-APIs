@@ -18,6 +18,8 @@ from validation.kat_vectors import (
 )
 from validation.nist_kat import (
     run_all,
+    run_ml_dsa_65_keygen,
+    run_ml_dsa_65_siggen,
     run_ml_dsa_65_sigver,
     run_ml_kem_768_encap_decap,
     run_ml_kem_768_keygen,
@@ -84,7 +86,26 @@ def test_run_all_reports_not_achievable_explicitly():
     every gap it doesn't cover, not just silently have fewer checks."""
     result = run_all()
     assert result["summary"]["all_passed"] is True
-    assert result["summary"]["total_checks"] == 75  # 25 + 25 + 10 + 15
-    assert "ml_dsa_65_keygen" in result["not_achievable"]
-    assert "ml_dsa_65_siggen" in result["not_achievable"]
+    assert result["summary"]["total_checks"] == 130  # 25 + 25 + 10 + 15 + 25 + 30
+    assert "ml_dsa_65_internal_interface" in result["not_achievable"]
     assert "ml_kem_768_key_checks" in result["not_achievable"]
+
+
+def test_ml_dsa_65_keygen_all_byte_exact():
+    result = run_ml_dsa_65_keygen()
+    assert result["total"] == 25
+    assert result["passed"] == 25, [r for r in result["results"] if not r["passed"]]
+
+
+def test_ml_dsa_65_siggen_all_byte_exact():
+    result = run_ml_dsa_65_siggen()
+    assert result["total"] == 30
+    assert result["deterministic_passed"] == 15 and result["hedged_passed"] == 15
+
+
+def test_fixed_randomness_restores_system_rng():
+    from crypto.oqs_adapter import MLDSA65, fixed_randomness
+    with fixed_randomness(bytes(32)):
+        a = MLDSA65.keypair()
+    b, c = MLDSA65.keypair(), MLDSA65.keypair()
+    assert len({a.public_key, b.public_key, c.public_key}) == 3

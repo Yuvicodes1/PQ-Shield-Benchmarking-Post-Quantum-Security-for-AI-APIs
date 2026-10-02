@@ -57,6 +57,10 @@ async def run_streaming_transaction(
         "total_signature_bytes": 0,
         "total_signing_ms": 0.0,
         "total_verify_ms": 0.0,
+        # Thread-CPU time of the same calls. Wall time also counts time the
+        # thread waited; CPU time is the work itself (crypto/instrumentation.py).
+        "total_signing_cpu_ms": 0.0,
+        "total_verify_cpu_ms": 0.0,
         "all_signatures_valid": True,
         "all_aead_ok": True,
         "all_in_order": True,
@@ -109,7 +113,8 @@ async def run_streaming_transaction(
         }
 
         t_start = time.perf_counter()
-        chain_state = HashChainClientState(handshake_id) if strategy == "hash_chain" else None
+        chain_state = (HashChainClientState(handshake_id, checkpoint_interval=checkpoint_interval)
+                       if strategy == "hash_chain" else None)
         terminal_seen = False  # every strategy ends with a signed terminal record
         expected_index = 0
         reconstructed = bytearray()
@@ -145,7 +150,9 @@ async def run_streaming_transaction(
                     metrics["all_in_order"] &= result["in_order"]
                     metrics["total_signature_bytes"] += data.get("signature_bytes", 0)
                     metrics["total_verify_ms"] += result["verify_ms"]
+                    metrics["total_verify_cpu_ms"] += result.get("verify_cpu_ms", 0.0)
                     metrics["total_signing_ms"] += data.get("sign_ms", 0.0)
+                    metrics["total_signing_cpu_ms"] += data.get("sign_cpu_ms", 0.0)
                     metrics["n_chunks"] += 1
                     metrics["n_signatures"] += 1
                     expected_index += 1
@@ -169,12 +176,16 @@ async def run_streaming_transaction(
                     metrics["all_aead_ok"] &= bool(result["aead_ok"])
                     metrics["total_signature_bytes"] += data.get("signature_bytes", 0)
                     metrics["total_signing_ms"] += data.get("sign_ms", 0.0)
+                    metrics["total_signing_cpu_ms"] += data.get("sign_cpu_ms", 0.0)
                     metrics["total_verify_ms"] += result["verify_ms"]
+                    metrics["total_verify_cpu_ms"] += result.get("verify_cpu_ms", 0.0)
                     metrics["n_chunks"] += 1
                     if result["plaintext"]:
                         reconstructed.extend(result["plaintext"])
                     now = time.perf_counter()
                     pending.append(now)
+                    if result["checkpoint_missing"]:
+                        metrics["all_signatures_valid"] = False
                     if result["checkpoint"]:
                         metrics["n_signatures"] += 1
                         metrics["all_signatures_valid"] &= result["checkpoint_valid"]
@@ -194,7 +205,9 @@ async def run_streaming_transaction(
                     metrics["all_aead_ok"] &= bool(result["aead_ok"])
                     metrics["total_signature_bytes"] += data.get("signature_bytes", 0)
                     metrics["total_verify_ms"] += result["verify_ms"]
+                    metrics["total_verify_cpu_ms"] += result.get("verify_cpu_ms", 0.0)
                     metrics["total_signing_ms"] += data.get("sign_ms", 0.0)
+                    metrics["total_signing_cpu_ms"] += data.get("sign_cpu_ms", 0.0)
                     metrics["n_signatures"] += 1
                     if result["plaintext"]:
                         reconstructed.extend(result["plaintext"])
@@ -205,7 +218,9 @@ async def run_streaming_transaction(
                         expected_index, sig_public_key, client_crypto, handshake_id)
                     metrics["total_signature_bytes"] += data.get("signature_bytes", 0)
                     metrics["total_verify_ms"] += result["verify_ms"]
+                    metrics["total_verify_cpu_ms"] += result.get("verify_cpu_ms", 0.0)
                     metrics["total_signing_ms"] += data.get("sign_ms", 0.0)
+                    metrics["total_signing_cpu_ms"] += data.get("sign_cpu_ms", 0.0)
                     metrics["n_signatures"] += 1
                     metrics["stream_fully_verified"] = (
                         result["stream_fully_verified"] and metrics["all_signatures_valid"]
@@ -223,7 +238,9 @@ async def run_streaming_transaction(
                     terminal_seen = True
                     metrics["total_signature_bytes"] += data.get("signature_bytes", 0)
                     metrics["total_verify_ms"] += result["verify_ms"]
+                    metrics["total_verify_cpu_ms"] += result.get("verify_cpu_ms", 0.0)
                     metrics["total_signing_ms"] += data.get("sign_ms", 0.0)
+                    metrics["total_signing_cpu_ms"] += data.get("sign_cpu_ms", 0.0)
                     metrics["n_signatures"] += 1
                     if result["stream_fully_verified"]:
                         _cover_pending(time.perf_counter())

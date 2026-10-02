@@ -25,6 +25,9 @@ CONFIG_COLORS = {
     # Raspberry: validated against its neighbours in config order (orange hybrid,
     # blue full_pqc); figures add hatch/marker as the secondary cue.
     "hybrid_kex": "#ad1457",
+    # Deep violet: the best sixth hue left (deutan dE 6.5 vs full_pqc blue, in
+    # the 6-8 band), so figures always pair it with its own hatch and marker.
+    "hybrid_kex_pq": "#6c3fa0",
     "hybrid": "#e67e22",
     "full_pqc": "#2471a3",
 }
@@ -35,6 +38,7 @@ CONFIG_COLORS = {
 CONFIG_COLORS_HYPHENATED = {**CONFIG_COLORS, "full-pqc": CONFIG_COLORS["full_pqc"],
                             "classical-ecdhe": CONFIG_COLORS["classical_ecdhe"],
                             "hybrid-kex": CONFIG_COLORS["hybrid_kex"],
+                            "hybrid-kex-pq": CONFIG_COLORS["hybrid_kex_pq"],
                             "control-2rt": CONFIG_COLORS["control_2rt"]}
 
 # Per-signing-strategy colors (buffer_and_sign/per_chunk/hash_chain) --

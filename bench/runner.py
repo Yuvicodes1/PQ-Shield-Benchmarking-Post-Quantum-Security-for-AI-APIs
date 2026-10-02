@@ -43,12 +43,13 @@ CONFIG_TO_MODULE_NAME = {
     "classical-ecdhe": "classical_ecdhe",
     "hybrid": "hybrid",
     "hybrid-kex": "hybrid_kex",
+    "hybrid-kex-pq": "hybrid_kex_pq",
     "full-pqc": "full_pqc",
 }
 
 CSV_FIELDS = [
-    "run_id", "config", "payload_profile", "network_profile", "requests_per_handshake", "resumed", "concurrency", "repetition", "request_index",
-    "rtt_ms", "handshake_ms", "total_ms",
+    "run_id", "config", "payload_profile", "network_profile", "requests_per_handshake", "resumed", "auth_handshake", "concurrency", "repetition", "request_index",
+    "rtt_ms", "handshake_ms", "total_ms", "handshake_auth_verify_ms",
     "client_establish_ms", "verify_ms", "valid_signature",
     "kex_blob_bytes", "signature_bytes",
     "request_plaintext_bytes", "response_plaintext_bytes", "response_ciphertext_bytes",
@@ -121,12 +122,14 @@ def _flatten(row: dict, config_name: str, concurrency: int, repetition: int, idx
         "network_profile": "localhost",  # bench.orchestrator overrides when a netem proxy is in the path
         "requests_per_handshake": row.get("requests_per_handshake", 1),
         "resumed": row.get("resumed", False),
+        "auth_handshake": row.get("auth_handshake", False),
         "concurrency": concurrency,
         "repetition": repetition,
         "request_index": idx,
         "rtt_ms": row.get("rtt_ms"),
         "handshake_ms": row.get("handshake_ms"),
         "total_ms": row.get("total_ms"),
+        "handshake_auth_verify_ms": row.get("handshake_auth_verify_ms"),
         "client_establish_ms": row.get("client_establish_ms"),
         "verify_ms": row.get("verify_ms"),
         "valid_signature": row.get("valid_signature"),
@@ -155,6 +158,7 @@ async def run_sweep_cell(
     reuse_handshake: bool = False,
     run_id: str | None = None,
     requests_per_handshake: int = 1,
+    auth_handshake: bool = False,
 ) -> list[dict]:
     """Runs one (config, concurrency, repetition) cell and returns flattened rows.
 
@@ -171,6 +175,11 @@ async def run_sweep_cell(
     limits = httpx.Limits(max_connections=concurrency + 10, max_keepalive_connections=concurrency)
     async with httpx.AsyncClient(timeout=30.0, limits=limits) as client:
         cached_handshake = None
+        pinned_identity = None
+        if auth_handshake and config_name not in ("control", "control_2rt"):
+            from api.secure_client import fetch_identity
+
+            pinned_identity = await fetch_identity(client, base_url)
         if reuse_handshake and config_name not in ("control", "control_2rt"):
             from api.secure_client import do_handshake
 
@@ -197,10 +206,12 @@ async def run_sweep_cell(
                             client, base_url, config_name, _sample_request(),
                             debug_metrics=True, cached_handshake=cached_handshake,
                             session=session if requests_per_handshake > 1 else None,
+                            pinned_identity=pinned_identity,
                         )
                         if row.get("error"):
                             session = None  # start a fresh session after any failure
                     row["requests_per_handshake"] = requests_per_handshake
+                    row["auth_handshake"] = pinned_identity is not None
                     results.append(_flatten(row, config_name, concurrency, repetition, idx, run_id))
 
         workers = [asyncio.create_task(worker()) for _ in range(concurrency)]

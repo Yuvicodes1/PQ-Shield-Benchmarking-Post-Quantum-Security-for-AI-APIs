@@ -182,6 +182,7 @@ class BufferAndSignStrategy(StreamSigningStrategy):
             "ciphertext": aead.ciphertext,
             "signature": signature,
             "sign_ms": meta["sign_ms"],
+            "sign_cpu_ms": meta.get("sign_cpu_ms", 0.0),
             "signature_bytes": len(signature),
         }
 
@@ -207,6 +208,7 @@ class PerChunkStrategy(StreamSigningStrategy):
             "ciphertext": aead.ciphertext,
             "signature": signature,
             "sign_ms": meta["sign_ms"],
+            "sign_cpu_ms": meta.get("sign_cpu_ms", 0.0),
             "signature_bytes": len(signature),
         }
 
@@ -219,6 +221,7 @@ class PerChunkStrategy(StreamSigningStrategy):
             "n_chunks": n_chunks,
             "signature": signature,
             "sign_ms": meta["sign_ms"],
+            "sign_cpu_ms": meta.get("sign_cpu_ms", 0.0),
             "signature_bytes": len(signature),
         }
 
@@ -255,6 +258,7 @@ class HashChainStrategy(StreamSigningStrategy):
             "chain_hash": self._running_hash,
             "signature": None,
             "sign_ms": 0.0,
+            "sign_cpu_ms": 0.0,
             "signature_bytes": 0,
         }
         if self._checkpoint_interval and self._since_checkpoint >= self._checkpoint_interval:
@@ -262,6 +266,7 @@ class HashChainStrategy(StreamSigningStrategy):
                 self._handshake_id, checkpoint_message(self._ctx, index, self._running_hash))
             row["signature"] = signature
             row["sign_ms"] = meta["sign_ms"]
+            row["sign_cpu_ms"] = meta.get("sign_cpu_ms", 0.0)
             row["signature_bytes"] = len(signature)
             self._since_checkpoint = 0
         return row
@@ -278,6 +283,7 @@ class HashChainStrategy(StreamSigningStrategy):
             "n_chunks": n_chunks,
             "signature": signature,
             "sign_ms": meta["sign_ms"],
+            "sign_cpu_ms": meta.get("sign_cpu_ms", 0.0),
             "signature_bytes": len(signature),
         }
 
@@ -306,6 +312,11 @@ class HashChainClientState:
     against checkpoint and final signatures."""
 
     handshake_id: str
+    # The checkpoint interval the client requested. When set, a chunk that
+    # should carry a checkpoint signature but does not is a failure: without
+    # this, an attacker can strip every checkpoint and silently widen the
+    # exposure window to the whole stream (threats/streaming_attack_campaign.py).
+    checkpoint_interval: int | None = None
     running_hash: bytes = field(init=False)
     ctx: bytes = field(init=False)
     n_absorbed: int = field(default=0, init=False)
@@ -333,7 +344,8 @@ def verify_buffer_and_sign_final(final_chunk: dict, session_key: bytes, sig_publ
                                   client_crypto: ClientCryptoConfig, handshake_id: str) -> dict:
     msg = buffered_message(stream_context(handshake_id), final_chunk["nonce"], final_chunk["ciphertext"])
     valid, meta = client_crypto.verify(msg, final_chunk["signature"], sig_public_key)
-    result = {"signature_valid": valid, "verify_ms": meta["verify_ms"], "aead_ok": None, "plaintext": None}
+    result = {"signature_valid": valid, "verify_ms": meta["verify_ms"],
+              "verify_cpu_ms": meta.get("verify_cpu_ms", 0.0), "aead_ok": None, "plaintext": None}
     if valid:
         _decrypt_into(result, session_key, final_chunk["nonce"], final_chunk["ciphertext"])
     return result
@@ -347,6 +359,7 @@ def verify_per_chunk(chunk: dict, expected_index: int, session_key: bytes, sig_p
         "index": chunk["index"],
         "signature_valid": valid,
         "verify_ms": meta["verify_ms"],
+        "verify_cpu_ms": meta.get("verify_cpu_ms", 0.0),
         "in_order": chunk["index"] == expected_index,
         "aead_ok": None,
         "plaintext": None,
@@ -364,7 +377,7 @@ def verify_per_chunk_final(final_record: dict, n_received: int, sig_public_key: 
     valid, meta = client_crypto.verify(msg, final_record["signature"], sig_public_key)
     count_ok = final_record["n_chunks"] == n_received
     return {"signature_valid": valid, "count_matches": count_ok, "verify_ms": meta["verify_ms"],
-            "stream_fully_verified": valid and count_ok}
+            "verify_cpu_ms": meta.get("verify_cpu_ms", 0.0), "stream_fully_verified": valid and count_ok}
 
 
 def verify_hash_chain_chunk(chunk: dict, chain_state: HashChainClientState, session_key: bytes,
@@ -384,12 +397,18 @@ def verify_hash_chain_chunk(chunk: dict, chain_state: HashChainClientState, sess
         "plaintext": None,
         "checkpoint": False,
         "checkpoint_valid": None,
+        "checkpoint_missing": False,
         "verify_ms": 0.0,
+        "verify_cpu_ms": 0.0,
     }
+    k = chain_state.checkpoint_interval
+    if k and chain_state.n_absorbed % k == 0 and not chunk.get("signature"):
+        result["checkpoint_missing"] = True
     if chunk.get("signature") and sig_public_key is not None and client_crypto is not None:
         msg = checkpoint_message(chain_state.ctx, chunk["index"], expected_hash)
         valid, meta = client_crypto.verify(msg, chunk["signature"], sig_public_key)
-        result.update(checkpoint=True, checkpoint_valid=valid, verify_ms=meta["verify_ms"])
+        result.update(checkpoint=True, checkpoint_valid=valid, verify_ms=meta["verify_ms"],
+                      verify_cpu_ms=meta.get("verify_cpu_ms", 0.0))
     _decrypt_into(result, session_key, chunk["nonce"], chunk["ciphertext"])
     return result
 
@@ -407,5 +426,6 @@ def verify_hash_chain_final(final_chunk: dict, chain_state: HashChainClientState
         "count_matches": count_ok,
         "signature_valid": valid,
         "verify_ms": meta["verify_ms"],
+        "verify_cpu_ms": meta.get("verify_cpu_ms", 0.0),
         "stream_fully_verified": chain_matches and count_ok and valid,
     }

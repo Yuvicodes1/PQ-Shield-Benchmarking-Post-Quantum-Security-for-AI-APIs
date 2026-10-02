@@ -17,6 +17,9 @@ class HandshakeResponse(BaseModel):
     kex_algorithm: str
     sig_algorithm: str
     meta: dict
+    # Present only when the server runs with PQ_SHIELD_AUTH_HANDSHAKE=1: the
+    # identity key's signature over the transcript (crypto/handshake_auth.py).
+    transcript_signature: str | None = None
 
 
 class SecurePredictRequest(BaseModel):

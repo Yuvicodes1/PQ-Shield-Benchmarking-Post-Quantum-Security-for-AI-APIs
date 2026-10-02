@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import base64
 import json
+import os
 import time
 from contextlib import asynccontextmanager
 
@@ -40,6 +41,7 @@ from api.schemas import (
     SecurePredictResponse,
 )
 from crypto.aead import AEADError, aead_decrypt, aead_encrypt
+from crypto.handshake_auth import IdentityKey, identity_algorithm_for, transcript
 from crypto.registry import get_server_crypto
 from crypto.streaming import get_server_strategy
 from model.streaming_backends.registry import get_backend
@@ -59,6 +61,11 @@ def build_app(config_name: str) -> FastAPI:
     # handshake_id. Empty unless a client opts in, so the default
     # one-key-exchange-per-transaction measurement is unchanged.
     session_keys: dict[str, bytes] = {}
+    # Authenticated-handshake mode (off by default, so every main experiment
+    # measures the unauthenticated handshake): a long-term identity key signs
+    # each handshake transcript. Clients pin its public key from /secure/identity.
+    identity = (IdentityKey.generate(identity_algorithm_for(server_crypto.sig_algorithm))
+                if os.environ.get("PQ_SHIELD_AUTH_HANDSHAKE") == "1" else None)
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI):
@@ -75,16 +82,31 @@ def build_app(config_name: str) -> FastAPI:
             "payload_profile": model_service.active_profile_name(),
         }
 
+    @app.get("/secure/identity")
+    def identity_key():
+        if identity is None:
+            raise HTTPException(status_code=404, detail="Handshake authentication is not enabled")
+        return {"algorithm": identity.algorithm, "public_key": _b64e(identity.public_key)}
+
     @app.get("/secure/handshake", response_model=HandshakeResponse)
     def handshake():
         bundle = server_crypto.new_handshake()
+        meta = dict(bundle.meta)
+        transcript_signature = None
+        if identity is not None:
+            sig, sign_meta = identity.sign(transcript(
+                bundle.handshake_id, server_crypto.kex_algorithm, server_crypto.sig_algorithm,
+                bundle.kex_public_key, bundle.sig_public_key))
+            transcript_signature = _b64e(sig)
+            meta["transcript_sign_ms"] = sign_meta["sign_ms"]
         return HandshakeResponse(
             handshake_id=bundle.handshake_id,
             kex_public_key=_b64e(bundle.kex_public_key),
             sig_public_key=_b64e(bundle.sig_public_key),
             kex_algorithm=server_crypto.kex_algorithm,
             sig_algorithm=server_crypto.sig_algorithm,
-            meta=bundle.meta,
+            meta=meta,
+            transcript_signature=transcript_signature,
         )
 
     @app.post("/secure/predict", response_model=SecurePredictResponse)
