@@ -17,32 +17,36 @@
   <line x1="500" y1="130" x2="500" y2="190" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>
   <text x="560" y="163" text-anchor="start" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="11.5" fill="#94a3b8">HTTP requests</text>
   <text x="50" y="178" text-anchor="start" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="12.5" fill="#8b5cf6">Server layer  —  one process per configuration</text>
-  <rect x="50" y="190" width="140" height="72" rx="9" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="1.5"/>
-  <text x="120" y="217.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="600" fill="#4c1d95">Control</text>
-  <text x="120" y="238.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="10.5" fill="#6d28d9">no crypto</text>
-  <rect x="202" y="190" width="140" height="72" rx="9" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="1.5"/>
-  <text x="272" y="217.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="600" fill="#4c1d95">A: Classical-RSA</text>
-  <text x="272" y="238.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="10.5" fill="#6d28d9">RSA-2048 + ECDSA</text>
-  <rect x="354" y="190" width="140" height="72" rx="9" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="1.5"/>
-  <text x="424" y="217.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="11.5" font-weight="600" fill="#4c1d95">A′: Classical-ECDHE</text>
-  <text x="424" y="238.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="10.5" fill="#6d28d9">X25519 + ECDSA</text>
-  <rect x="506" y="190" width="140" height="72" rx="9" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="1.5"/>
-  <text x="576" y="217.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="600" fill="#4c1d95">B: Hybrid</text>
-  <text x="576" y="238.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="10.5" fill="#6d28d9">ML-KEM-768 + ECDSA</text>
-  <rect x="658" y="190" width="140" height="72" rx="9" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="1.5"/>
-  <text x="728" y="217.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="600" fill="#4c1d95">B′: Hybrid-KEX</text>
-  <text x="728" y="238.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="9.5" fill="#6d28d9">X25519MLKEM768+ECDSA</text>
-  <rect x="810" y="190" width="140" height="72" rx="9" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="1.5"/>
-  <text x="880" y="217.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="600" fill="#4c1d95">C: Full PQC</text>
-  <text x="880" y="238.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="9.5" fill="#6d28d9">ML-KEM-768+ML-DSA-65</text>
+  <rect x="51" y="190" width="118" height="72" rx="9" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="1.5"/>
+  <text x="110.0" y="217.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="11" font-weight="600" fill="#4c1d95">Control</text>
+  <text x="110.0" y="238.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="8.6" fill="#6d28d9">no crypto (1 or 2 req.)</text>
+  <rect x="181" y="190" width="118" height="72" rx="9" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="1.5"/>
+  <text x="240.0" y="217.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="10" font-weight="600" fill="#4c1d95">A: Classical-RSA</text>
+  <text x="240.0" y="238.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="8.6" fill="#6d28d9">RSA-2048 + ECDSA</text>
+  <rect x="311" y="190" width="118" height="72" rx="9" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="1.5"/>
+  <text x="370.0" y="217.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="10" font-weight="600" fill="#4c1d95">A′: Classical-ECDHE</text>
+  <text x="370.0" y="238.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="8.6" fill="#6d28d9">X25519 + ECDSA</text>
+  <rect x="441" y="190" width="118" height="72" rx="9" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="1.5"/>
+  <text x="500.0" y="217.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="11" font-weight="600" fill="#4c1d95">B: Hybrid</text>
+  <text x="500.0" y="238.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="8.6" fill="#6d28d9">ML-KEM-768 + ECDSA</text>
+  <rect x="571" y="190" width="118" height="72" rx="9" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="1.5"/>
+  <text x="630.0" y="217.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="11" font-weight="600" fill="#4c1d95">B′: Hybrid-KEX</text>
+  <text x="630.0" y="238.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="8.6" fill="#6d28d9">X25519MLKEM768+ECDSA</text>
+  <rect x="701" y="190" width="118" height="72" rx="9" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="1.5"/>
+  <text x="760.0" y="217.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="11" font-weight="600" fill="#4c1d95">C: Full PQC</text>
+  <text x="760.0" y="238.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="8.6" fill="#6d28d9">ML-KEM-768+ML-DSA-65</text>
+  <rect x="831" y="190" width="118" height="72" rx="9" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="1.5"/>
+  <text x="890.0" y="217.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="10" font-weight="600" fill="#4c1d95">C′: Hybrid-KEX-PQ</text>
+  <text x="890.0" y="238.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="8.6" fill="#6d28d9">X25519MLKEM768+ML-DSA</text>
   <rect x="370" y="320" width="260" height="72" rx="9" fill="#f0fdfa" stroke="#14b8a6" stroke-width="1.5"/>
   <text x="500.0" y="347.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="14.5" font-weight="600" fill="#134e4a">secure_app.py</text>
-  <text x="500.0" y="368.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="12" fill="#0f766e">handshake + predict endpoints</text>
-  <line x1="272" y1="262" x2="500" y2="320" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>
-  <line x1="424" y1="262" x2="500" y2="320" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>
-  <line x1="576" y1="262" x2="500" y2="320" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>
-  <line x1="728" y1="262" x2="500" y2="320" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>
-  <line x1="880" y1="262" x2="500" y2="320" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="500.0" y="368.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="12" fill="#0f766e">handshake + predict; optional identity key</text>
+  <line x1="240.0" y1="262" x2="500" y2="320" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <line x1="370.0" y1="262" x2="500" y2="320" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <line x1="500.0" y1="262" x2="500" y2="320" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <line x1="630.0" y1="262" x2="500" y2="320" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <line x1="760.0" y1="262" x2="500" y2="320" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <line x1="890.0" y1="262" x2="500" y2="320" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>
   <text x="50" y="308" text-anchor="start" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="12.5" fill="#14b8a6">Shared logic  —  identical across all protected configurations</text>
   <rect x="50" y="410" width="280" height="72" rx="9" fill="#f0fdfa" stroke="#14b8a6" stroke-width="1.5"/>
   <text x="190.0" y="437.0" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="14.5" font-weight="600" fill="#134e4a">model_service.py</text>

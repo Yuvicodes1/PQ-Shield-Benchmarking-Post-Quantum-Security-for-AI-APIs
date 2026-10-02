@@ -1,13 +1,12 @@
-\begin{table*}[t]
+\begin{table}[t]
 \centering
-\caption{Active tampering. (a) One flipped bit per response; detection time is the rejecting check alone. (b) Mid-stream sequence attacks on 60-token streams: share of trials detected at all, and before the stream completed (buffer-and-sign has no intermediate chunks to attack).}
+\caption{Tampering with single responses: one flipped bit per response, in the AEAD ciphertext or in the signature. Detection time is the rejecting check alone (median).}
 \label{tab:threats}
 \setlength{\tabcolsep}{4pt}
 \footnotesize
-\begin{tabular}[t]{@{}llrrl@{}}
+\begin{tabular}{@{}llrrr@{}}
 \toprule
-\multicolumn{5}{@{}l}{\textit{(a) Single-response tampering}} \\
-Config. & Target & $n$ & Detected & Median detection (ms) \\
+Config. & Target & $n$ & Detected & Detection (ms) \\
 \midrule
 Classical-RSA & ciphertext & 100 & 100\% & 0.007 \\
 Classical-RSA & signature & 100 & 100\% & 0.063 \\
@@ -19,63 +18,8 @@ Hybrid-KEX & ciphertext & 100 & 100\% & 0.008 \\
 Hybrid-KEX & signature & 100 & 100\% & 0.082 \\
 Full PQC & ciphertext & 100 & 100\% & 0.008 \\
 Full PQC & signature & 100 & 100\% & 0.059 \\
-\bottomrule
-\end{tabular}\hfill
-\begin{tabular}[t]{@{}llrrr@{}}
-\toprule
-\multicolumn{5}{@{}l}{\textit{(b) Streaming sequence attacks}} \\
-Config. & Strategy / attack & $n$ & Detected & Mid-stream \\
-\midrule
-Classical-RSA & Per-chunk / drop & 10 & 100\% & 100\% \\
-Classical-RSA & Per-chunk / duplicate & 10 & 100\% & 100\% \\
-Classical-RSA & Per-chunk / reorder & 10 & 100\% & 100\% \\
-Classical-RSA & Per-chunk / replay & 10 & 100\% & 100\% \\
-Classical-RSA & Per-chunk / truncate & 10 & 100\% & 0\% \\
-Classical-RSA & Hash-chain / drop & 10 & 100\% & 0\% \\
-Classical-RSA & Hash-chain / duplicate & 10 & 100\% & 0\% \\
-Classical-RSA & Hash-chain / reorder & 10 & 100\% & 0\% \\
-Classical-RSA & Hash-chain / replay & 10 & 100\% & 100\% \\
-Classical-RSA & Hash-chain / truncate & 10 & 100\% & 0\% \\
-Classical-ECDHE & Per-chunk / drop & 10 & 100\% & 100\% \\
-Classical-ECDHE & Per-chunk / duplicate & 10 & 100\% & 100\% \\
-Classical-ECDHE & Per-chunk / reorder & 10 & 100\% & 100\% \\
-Classical-ECDHE & Per-chunk / replay & 10 & 100\% & 100\% \\
-Classical-ECDHE & Per-chunk / truncate & 10 & 100\% & 0\% \\
-Classical-ECDHE & Hash-chain / drop & 10 & 100\% & 0\% \\
-Classical-ECDHE & Hash-chain / duplicate & 10 & 100\% & 0\% \\
-Classical-ECDHE & Hash-chain / reorder & 10 & 100\% & 0\% \\
-Classical-ECDHE & Hash-chain / replay & 10 & 100\% & 100\% \\
-Classical-ECDHE & Hash-chain / truncate & 10 & 100\% & 0\% \\
-Hybrid & Per-chunk / drop & 10 & 100\% & 100\% \\
-Hybrid & Per-chunk / duplicate & 10 & 100\% & 100\% \\
-Hybrid & Per-chunk / reorder & 10 & 100\% & 100\% \\
-Hybrid & Per-chunk / replay & 10 & 100\% & 100\% \\
-Hybrid & Per-chunk / truncate & 10 & 100\% & 0\% \\
-Hybrid & Hash-chain / drop & 10 & 100\% & 0\% \\
-Hybrid & Hash-chain / duplicate & 10 & 100\% & 0\% \\
-Hybrid & Hash-chain / reorder & 10 & 100\% & 0\% \\
-Hybrid & Hash-chain / replay & 10 & 100\% & 100\% \\
-Hybrid & Hash-chain / truncate & 10 & 100\% & 0\% \\
-Hybrid-KEX & Per-chunk / drop & 10 & 100\% & 100\% \\
-Hybrid-KEX & Per-chunk / duplicate & 10 & 100\% & 100\% \\
-Hybrid-KEX & Per-chunk / reorder & 10 & 100\% & 100\% \\
-Hybrid-KEX & Per-chunk / replay & 10 & 100\% & 100\% \\
-Hybrid-KEX & Per-chunk / truncate & 10 & 100\% & 0\% \\
-Hybrid-KEX & Hash-chain / drop & 10 & 100\% & 0\% \\
-Hybrid-KEX & Hash-chain / duplicate & 10 & 100\% & 0\% \\
-Hybrid-KEX & Hash-chain / reorder & 10 & 100\% & 0\% \\
-Hybrid-KEX & Hash-chain / replay & 10 & 100\% & 100\% \\
-Hybrid-KEX & Hash-chain / truncate & 10 & 100\% & 0\% \\
-Full PQC & Per-chunk / drop & 10 & 100\% & 100\% \\
-Full PQC & Per-chunk / duplicate & 10 & 100\% & 100\% \\
-Full PQC & Per-chunk / reorder & 10 & 100\% & 100\% \\
-Full PQC & Per-chunk / replay & 10 & 100\% & 100\% \\
-Full PQC & Per-chunk / truncate & 10 & 100\% & 0\% \\
-Full PQC & Hash-chain / drop & 10 & 100\% & 0\% \\
-Full PQC & Hash-chain / duplicate & 10 & 100\% & 0\% \\
-Full PQC & Hash-chain / reorder & 10 & 100\% & 0\% \\
-Full PQC & Hash-chain / replay & 10 & 100\% & 100\% \\
-Full PQC & Hash-chain / truncate & 10 & 100\% & 0\% \\
+Hybrid-KEX-PQ & ciphertext & 100 & 100\% & 0.009 \\
+Hybrid-KEX-PQ & signature & 100 & 100\% & 0.058 \\
 \bottomrule
 \end{tabular}
-\end{table*}
+\end{table}

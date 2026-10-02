@@ -1,0 +1,887 @@
+{
+  "ml_kem_768_keygen": {
+    "provenance": {
+      "source": "https://raw.githubusercontent.com/usnistgov/ACVP-Server/master/gen-val/json-files/ML-KEM-keyGen-FIPS203/internalProjection.json",
+      "fetched": "2026-09-02",
+      "note": "Trimmed to the ML-KEM-768 group only (source also has ML-KEM-512/1024). Full upstream file: run validation/vectors/fetch.sh."
+    },
+    "results": [
+      {
+        "tcId": 26,
+        "ek_match": true,
+        "dk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 27,
+        "ek_match": true,
+        "dk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 28,
+        "ek_match": true,
+        "dk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 29,
+        "ek_match": true,
+        "dk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 30,
+        "ek_match": true,
+        "dk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 31,
+        "ek_match": true,
+        "dk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 32,
+        "ek_match": true,
+        "dk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 33,
+        "ek_match": true,
+        "dk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 34,
+        "ek_match": true,
+        "dk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 35,
+        "ek_match": true,
+        "dk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 36,
+        "ek_match": true,
+        "dk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 37,
+        "ek_match": true,
+        "dk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 38,
+        "ek_match": true,
+        "dk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 39,
+        "ek_match": true,
+        "dk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 40,
+        "ek_match": true,
+        "dk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 41,
+        "ek_match": true,
+        "dk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 42,
+        "ek_match": true,
+        "dk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 43,
+        "ek_match": true,
+        "dk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 44,
+        "ek_match": true,
+        "dk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 45,
+        "ek_match": true,
+        "dk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 46,
+        "ek_match": true,
+        "dk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 47,
+        "ek_match": true,
+        "dk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 48,
+        "ek_match": true,
+        "dk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 49,
+        "ek_match": true,
+        "dk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 50,
+        "ek_match": true,
+        "dk_match": true,
+        "passed": true
+      }
+    ],
+    "passed": 25,
+    "total": 25
+  },
+  "ml_kem_768_encap_decap": {
+    "provenance": {
+      "source": "https://raw.githubusercontent.com/usnistgov/ACVP-Server/master/gen-val/json-files/ML-KEM-encapDecap-FIPS203/internalProjection.json",
+      "fetched": "2026-09-02",
+      "note": "Trimmed to ML-KEM-768 'encapsulation' (AFT) and 'decapsulation' (VAL, includes implicit-rejection cases) groups only. Source also has ML-KEM-512/1024 and 'encapsulationKeyCheck'/'decapsulationKeyCheck' groups (key-validity structural checks) -- the latter dropped because liboqs's public API has no separate key-validation entrypoint to test against; see validation/nist_kat.py docstring. Full upstream file: run validation/vectors/fetch.sh."
+    },
+    "encapsulation": {
+      "results": [
+        {
+          "tcId": 26,
+          "c_match": true,
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 27,
+          "c_match": true,
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 28,
+          "c_match": true,
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 29,
+          "c_match": true,
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 30,
+          "c_match": true,
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 31,
+          "c_match": true,
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 32,
+          "c_match": true,
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 33,
+          "c_match": true,
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 34,
+          "c_match": true,
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 35,
+          "c_match": true,
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 36,
+          "c_match": true,
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 37,
+          "c_match": true,
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 38,
+          "c_match": true,
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 39,
+          "c_match": true,
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 40,
+          "c_match": true,
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 41,
+          "c_match": true,
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 42,
+          "c_match": true,
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 43,
+          "c_match": true,
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 44,
+          "c_match": true,
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 45,
+          "c_match": true,
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 46,
+          "c_match": true,
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 47,
+          "c_match": true,
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 48,
+          "c_match": true,
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 49,
+          "c_match": true,
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 50,
+          "c_match": true,
+          "k_match": true,
+          "passed": true
+        }
+      ],
+      "passed": 25,
+      "total": 25
+    },
+    "decapsulation": {
+      "results": [
+        {
+          "tcId": 86,
+          "reason": "valid decapsulation",
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 87,
+          "reason": "valid decapsulation",
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 88,
+          "reason": "modified ciphertext",
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 89,
+          "reason": "valid decapsulation",
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 90,
+          "reason": "valid decapsulation",
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 91,
+          "reason": "modified ciphertext",
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 92,
+          "reason": "modified ciphertext",
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 93,
+          "reason": "modified ciphertext",
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 94,
+          "reason": "valid decapsulation",
+          "k_match": true,
+          "passed": true
+        },
+        {
+          "tcId": 95,
+          "reason": "modified ciphertext",
+          "k_match": true,
+          "passed": true
+        }
+      ],
+      "implicit_rejection_cases": 5,
+      "passed": 10,
+      "total": 10
+    }
+  },
+  "ml_dsa_65_sigver": {
+    "provenance": {
+      "source": "https://raw.githubusercontent.com/usnistgov/ACVP-Server/master/gen-val/json-files/ML-DSA-sigVer-FIPS204/internalProjection.json",
+      "fetched": "2026-09-02",
+      "note": "Trimmed to the ML-DSA-65 / signatureInterface=external / preHash=pure group only (15 tests). liboqs implements the FIPS 204 EXTERNAL/pure interface exclusively -- the source file's other three ML-DSA-65 group variants (preHash, and both 'internal' interface groups, which use a raw mu digest liboqs does not expose) are not testable against this binding and are dropped. Testing against them produces 12/15 apparent failures that are an interface mismatch, not a bug -- see validation/nist_kat.py module docstring. Full upstream file: run validation/vectors/fetch.sh."
+    },
+    "results": [
+      {
+        "tcId": 31,
+        "reason": "modified signature - z",
+        "context_bytes": 13,
+        "expected_valid": false,
+        "actual_valid": false,
+        "passed": true
+      },
+      {
+        "tcId": 32,
+        "reason": "modified signature - hint",
+        "context_bytes": 159,
+        "expected_valid": false,
+        "actual_valid": false,
+        "passed": true
+      },
+      {
+        "tcId": 33,
+        "reason": "valid signature and message - signature should verify successfully",
+        "context_bytes": 142,
+        "expected_valid": true,
+        "actual_valid": true,
+        "passed": true
+      },
+      {
+        "tcId": 34,
+        "reason": "modified signature - commitment",
+        "context_bytes": 141,
+        "expected_valid": false,
+        "actual_valid": false,
+        "passed": true
+      },
+      {
+        "tcId": 35,
+        "reason": "modified message",
+        "context_bytes": 181,
+        "expected_valid": false,
+        "actual_valid": false,
+        "passed": true
+      },
+      {
+        "tcId": 36,
+        "reason": "modified signature - z",
+        "context_bytes": 229,
+        "expected_valid": false,
+        "actual_valid": false,
+        "passed": true
+      },
+      {
+        "tcId": 37,
+        "reason": "modified signature - commitment",
+        "context_bytes": 61,
+        "expected_valid": false,
+        "actual_valid": false,
+        "passed": true
+      },
+      {
+        "tcId": 38,
+        "reason": "modified signature - hint",
+        "context_bytes": 163,
+        "expected_valid": false,
+        "actual_valid": false,
+        "passed": true
+      },
+      {
+        "tcId": 39,
+        "reason": "modified message",
+        "context_bytes": 0,
+        "expected_valid": false,
+        "actual_valid": false,
+        "passed": true
+      },
+      {
+        "tcId": 40,
+        "reason": "modified signature - z",
+        "context_bytes": 135,
+        "expected_valid": false,
+        "actual_valid": false,
+        "passed": true
+      },
+      {
+        "tcId": 41,
+        "reason": "modified signature - hint",
+        "context_bytes": 38,
+        "expected_valid": false,
+        "actual_valid": false,
+        "passed": true
+      },
+      {
+        "tcId": 42,
+        "reason": "modified signature - commitment",
+        "context_bytes": 255,
+        "expected_valid": false,
+        "actual_valid": false,
+        "passed": true
+      },
+      {
+        "tcId": 43,
+        "reason": "valid signature and message - signature should verify successfully",
+        "context_bytes": 149,
+        "expected_valid": true,
+        "actual_valid": true,
+        "passed": true
+      },
+      {
+        "tcId": 44,
+        "reason": "valid signature and message - signature should verify successfully",
+        "context_bytes": 133,
+        "expected_valid": true,
+        "actual_valid": true,
+        "passed": true
+      },
+      {
+        "tcId": 45,
+        "reason": "modified message",
+        "context_bytes": 148,
+        "expected_valid": false,
+        "actual_valid": false,
+        "passed": true
+      }
+    ],
+    "passed": 15,
+    "total": 15
+  },
+  "ml_dsa_65_keygen": {
+    "provenance": {
+      "source": "https://raw.githubusercontent.com/usnistgov/ACVP-Server/master/gen-val/json-files/ML-DSA-keyGen-FIPS204/internalProjection.json",
+      "fetched": "2026-10-02",
+      "note": "Trimmed to the ML-DSA-65 group only (25 tests, unmodified). Each test fixes the 32-byte seed xi of FIPS 204 Algorithm 1; validation/nist_kat.py feeds it to liboqs through OQS_randombytes_custom_algorithm (crypto/oqs_adapter.fixed_randomness), since liboqs exports no derandomized ML-DSA keygen. Full upstream file: run validation/vectors/fetch.sh."
+    },
+    "results": [
+      {
+        "tcId": 26,
+        "pk_match": true,
+        "sk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 27,
+        "pk_match": true,
+        "sk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 28,
+        "pk_match": true,
+        "sk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 29,
+        "pk_match": true,
+        "sk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 30,
+        "pk_match": true,
+        "sk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 31,
+        "pk_match": true,
+        "sk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 32,
+        "pk_match": true,
+        "sk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 33,
+        "pk_match": true,
+        "sk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 34,
+        "pk_match": true,
+        "sk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 35,
+        "pk_match": true,
+        "sk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 36,
+        "pk_match": true,
+        "sk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 37,
+        "pk_match": true,
+        "sk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 38,
+        "pk_match": true,
+        "sk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 39,
+        "pk_match": true,
+        "sk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 40,
+        "pk_match": true,
+        "sk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 41,
+        "pk_match": true,
+        "sk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 42,
+        "pk_match": true,
+        "sk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 43,
+        "pk_match": true,
+        "sk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 44,
+        "pk_match": true,
+        "sk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 45,
+        "pk_match": true,
+        "sk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 46,
+        "pk_match": true,
+        "sk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 47,
+        "pk_match": true,
+        "sk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 48,
+        "pk_match": true,
+        "sk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 49,
+        "pk_match": true,
+        "sk_match": true,
+        "passed": true
+      },
+      {
+        "tcId": 50,
+        "pk_match": true,
+        "sk_match": true,
+        "passed": true
+      }
+    ],
+    "passed": 25,
+    "total": 25
+  },
+  "ml_dsa_65_siggen": {
+    "provenance": {
+      "source": "https://raw.githubusercontent.com/usnistgov/ACVP-Server/master/gen-val/json-files/ML-DSA-sigGen-FIPS204/internalProjection.json",
+      "fetched": "2026-10-02",
+      "note": "Trimmed to the two ML-DSA-65 / signatureInterface=external / preHash=pure groups (15 deterministic tests with rnd = 0^32, 15 hedged tests with an explicit rnd), unmodified. liboqs implements only the external/pure interface (see validation/nist_kat.py). The 32-byte rnd of FIPS 204 Algorithm 2 is fed to liboqs through OQS_randombytes_custom_algorithm (crypto/oqs_adapter.fixed_randomness). Full upstream file: run validation/vectors/fetch.sh."
+    },
+    "results": [
+      {
+        "tcId": 31,
+        "deterministic": true,
+        "context_bytes": 17,
+        "passed": true
+      },
+      {
+        "tcId": 32,
+        "deterministic": true,
+        "context_bytes": 106,
+        "passed": true
+      },
+      {
+        "tcId": 33,
+        "deterministic": true,
+        "context_bytes": 228,
+        "passed": true
+      },
+      {
+        "tcId": 34,
+        "deterministic": true,
+        "context_bytes": 213,
+        "passed": true
+      },
+      {
+        "tcId": 35,
+        "deterministic": true,
+        "context_bytes": 209,
+        "passed": true
+      },
+      {
+        "tcId": 36,
+        "deterministic": true,
+        "context_bytes": 105,
+        "passed": true
+      },
+      {
+        "tcId": 37,
+        "deterministic": true,
+        "context_bytes": 83,
+        "passed": true
+      },
+      {
+        "tcId": 38,
+        "deterministic": true,
+        "context_bytes": 91,
+        "passed": true
+      },
+      {
+        "tcId": 39,
+        "deterministic": true,
+        "context_bytes": 255,
+        "passed": true
+      },
+      {
+        "tcId": 40,
+        "deterministic": true,
+        "context_bytes": 205,
+        "passed": true
+      },
+      {
+        "tcId": 41,
+        "deterministic": true,
+        "context_bytes": 11,
+        "passed": true
+      },
+      {
+        "tcId": 42,
+        "deterministic": true,
+        "context_bytes": 96,
+        "passed": true
+      },
+      {
+        "tcId": 43,
+        "deterministic": true,
+        "context_bytes": 71,
+        "passed": true
+      },
+      {
+        "tcId": 44,
+        "deterministic": true,
+        "context_bytes": 0,
+        "passed": true
+      },
+      {
+        "tcId": 45,
+        "deterministic": true,
+        "context_bytes": 8,
+        "passed": true
+      },
+      {
+        "tcId": 211,
+        "deterministic": false,
+        "context_bytes": 73,
+        "passed": true
+      },
+      {
+        "tcId": 212,
+        "deterministic": false,
+        "context_bytes": 177,
+        "passed": true
+      },
+      {
+        "tcId": 213,
+        "deterministic": false,
+        "context_bytes": 223,
+        "passed": true
+      },
+      {
+        "tcId": 214,
+        "deterministic": false,
+        "context_bytes": 171,
+        "passed": true
+      },
+      {
+        "tcId": 215,
+        "deterministic": false,
+        "context_bytes": 255,
+        "passed": true
+      },
+      {
+        "tcId": 216,
+        "deterministic": false,
+        "context_bytes": 0,
+        "passed": true
+      },
+      {
+        "tcId": 217,
+        "deterministic": false,
+        "context_bytes": 70,
+        "passed": true
+      },
+      {
+        "tcId": 218,
+        "deterministic": false,
+        "context_bytes": 168,
+        "passed": true
+      },
+      {
+        "tcId": 219,
+        "deterministic": false,
+        "context_bytes": 77,
+        "passed": true
+      },
+      {
+        "tcId": 220,
+        "deterministic": false,
+        "context_bytes": 54,
+        "passed": true
+      },
+      {
+        "tcId": 221,
+        "deterministic": false,
+        "context_bytes": 101,
+        "passed": true
+      },
+      {
+        "tcId": 222,
+        "deterministic": false,
+        "context_bytes": 182,
+        "passed": true
+      },
+      {
+        "tcId": 223,
+        "deterministic": false,
+        "context_bytes": 111,
+        "passed": true
+      },
+      {
+        "tcId": 224,
+        "deterministic": false,
+        "context_bytes": 162,
+        "passed": true
+      },
+      {
+        "tcId": 225,
+        "deterministic": false,
+        "context_bytes": 39,
+        "passed": true
+      }
+    ],
+    "deterministic_passed": 15,
+    "hedged_passed": 15,
+    "passed": 30,
+    "total": 30
+  },
+  "not_achievable": {
+    "ml_kem_768_key_checks": "liboqs exposes no isolated key-validation entrypoint -- see module docstring",
+    "ml_dsa_65_internal_interface": "liboqs implements only the external/pure ML-DSA interface -- see module docstring"
+  },
+  "summary": {
+    "total_checks": 130,
+    "passed": 130,
+    "all_passed": true
+  }
+}

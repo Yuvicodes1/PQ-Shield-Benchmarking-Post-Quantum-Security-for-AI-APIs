@@ -1,0 +1,22 @@
+\begin{table}[t]
+\centering
+\caption{Full man-in-the-middle (key substitution) against a live server, pooled over 6 configurations (results were identical in each). Accepted: the client accepted the response; Read: the attacker decrypted the request; Forged: the client accepted an attacker-chosen prediction. Pinned: the client checks the handshake transcript signature under a pinned server identity key (Section~\ref{sec:auth}). Counts out of 1,800 trials per row (300 per configuration).}
+\label{tab:keysub}
+\setlength{\tabcolsep}{1.6pt}
+\footnotesize
+\begin{tabular}{@{}llrrrl@{}}
+\toprule
+Client & Attack & Accepted & Read & Forged & Rejected \\
+\midrule
+Unauth. & None & 1,800 & 0 & 0 & -- \\
+ & Substitute & 1,800 & 1,800 & 1,800 & -- \\
+ & Subst.\ + re-sign & 1,800 & 1,800 & 1,800 & -- \\
+ & Relay + bit flip & 0 & 0 & 0 & AEAD \\
+\addlinespace
+Pinned & None & 1,800 & 0 & 0 & -- \\
+ & Substitute & 0 & 0 & 0 & handshake \\
+ & Subst.\ + re-sign & 0 & 0 & 0 & handshake \\
+ & Relay + bit flip & 0 & 0 & 0 & AEAD \\
+\bottomrule
+\end{tabular}
+\end{table}

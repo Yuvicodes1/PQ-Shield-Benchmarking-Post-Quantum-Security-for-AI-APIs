@@ -1,0 +1,5733 @@
+{
+  "backend": "llama_cpp",
+  "trials": 500,
+  "pool": 10,
+  "max_tokens": 100,
+  "seed": 20261003,
+  "rows": [
+    {
+      "config": "classical",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 481,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 9.014,
+      "exposure_chunks_max": 19,
+      "unverified_at_detection_mean": 19.0,
+      "unverified_at_detection_max": 19,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 11.148,
+      "exposure_chunks_max": 20,
+      "unverified_at_detection_mean": 20.0,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 10.15,
+      "exposure_chunks_max": 20,
+      "unverified_at_detection_mean": 21.0,
+      "unverified_at_detection_max": 21,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 9.732,
+      "unverified_at_detection_max": 19,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 10.24,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 472,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.498,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.462,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.5,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.512,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.524,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "checkpoint_strip",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.0,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "checkpoint_strip_v2client",
+      "n": 500,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.007350610051907784
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": 20.0,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "checkpoint_move",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.0,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "drop_before_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "drop_after_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "reorder_across",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.0,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 473,
+      "exposure_chunks_mean": 1.212,
+      "exposure_chunks_max": 3,
+      "unverified_at_detection_mean": 3.208,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 1.952,
+      "exposure_chunks_max": 4,
+      "unverified_at_detection_mean": 3.78,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 1.252,
+      "exposure_chunks_max": 3,
+      "unverified_at_detection_mean": 3.264,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 2.082,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.934,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "checkpoint_strip",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.0,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "checkpoint_strip_v2client",
+      "n": 500,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.007350610051907784
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": 20.0,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "checkpoint_move",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.0,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "drop_before_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 3.0,
+      "unverified_at_detection_max": 3,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "drop_after_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 3.0,
+      "exposure_chunks_max": 3,
+      "unverified_at_detection_mean": 3.0,
+      "unverified_at_detection_max": 3,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "reorder_across",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.0,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 481,
+      "exposure_chunks_mean": 3.41,
+      "exposure_chunks_max": 8,
+      "unverified_at_detection_mean": 8.092,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 4.818,
+      "exposure_chunks_max": 9,
+      "unverified_at_detection_mean": 8.902,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 3.598,
+      "exposure_chunks_max": 8,
+      "unverified_at_detection_mean": 8.244,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.528,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.476,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "checkpoint_strip",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 9.0,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "checkpoint_strip_v2client",
+      "n": 500,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.007350610051907784
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": 20.0,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "checkpoint_move",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 9.0,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "drop_before_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 8.0,
+      "unverified_at_detection_max": 8,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "drop_after_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 8.0,
+      "exposure_chunks_max": 8,
+      "unverified_at_detection_mean": 8.0,
+      "unverified_at_detection_max": 8,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "reorder_across",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 9.0,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 476,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 9.61,
+      "exposure_chunks_max": 19,
+      "unverified_at_detection_mean": 19.0,
+      "unverified_at_detection_max": 19,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 11.062,
+      "exposure_chunks_max": 20,
+      "unverified_at_detection_mean": 20.0,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 10.132,
+      "exposure_chunks_max": 20,
+      "unverified_at_detection_mean": 21.0,
+      "unverified_at_detection_max": 21,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 9.744,
+      "unverified_at_detection_max": 19,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 10.406,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 474,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.53,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.446,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.524,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.516,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.464,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "checkpoint_strip",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.0,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "checkpoint_strip_v2client",
+      "n": 500,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.007350610051907784
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": 20.0,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "checkpoint_move",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.0,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "drop_before_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "drop_after_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "reorder_across",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.0,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 478,
+      "exposure_chunks_mean": 1.216,
+      "exposure_chunks_max": 3,
+      "unverified_at_detection_mean": 3.216,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 1.958,
+      "exposure_chunks_max": 4,
+      "unverified_at_detection_mean": 3.806,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 1.136,
+      "exposure_chunks_max": 3,
+      "unverified_at_detection_mean": 3.28,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.92,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.96,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "checkpoint_strip",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.0,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "checkpoint_strip_v2client",
+      "n": 500,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.007350610051907784
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": 20.0,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "checkpoint_move",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.0,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "drop_before_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 3.0,
+      "unverified_at_detection_max": 3,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "drop_after_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 3.0,
+      "exposure_chunks_max": 3,
+      "unverified_at_detection_mean": 3.0,
+      "unverified_at_detection_max": 3,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "reorder_across",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.0,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 469,
+      "exposure_chunks_mean": 3.488,
+      "exposure_chunks_max": 8,
+      "unverified_at_detection_mean": 8.116,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 4.582,
+      "exposure_chunks_max": 9,
+      "unverified_at_detection_mean": 8.87,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 3.456,
+      "exposure_chunks_max": 8,
+      "unverified_at_detection_mean": 7.83,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.46,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.718,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "checkpoint_strip",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 9.0,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "checkpoint_strip_v2client",
+      "n": 500,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.007350610051907784
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": 20.0,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "checkpoint_move",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 9.0,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "drop_before_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 8.0,
+      "unverified_at_detection_max": 8,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "drop_after_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 8.0,
+      "exposure_chunks_max": 8,
+      "unverified_at_detection_mean": 8.0,
+      "unverified_at_detection_max": 8,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "classical_ecdhe",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "reorder_across",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 9.0,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 472,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 9.592,
+      "exposure_chunks_max": 19,
+      "unverified_at_detection_mean": 19.0,
+      "unverified_at_detection_max": 19,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 11.188,
+      "exposure_chunks_max": 20,
+      "unverified_at_detection_mean": 20.0,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 10.354,
+      "exposure_chunks_max": 20,
+      "unverified_at_detection_mean": 21.0,
+      "unverified_at_detection_max": 21,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 10.046,
+      "unverified_at_detection_max": 19,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 10.324,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 461,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.528,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.512,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.472,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.504,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.52,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "checkpoint_strip",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.0,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "checkpoint_strip_v2client",
+      "n": 500,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.007350610051907784
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": 20.0,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "checkpoint_move",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.0,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "drop_before_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "drop_after_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "reorder_across",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.0,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 482,
+      "exposure_chunks_mean": 1.202,
+      "exposure_chunks_max": 3,
+      "unverified_at_detection_mean": 3.198,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 1.928,
+      "exposure_chunks_max": 4,
+      "unverified_at_detection_mean": 3.79,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 1.126,
+      "exposure_chunks_max": 3,
+      "unverified_at_detection_mean": 3.192,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.918,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 2.044,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "checkpoint_strip",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.0,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "checkpoint_strip_v2client",
+      "n": 500,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.007350610051907784
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": 20.0,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "checkpoint_move",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.0,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "drop_before_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 3.0,
+      "unverified_at_detection_max": 3,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "drop_after_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 3.0,
+      "exposure_chunks_max": 3,
+      "unverified_at_detection_mean": 3.0,
+      "unverified_at_detection_max": 3,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "reorder_across",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.0,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 478,
+      "exposure_chunks_mean": 3.698,
+      "exposure_chunks_max": 8,
+      "unverified_at_detection_mean": 8.094,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 4.53,
+      "exposure_chunks_max": 9,
+      "unverified_at_detection_mean": 8.896,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 3.602,
+      "exposure_chunks_max": 8,
+      "unverified_at_detection_mean": 8.208,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.528,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.638,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "checkpoint_strip",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 9.0,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "checkpoint_strip_v2client",
+      "n": 500,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.007350610051907784
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": 20.0,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "checkpoint_move",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 9.0,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "drop_before_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 8.0,
+      "unverified_at_detection_max": 8,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "drop_after_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 8.0,
+      "exposure_chunks_max": 8,
+      "unverified_at_detection_mean": 8.0,
+      "unverified_at_detection_max": 8,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "reorder_across",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 9.0,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 479,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 9.584,
+      "exposure_chunks_max": 19,
+      "unverified_at_detection_mean": 19.0,
+      "unverified_at_detection_max": 19,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 10.92,
+      "exposure_chunks_max": 20,
+      "unverified_at_detection_mean": 20.0,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 10.45,
+      "exposure_chunks_max": 20,
+      "unverified_at_detection_mean": 21.0,
+      "unverified_at_detection_max": 21,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 9.156,
+      "unverified_at_detection_max": 19,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 10.348,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 482,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.52,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.482,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.456,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.504,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.556,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "checkpoint_strip",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.0,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "checkpoint_strip_v2client",
+      "n": 500,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.007350610051907784
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": 20.0,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "checkpoint_move",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.0,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "drop_before_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "drop_after_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "reorder_across",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.0,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 479,
+      "exposure_chunks_mean": 1.266,
+      "exposure_chunks_max": 3,
+      "unverified_at_detection_mean": 3.184,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 1.956,
+      "exposure_chunks_max": 4,
+      "unverified_at_detection_mean": 3.806,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 1.194,
+      "exposure_chunks_max": 3,
+      "unverified_at_detection_mean": 3.208,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.994,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.922,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "checkpoint_strip",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.0,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "checkpoint_strip_v2client",
+      "n": 500,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.007350610051907784
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": 20.0,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "checkpoint_move",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.0,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "drop_before_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 3.0,
+      "unverified_at_detection_max": 3,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "drop_after_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 3.0,
+      "exposure_chunks_max": 3,
+      "unverified_at_detection_mean": 3.0,
+      "unverified_at_detection_max": 3,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "reorder_across",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.0,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 474,
+      "exposure_chunks_mean": 3.54,
+      "exposure_chunks_max": 8,
+      "unverified_at_detection_mean": 8.116,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 4.374,
+      "exposure_chunks_max": 9,
+      "unverified_at_detection_mean": 8.856,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 3.64,
+      "exposure_chunks_max": 8,
+      "unverified_at_detection_mean": 8.082,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.31,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.522,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "checkpoint_strip",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 9.0,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "checkpoint_strip_v2client",
+      "n": 500,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.007350610051907784
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": 20.0,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "checkpoint_move",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 9.0,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "drop_before_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 8.0,
+      "unverified_at_detection_max": 8,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "drop_after_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 8.0,
+      "exposure_chunks_max": 8,
+      "unverified_at_detection_mean": 8.0,
+      "unverified_at_detection_max": 8,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "reorder_across",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 9.0,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 473,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 9.218,
+      "exposure_chunks_max": 19,
+      "unverified_at_detection_mean": 19.0,
+      "unverified_at_detection_max": 19,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 11.052,
+      "exposure_chunks_max": 20,
+      "unverified_at_detection_mean": 20.0,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 10.314,
+      "exposure_chunks_max": 20,
+      "unverified_at_detection_mean": 21.0,
+      "unverified_at_detection_max": 21,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 9.636,
+      "unverified_at_detection_max": 19,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 10.67,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 485,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.512,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.494,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.502,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.492,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.454,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "checkpoint_strip",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.0,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "checkpoint_strip_v2client",
+      "n": 500,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.007350610051907784
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": 20.0,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "checkpoint_move",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.0,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "drop_before_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "drop_after_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "reorder_across",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.0,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 464,
+      "exposure_chunks_mean": 1.23,
+      "exposure_chunks_max": 3,
+      "unverified_at_detection_mean": 3.212,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 1.854,
+      "exposure_chunks_max": 4,
+      "unverified_at_detection_mean": 3.782,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 1.25,
+      "exposure_chunks_max": 3,
+      "unverified_at_detection_mean": 3.184,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 2.042,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.994,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "checkpoint_strip",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.0,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "checkpoint_strip_v2client",
+      "n": 500,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.007350610051907784
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": 20.0,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "checkpoint_move",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.0,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "drop_before_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 3.0,
+      "unverified_at_detection_max": 3,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "drop_after_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 3.0,
+      "exposure_chunks_max": 3,
+      "unverified_at_detection_mean": 3.0,
+      "unverified_at_detection_max": 3,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "reorder_across",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.0,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 480,
+      "exposure_chunks_mean": 3.658,
+      "exposure_chunks_max": 8,
+      "unverified_at_detection_mean": 8.082,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 4.552,
+      "exposure_chunks_max": 9,
+      "unverified_at_detection_mean": 8.904,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 3.534,
+      "exposure_chunks_max": 8,
+      "unverified_at_detection_mean": 8.028,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.43,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.706,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "checkpoint_strip",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 9.0,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "checkpoint_strip_v2client",
+      "n": 500,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.007350610051907784
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": 20.0,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "checkpoint_move",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 9.0,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "drop_before_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 8.0,
+      "unverified_at_detection_max": 8,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "drop_after_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 8.0,
+      "exposure_chunks_max": 8,
+      "unverified_at_detection_mean": 8.0,
+      "unverified_at_detection_max": 8,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "full_pqc",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "reorder_across",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 9.0,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 479,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "per_chunk",
+      "checkpoint_interval": null,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 9.448,
+      "exposure_chunks_max": 19,
+      "unverified_at_detection_mean": 19.0,
+      "unverified_at_detection_max": 19,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 10.746,
+      "exposure_chunks_max": 20,
+      "unverified_at_detection_mean": 20.0,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 10.492,
+      "exposure_chunks_max": 20,
+      "unverified_at_detection_mean": 21.0,
+      "unverified_at_detection_max": 21,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 9.75,
+      "unverified_at_detection_max": 19,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 10.57,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": null,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 486,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.498,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.484,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.516,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.484,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.476,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "checkpoint_strip",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.0,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "checkpoint_strip_v2client",
+      "n": 500,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.007350610051907784
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": 20.0,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "checkpoint_move",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.0,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "drop_before_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "drop_after_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 2,
+      "attack": "reorder_across",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.0,
+      "unverified_at_detection_max": 1,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 471,
+      "exposure_chunks_mean": 1.136,
+      "exposure_chunks_max": 3,
+      "unverified_at_detection_mean": 3.222,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 1.86,
+      "exposure_chunks_max": 4,
+      "unverified_at_detection_mean": 3.798,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 1.246,
+      "exposure_chunks_max": 3,
+      "unverified_at_detection_mean": 3.24,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 1.966,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 2.05,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "checkpoint_strip",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.0,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "checkpoint_strip_v2client",
+      "n": 500,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.007350610051907784
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": 20.0,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "checkpoint_move",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.0,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "drop_before_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 3.0,
+      "unverified_at_detection_max": 3,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "drop_after_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 3.0,
+      "exposure_chunks_max": 3,
+      "unverified_at_detection_mean": 3.0,
+      "unverified_at_detection_max": 3,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 5,
+      "attack": "reorder_across",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.0,
+      "unverified_at_detection_max": 4,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "benign",
+      "n": 10,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.3084971078187608
+      ],
+      "mid_stream": null,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": null,
+      "unverified_at_detection_max": null,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "drop",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 476,
+      "exposure_chunks_mean": 3.678,
+      "exposure_chunks_max": 8,
+      "unverified_at_detection_mean": 8.096,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "reorder",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 4.522,
+      "exposure_chunks_max": 9,
+      "unverified_at_detection_mean": 8.894,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "duplicate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 3.632,
+      "exposure_chunks_max": 8,
+      "unverified_at_detection_mean": 8.082,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.566,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "truncate",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 4.65,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "session_replay",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 0.0,
+      "unverified_at_detection_max": 0,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "checkpoint_strip",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 9.0,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "checkpoint_strip_v2client",
+      "n": 500,
+      "detected": 0,
+      "detected_ci95": [
+        0.0,
+        0.007350610051907784
+      ],
+      "mid_stream": 0,
+      "exposure_chunks_mean": null,
+      "exposure_chunks_max": null,
+      "unverified_at_detection_mean": 20.0,
+      "unverified_at_detection_max": 20,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "checkpoint_move",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 9.0,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "drop_before_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 8.0,
+      "unverified_at_detection_max": 8,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "drop_after_ckpt",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 8.0,
+      "exposure_chunks_max": 8,
+      "unverified_at_detection_mean": 8.0,
+      "unverified_at_detection_max": 8,
+      "n_chunks_mean": 20.0
+    },
+    {
+      "config": "hybrid_kex_pq",
+      "strategy": "hash_chain",
+      "checkpoint_interval": 10,
+      "attack": "reorder_across",
+      "n": 500,
+      "detected": 500,
+      "detected_ci95": [
+        0.9926493899480923,
+        1.0
+      ],
+      "mid_stream": 500,
+      "exposure_chunks_mean": 0.0,
+      "exposure_chunks_max": 0,
+      "unverified_at_detection_mean": 9.0,
+      "unverified_at_detection_max": 9,
+      "n_chunks_mean": 20.0
+    }
+  ]
+}

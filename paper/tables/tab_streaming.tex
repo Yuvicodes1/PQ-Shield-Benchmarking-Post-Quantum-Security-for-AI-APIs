@@ -1,52 +1,61 @@
 \begin{table*}[t]
 \centering
-\caption{Streaming signature strategies on a real Llama-3.2-3B-Instruct backend (10 repetitions per cell; median, with interquartile range for TTFT). Signing and verification times are summed over the whole stream.}
+\caption{Streaming signature strategies on a real Llama-3.2-3B-Instruct backend (10 repetitions per cell; median, with interquartile range for TTFT). Signing and verification times are summed over the whole stream and given as wall-clock / thread-CPU time; Section~\ref{sec:timing} explains why per-signature cost in a stream exceeds the back-to-back microbenchmark. Generation slowed over the sweep (thermal), so compare times within a configuration, not across.}
 \label{tab:streaming}
-\setlength{\tabcolsep}{4pt}
+\setlength{\tabcolsep}{2.4pt}
+\footnotesize
 \begin{tabular}{@{}rllrrrrrr@{}}
 \toprule
-Tokens & Config. & Strategy & TTFT (ms) & Total (ms) & Sigs & Sig. bytes & Sign (ms) & Verify (ms) \\
+Tokens & Config. & Strategy & TTFT (ms) & Total (ms) & Sigs & Sig. bytes & Sign wall/CPU (ms) & Verify wall/CPU (ms) \\
 \midrule
-50 & Classical-RSA & Buffer-and-sign & 1,239.6 [1,239--1,241] & 1,240 & 1 & 71 & 0.07 & 0.07 \\
- &  & Per-chunk & 128.6 [128--132] & 1,252 & 10 & 783 & 0.43 & 0.73 \\
- &  & Hash-chain & 127.3 [127--132] & 1,242 & 1 & 71 & 0.08 & 0.07 \\
+50 & Classical-RSA & Buffer-and-sign & 1,239.0 [1,238--1,241] & 1,239 & 1 & 72 & 0.07 / 0.07 & 0.08 / 0.08 \\
+ &  & Per-chunk & 126.7 [126--129] & 1,236 & 11 & 780 & 0.43 / 0.44 & 0.74 / 0.74 \\
+ &  & Hash-chain & 127.7 [126--130] & 1,239 & 1 & 71 & 0.08 / 0.08 & 0.07 / 0.08 \\
 \addlinespace[1pt]
- & Classical-ECDHE & Buffer-and-sign & 1,331.8 [1,319--1,335] & 1,332 & 1 & 71 & 0.07 & 0.08 \\
- &  & Per-chunk & 135.1 [134--137] & 1,382 & 10 & 780 & 0.43 & 0.73 \\
- &  & Hash-chain & 128.5 [128--129] & 1,280 & 1 & 71 & 0.08 & 0.07 \\
+ & Classical-ECDHE & Buffer-and-sign & 1,268.1 [1,256--1,289] & 1,268 & 1 & 71 & 0.07 / 0.07 & 0.08 / 0.08 \\
+ &  & Per-chunk & 127.4 [126--129] & 1,262 & 11 & 782 & 0.45 / 0.46 & 0.74 / 0.74 \\
+ &  & Hash-chain & 132.8 [130--135] & 1,332 & 1 & 71 & 0.09 / 0.09 & 0.08 / 0.09 \\
 \addlinespace[1pt]
- & Hybrid & Buffer-and-sign & 1,277.0 [1,234--1,370] & 1,277 & 1 & 71 & 0.07 & 0.08 \\
- &  & Per-chunk & 142.9 [141--144] & 1,446 & 10 & 782 & 0.43 & 0.72 \\
- &  & Hash-chain & 137.8 [137--139] & 1,400 & 1 & 71 & 0.08 & 0.07 \\
+ & Hybrid & Buffer-and-sign & 1,313.6 [1,312--1,316] & 1,315 & 1 & 71 & 0.33 / 0.34 & 0.35 / 0.35 \\
+ &  & Per-chunk & 136.5 [136--138] & 1,366 & 11 & 781 & 2.55 / 2.59 & 4.57 / 4.56 \\
+ &  & Hash-chain & 134.6 [131--136] & 1,350 & 1 & 71 & 0.34 / 0.34 & 0.34 / 0.34 \\
 \addlinespace[1pt]
- & Hybrid-KEX & Buffer-and-sign & 1,455.5 [1,434--1,529] & 1,456 & 1 & 71 & 0.34 & 0.37 \\
- &  & Per-chunk & 145.3 [142--149] & 1,478 & 10 & 782 & 2.39 & 4.02 \\
- &  & Hash-chain & 153.3 [144--155] & 1,530 & 1 & 70 & 0.25 & 0.31 \\
+ & Hybrid-KEX & Buffer-and-sign & 1,284.6 [1,280--1,290] & 1,285 & 1 & 71 & 0.07 / 0.07 & 0.08 / 0.08 \\
+ &  & Per-chunk & 126.8 [125--128] & 1,241 & 11 & 782 & 0.42 / 0.43 & 0.73 / 0.73 \\
+ &  & Hash-chain & 135.6 [135--136] & 1,361 & 1 & 70 & 0.36 / 0.36 & 0.34 / 0.34 \\
 \addlinespace[1pt]
- & Full PQC & Buffer-and-sign & 1,535.8 [1,505--1,585] & 1,537 & 1 & 3,309 & 0.61 & 0.28 \\
- &  & Per-chunk & 141.9 [133--162] & 1,431 & 10 & 36,399 & 4.40 & 2.53 \\
- &  & Hash-chain & 152.5 [143--160] & 1,525 & 1 & 3,309 & 0.53 & 0.21 \\
+ & Full PQC & Buffer-and-sign & 1,298.6 [1,242--1,314] & 1,300 & 1 & 3,309 & 0.46 / 0.47 & 0.22 / 0.22 \\
+ &  & Per-chunk & 134.5 [133--135] & 1,366 & 11 & 36,399 & 1.15 / 1.16 & 0.55 / 0.55 \\
+ &  & Hash-chain & 133.7 [133--134] & 1,353 & 1 & 3,309 & 0.09 / 0.09 & 0.05 / 0.05 \\
+\addlinespace[1pt]
+ & Hybrid-KEX-PQ & Buffer-and-sign & 1,322.0 [1,312--1,358] & 1,323 & 1 & 3,309 & 0.43 / 0.44 & 0.26 / 0.27 \\
+ &  & Per-chunk & 137.7 [137--140] & 1,387 & 11 & 36,399 & 6.14 / 6.17 & 3.02 / 3.03 \\
+ &  & Hash-chain & 137.5 [137--142] & 1,387 & 1 & 3,309 & 0.63 / 0.64 & 0.20 / 0.20 \\
 \addlinespace[1pt]
 \midrule
-200 & Classical-RSA & Buffer-and-sign & 5,013.0 [5,007--5,035] & 5,013 & 1 & 71 & 0.07 & 0.09 \\
- &  & Per-chunk & 133.6 [128--136] & 4,943 & 40 & 2,908 & 1.47 & 2.59 \\
- &  & Hash-chain & 126.8 [126--129] & 4,948 & 1 & 71 & 0.07 & 0.07 \\
+200 & Classical-RSA & Buffer-and-sign & 5,053.1 [4,962--5,304] & 5,054 & 1 & 71 & 0.08 / 0.08 & 0.10 / 0.10 \\
+ &  & Per-chunk & 128.2 [128--129] & 4,997 & 41 & 2,912 & 1.60 / 1.62 & 2.72 / 2.73 \\
+ &  & Hash-chain & 127.0 [127--130] & 4,964 & 1 & 71 & 0.08 / 0.08 & 0.07 / 0.08 \\
 \addlinespace[1pt]
- & Classical-ECDHE & Buffer-and-sign & 5,365.7 [5,323--5,504] & 5,366 & 1 & 71 & 0.08 & 0.09 \\
- &  & Per-chunk & 126.0 [126--126] & 5,015 & 40 & 2,912 & 1.49 & 2.57 \\
- &  & Hash-chain & 141.2 [139--143] & 5,730 & 1 & 71 & 0.08 & 0.08 \\
+ & Classical-ECDHE & Buffer-and-sign & 4,992.2 [4,972--5,024] & 4,993 & 1 & 72 & 0.07 / 0.07 & 0.09 / 0.09 \\
+ &  & Per-chunk & 129.8 [127--134] & 5,396 & 41 & 2,912 & 6.78 / 6.80 & 10.00 / 9.93 \\
+ &  & Hash-chain & 126.5 [126--127] & 5,025 & 1 & 71 & 0.08 / 0.08 & 0.08 / 0.08 \\
 \addlinespace[1pt]
- & Hybrid & Buffer-and-sign & 5,669.1 [5,634--5,688] & 5,669 & 1 & 71 & 0.07 & 0.09 \\
- &  & Per-chunk & 140.5 [139--143] & 5,833 & 40 & 2,910 & 1.58 & 2.65 \\
- &  & Hash-chain & 140.0 [137--143] & 5,657 & 1 & 71 & 0.07 & 0.08 \\
+ & Hybrid & Buffer-and-sign & 5,479.0 [5,457--5,495] & 5,480 & 1 & 71 & 0.29 / 0.29 & 0.28 / 0.29 \\
+ &  & Per-chunk & 129.6 [129--134] & 5,327 & 41 & 2,908 & 5.29 / 5.34 & 7.83 / 7.85 \\
+ &  & Hash-chain & 132.1 [131--133] & 5,393 & 1 & 71 & 0.30 / 0.30 & 0.30 / 0.30 \\
 \addlinespace[1pt]
- & Hybrid-KEX & Buffer-and-sign & 6,021.3 [5,999--6,143] & 6,022 & 1 & 71 & 0.30 & 0.29 \\
- &  & Per-chunk & 143.7 [144--146] & 5,880 & 40 & 2,910 & 1.72 & 2.77 \\
- &  & Hash-chain & 145.5 [140--152] & 6,057 & 1 & 71 & 0.30 & 0.34 \\
+ & Hybrid-KEX & Buffer-and-sign & 5,472.8 [5,416--5,491] & 5,474 & 1 & 71 & 0.34 / 0.35 & 0.28 / 0.29 \\
+ &  & Per-chunk & 133.6 [131--135] & 5,523 & 41 & 2,912 & 9.77 / 9.92 & 15.03 / 14.90 \\
+ &  & Hash-chain & 127.2 [127--128] & 5,062 & 1 & 71 & 0.08 / 0.08 & 0.08 / 0.08 \\
 \addlinespace[1pt]
- & Full PQC & Buffer-and-sign & 6,085.0 [6,065--6,106] & 6,086 & 1 & 3,309 & 0.57 & 0.24 \\
- &  & Per-chunk & 153.1 [147--160] & 6,193 & 40 & 135,669 & 22.81 & 10.88 \\
- &  & Hash-chain & 148.5 [143--163] & 6,158 & 1 & 3,309 & 0.41 & 0.25 \\
+ & Full PQC & Buffer-and-sign & 5,508.2 [5,488--5,520] & 5,509 & 1 & 3,309 & 0.44 / 0.44 & 0.29 / 0.29 \\
+ &  & Per-chunk & 132.2 [130--135] & 5,462 & 41 & 135,669 & 10.91 / 10.99 & 5.89 / 5.83 \\
+ &  & Hash-chain & 129.7 [127--132] & 5,246 & 1 & 3,309 & 0.11 / 0.11 & 0.05 / 0.05 \\
+\addlinespace[1pt]
+ & Hybrid-KEX-PQ & Buffer-and-sign & 5,524.3 [5,356--5,577] & 5,525 & 1 & 3,309 & 0.32 / 0.33 & 0.23 / 0.23 \\
+ &  & Per-chunk & 136.5 [133--139] & 5,625 & 41 & 135,669 & 16.25 / 16.33 & 7.59 / 7.64 \\
+ &  & Hash-chain & 138.9 [137--143] & 5,614 & 1 & 3,309 & 0.47 / 0.47 & 0.27 / 0.27 \\
 \addlinespace[1pt]
 \bottomrule
 \end{tabular}

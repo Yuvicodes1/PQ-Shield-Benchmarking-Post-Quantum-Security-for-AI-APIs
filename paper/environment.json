@@ -1,5 +1,5 @@
 {
-  "captured": "2026-10-02T17:25:23",
+  "captured": "2026-10-02T21:25:49",
   "os": "Darwin 26.6.2",
   "machine": "arm64",
   "cpu": "Apple M3",
@@ -21,7 +21,7 @@
   },
   "openssl": "OpenSSL 4.0.1 9 Jun 2026",
   "liboqs_commit": "8979276ad1eb008215aa78a3c56b3649f604bbb1",
-  "repo_commit": "1a5b1de7b20e3ed92c99b94ff31df8ac4bef416c",
+  "repo_commit": "5a02de4df8bf82034bd372261eab369db217c962",
   "repo_dirty": true,
   "llama_model_file": "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
   "llama_model_sha256": "6c1a2b41161032677be168d354123594c0e6e67d2b9227c84f296ad037c728ff",

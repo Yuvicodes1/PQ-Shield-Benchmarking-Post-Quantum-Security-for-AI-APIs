@@ -66,3 +66,23 @@ These came from auditing the data and code, and they are why the results changed
 | Conclusion | Now states the strongest-security, best-performance, and best-balance configurations and what each answer depends on (streaming, session reuse, threat model, network) |
 
 New findings disclosed in the paper: queueing bimodality at 100 connections appears only with crypto (both controls stable), and generation slowed from ~40 to ~33 tokens/s over the streaming sweep (thermal throttling), so streaming times are compared within, not across, configurations.
+
+## Third revision (second external review, 2026-10-02 night)
+
+The full point-by-point response is in `response_to_reviewers.md`. In short:
+
+- **Title and framing:** now "Post-Quantum Signature Schedules for Streaming LLM Inference: A Measurement Study with PQ-Shield". The abstract and contributions lead with the signature-schedule result; key establishment is presented as confirmation of the TLS literature.
+- **Timing inconsistency explained (new Sec. VI-C, Table V):** per-signature time depends on processor power state (back to back 20/73 µs vs. spaced 343/519 µs for ECDSA/ML-DSA, in CPU time too). All streaming tables report wall-clock and CPU time.
+- **ML-DSA-65 key generation and signing validated:** 25/25 and 30/30 byte-exact, via liboqs's random-source hook (130/130 vectors).
+- **Key substitution (new Sec. VI-E):** succeeds against the unauthenticated handshake in 1,800/1,800 trials; a pinned-identity transcript signature stops all 3,600 attempts at no resolvable cost.
+- **Attack campaign (new Sec. VI-D):** 500 trials per cell, adaptive checkpoint attacks, exact CIs, 0/750 false rejections. Checkpoint stripping defeated the previous client (0/9,000 detected) and is fixed by enforcing the requested schedule.
+- **Failures (Table XII):** all connection resets; counting them at the 30 s timeout changes no conclusion.
+- **Composite score removed:** replaced by a weight-free dominance table (only Classical-RSA is dominated).
+- **New configuration C′ Hybrid-KEX-PQ** (X25519MLKEM768 + ML-DSA-65).
+- **Corrected claims:** signing vs. verification (H4), equivalence exceptions, the RSA single-core claim (removed), HNDL as modeled bytes, detection vs. prevention.
+- **New "Limitations and Threats to Validity" section.**
+
+### Still yours to do
+- Replace the four `x@vit.com` addresses (`TODO(authors)` in the `.tex`) and confirm the Acknowledgment.
+- **IEEE Access requires its own LaTeX template** (`ieeeaccess.cls`, from the IEEE Author Center). The content ports directly; the current file uses IEEEtran.
+- Check the IEEE Access article processing charge and any VIT discount.

@@ -1,0 +1,19 @@
+\begin{table}[t]
+\centering
+\caption{Cost of authenticating the handshake (10 connections, 5 repetitions each, run back to back with the unauthenticated configuration). The identity key uses the configuration's signature scheme (ML-DSA-65 for Full PQC and Hybrid-KEX-PQ, ECDSA P-256 otherwise). +B: bytes added per handshake; verify: client transcript check; $\Delta$: end-to-end median difference with 95\% CI.}
+\label{tab:authcost}
+\setlength{\tabcolsep}{3pt}
+\footnotesize
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Configuration & +B & Verify ($\mu$s) & $\Delta$ (ms) \\
+\midrule
+Classical-RSA & 71 & 200 & +4.7 [-4.4, +17.2] \\
+Classical-ECDHE & 71 & 86 & +0.4 [-2.5, +3.5] \\
+Hybrid & 71 & 86 & -0.7 [-2.6, +1.6] \\
+Hybrid-KEX & 71 & 86 & +0.2 [-2.0, +2.1] \\
+Full PQC & 3,309 & 46 & -1.4 [-3.7, +2.0] \\
+Hybrid-KEX-PQ & 3,309 & 46 & +1.7 [-1.0, +4.0] \\
+\bottomrule
+\end{tabular}
+\end{table}
